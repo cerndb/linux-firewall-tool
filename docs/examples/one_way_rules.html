@@ -1,0 +1,320 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Single rules &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Examples" href="../examples.html" />
+    <link rel="next" title="Log rules" href="log_rule.html" />
+    <link rel="prev" title="Bidirectional Rules" href="two_way_rule.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="single-rules">
+<h1>Single rules<a class="headerlink" href="#single-rules" title="Permalink to this headline">¶</a></h1>
+<p><strong>Example rules for INPUT or OUTPUT chain</strong></p>
+<blockquote>
+<div><div class="highlight-ini"><div class="highlight"><pre><span></span><span class="k">[access_outgoing_ports_tcp_signle]</span>
+<span class="na">section_type</span> <span class="o">=</span> <span class="s">general</span>
+<span class="na">action</span> <span class="o">=</span> <span class="s">[&#39;drop&#39;]</span>
+<span class="na">default_chain</span> <span class="o">=</span> <span class="s">OUTPUT</span>
+<span class="na">ip_version</span> <span class="o">=</span> <span class="s">ipv4</span>
+<span class="na">interface</span> <span class="o">=</span> <span class="s">main</span>
+<span class="na">protocol</span> <span class="o">=</span> <span class="s">tcp,udp</span>
+<span class="c1">#ports = &quot;ports.sh&quot;</span>
+<span class="na">set</span> <span class="o">=</span> <span class="s">static_dns_servers4_single</span>
+
+
+<span class="k">[static_dns_servers4_single]</span>
+<span class="na">section_type</span> <span class="o">=</span> <span class="s">ipset</span>
+<span class="na">ipset_type</span> <span class="o">=</span> <span class="s">hash:ip,port</span>
+<span class="na">set_name</span> <span class="o">=</span> <span class="s">[&#39;static_dns_servers4_single&#39;]</span>
+<span class="na">set_ips_v4</span> <span class="o">=</span> <span class="s">[&#39;137.138.16.5,80&#39;, &#39;137.138.17.5,443&#39;, &#39;172.18.16.5,5550&#39;, &#39;172.18.17.5,6598&#39;]</span>
+<span class="na">set_hostnames</span> <span class="o">=</span> <span class="s">[&quot;script:test_port.sh&quot;,&quot;script:test_port_2.sh&quot;,&quot;agkara-train,6178&quot;]</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The section <strong>[access_outgoing_ports_tcp_signle]</strong> will create a <strong>kernel ipset</strong> called <strong>static_dns_servers4_single_v4</strong> since its set to ipv4.</p>
+<p><strong>Output of the scripts</strong></p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>helpers/test_port.sh
+itrac5160,443
+itrac5161,890
+itrac5120,5366
+itrac5162,3321
+itrac5121,7563
+itrac5163,7363
+itrac5122,6564
+</pre></div>
+</div>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>helpers/test_port_2.sh
+itrac5164,9079
+itrac5123,1023
+itrac5165,5547
+itrac5124,6987
+itrac5166,6123
+itrac5125,787
+itrac5167,443
+itrac5126,80
+</pre></div>
+</div>
+</div></blockquote>
+<p><strong>Kernel ipset</strong></p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>Section name: access_outgoing_ports_tcp_signle
+Script  <span class="o">[</span><span class="s1">&#39;test_port.sh&#39;</span><span class="o">]</span>  not in system path
+Trying herlpers: /root/cerndb-infra-firewall/helpers/test_port.sh
+Script  <span class="o">[</span><span class="s1">&#39;test_port_2.sh&#39;</span><span class="o">]</span>  not in system path
+Trying herlpers: /root/cerndb-infra-firewall/helpers/test_port_2.sh
+Set <span class="nb">type</span> is:  hash:ip,port
+/usr/sbin/ipset create static_dns_servers4_single_v4 hash:ip,port family inet hashsize <span class="m">1024</span> maxelem 65536
+Set  static_dns_servers4_single_v4  created
+/usr/sbin/ipset add static_dns_servers4_single_v4 10.17.6.55,tcp:3321
+/usr/sbin/ipset add static_dns_servers4_single_v4 172.18.17.5,tcp:6598
+/usr/sbin/ipset add static_dns_servers4_single_v4 137.138.17.5,tcp:443
+/usr/sbin/ipset add static_dns_servers4_single_v4 10.17.6.56,tcp:7363
+/usr/sbin/ipset add static_dns_servers4_single_v4 188.184.45.151,tcp:5366
+/usr/sbin/ipset add static_dns_servers4_single_v4 188.184.45.155,tcp:6987
+/usr/sbin/ipset add static_dns_servers4_single_v4 188.184.37.104,tcp:6123
+/usr/sbin/ipset add static_dns_servers4_single_v4 188.184.45.153,tcp:6564
+/usr/sbin/ipset add static_dns_servers4_single_v4 10.17.6.25,tcp:80
+/usr/sbin/ipset add static_dns_servers4_single_v4 188.184.45.154,tcp:1023
+/usr/sbin/ipset add static_dns_servers4_single_v4 188.184.37.103,tcp:5547
+/usr/sbin/ipset add static_dns_servers4_single_v4 10.17.6.54,tcp:890
+/usr/sbin/ipset add static_dns_servers4_single_v4 137.138.16.5,tcp:80
+/usr/sbin/ipset add static_dns_servers4_single_v4 188.184.37.102,tcp:9079
+/usr/sbin/ipset add static_dns_servers4_single_v4 188.184.45.163,tcp:443
+/usr/sbin/ipset add static_dns_servers4_single_v4 188.184.45.152,tcp:7563
+/usr/sbin/ipset add static_dns_servers4_single_v4 172.18.16.5,tcp:5550
+/usr/sbin/ipset add static_dns_servers4_single_v4 10.17.6.24,tcp:787
+/usr/sbin/ipset add static_dns_servers4_single_v4 188.184.37.105,tcp:443
+/usr/sbin/ipset add static_dns_servers4_single_v4 188.184.185.176,tcp:6178
+</pre></div>
+</div>
+</div></blockquote>
+<dl class="docutils">
+<dt>The logic of the action is the following:</dt>
+<dd><div class="first last highlight-ini"><div class="highlight"><pre><span></span><span class="na">action</span> <span class="o">=</span> <span class="s">[&#39;drop&#39;]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>If the list has 1 element it means that it will create a single rule for the defined chain.
+The above section will create two rules in reality one for each protocol tcp,udp</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>/sbin/iptables -A OUTPUT -o eth0 -p tcp -m <span class="nb">set</span> --match-set static_dns_servers4_single_v4 dst,dst -j DROP -m comment --comment access_outgoing_ports_tcp_signle
+/sbin/iptables -A OUTPUT -o eth0 -p udp -m <span class="nb">set</span> --match-set static_dns_servers4_single_v4 dst,dst -j DROP -m comment --comment access_outgoing_ports_tcp_signle
+</pre></div>
+</div>
+</div></blockquote>
+<p><strong>Example with ipset triplet</strong></p>
+<blockquote>
+<div><div class="highlight-ini"><div class="highlight"><pre><span></span><span class="k">[triplet_set]</span>
+<span class="na">section_type</span> <span class="o">=</span> <span class="s">general</span>
+<span class="na">action</span> <span class="o">=</span> <span class="s">[&#39;accept&#39;]</span>
+<span class="na">default_chain</span> <span class="o">=</span> <span class="s">INPUT,OUTPUT</span>
+<span class="na">ip_version</span> <span class="o">=</span> <span class="s">ipv4</span>
+<span class="na">interface</span> <span class="o">=</span> <span class="s">all</span>
+<span class="na">protocol</span> <span class="o">=</span> <span class="s">tcp,udp</span>
+<span class="na">set</span> <span class="o">=</span> <span class="s">triplet_ipset</span>
+<span class="na">set_directions</span> <span class="o">=</span> <span class="s">src,dst,dst</span>
+
+<span class="k">[triplet_ipset]</span>
+<span class="na">section_type</span> <span class="o">=</span> <span class="s">ipset</span>
+<span class="na">ipset_type</span> <span class="o">=</span> <span class="s">hash:ip,port,ip</span>
+<span class="na">set_name</span> <span class="o">=</span> <span class="s">[&#39;triplet_ip_set&#39;]</span>
+<span class="na">set_hostnames</span> <span class="o">=</span> <span class="s">[&#39;lxplus,443,agkara-train&#39;,&#39;syscontrol-dev,5555,pcjcano2&#39;,&#39;kubernetes-node,80,kubernetes-master&#39;]</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The output of the above section is the following:</p>
+<p><strong>Kernel ipset</strong></p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>/usr/sbin/ipset create triplet_ip_set_v4 hash:ip,port,ip family inet hashsize <span class="m">1024</span> maxelem 65536
+</pre></div>
+</div>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>/usr/sbin/ipset add triplet_ip_set_v4 188.184.94.29,tcp:443,188.184.185.176
+/usr/sbin/ipset add triplet_ip_set_v4 188.184.92.227,tcp:443,188.184.185.176
+/usr/sbin/ipset add triplet_ip_set_v4 128.142.153.55,tcp:80,128.142.147.69
+/usr/sbin/ipset add triplet_ip_set_v4 188.184.95.215,tcp:443,188.184.185.176
+/usr/sbin/ipset add triplet_ip_set_v4 188.184.94.26,tcp:443,188.184.185.176
+/usr/sbin/ipset add triplet_ip_set_v4 188.184.89.225,tcp:443,188.184.185.176
+/usr/sbin/ipset add triplet_ip_set_v4 188.184.90.207,tcp:443,188.184.185.176
+/usr/sbin/ipset add triplet_ip_set_v4 188.184.92.114,tcp:443,188.184.185.176
+/usr/sbin/ipset add triplet_ip_set_v4 188.184.95.36,tcp:443,188.184.185.176
+/usr/sbin/ipset add triplet_ip_set_v4 188.184.92.51,tcp:443,188.184.185.176
+/usr/sbin/ipset add triplet_ip_set_v4 188.184.91.82,tcp:443,188.184.185.176
+/usr/sbin/ipset add triplet_ip_set_v4 188.184.91.170,tcp:443,188.184.185.176
+/usr/sbin/ipset add triplet_ip_set_v4 188.184.92.95,tcp:443,188.184.185.176
+/usr/sbin/ipset add triplet_ip_set_v4 188.184.95.238,tcp:443,188.184.185.176
+/usr/sbin/ipset add triplet_ip_set_v4 188.184.92.172,tcp:443,188.184.185.176
+/usr/sbin/ipset add triplet_ip_set_v4 188.184.93.17,tcp:443,188.184.185.176
+/etc/init.d/ipset save
+</pre></div>
+</div>
+</div></blockquote>
+<p><strong>Rules</strong></p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>/sbin/iptables -A INPUT -i eth0 -p tcp -m <span class="nb">set</span> --match-set triplet_ip_set_v4 src,dst,dst -j ACCEPT -m comment --comment triplet_set
+/sbin/iptables -A INPUT -i lo -p tcp -m <span class="nb">set</span> --match-set triplet_ip_set_v4 src,dst,dst -j ACCEPT -m comment --comment triplet_set
+/sbin/iptables -A INPUT -i eth0 -p udp -m <span class="nb">set</span> --match-set triplet_ip_set_v4 src,dst,dst -j ACCEPT -m comment --comment triplet_set
+/sbin/iptables -A INPUT -i lo -p udp -m <span class="nb">set</span> --match-set triplet_ip_set_v4 src,dst,dst -j ACCEPT -m comment --comment triplet_set
+/sbin/iptables -A OUTPUT -o eth0 -p tcp -m <span class="nb">set</span> --match-set triplet_ip_set_v4 src,dst,dst -j ACCEPT -m comment --comment triplet_set
+/sbin/iptables -A OUTPUT -o lo -p tcp -m <span class="nb">set</span> --match-set triplet_ip_set_v4 src,dst,dst -j ACCEPT -m comment --comment triplet_set
+/sbin/iptables -A OUTPUT -o eth0 -p udp -m <span class="nb">set</span> --match-set triplet_ip_set_v4 src,dst,dst -j ACCEPT -m comment --comment triplet_set
+/sbin/iptables -A OUTPUT -o lo -p udp -m <span class="nb">set</span> --match-set triplet_ip_set_v4 src,dst,dst -j ACCEPT -m comment --comment triplet_set
+</pre></div>
+</div>
+</div></blockquote>
+<p><strong>Example using CERN LanDB sets to create an ipset</strong></p>
+<blockquote>
+<div><div class="highlight-ini"><div class="highlight"><pre><span></span><span class="k">[test_triplet_from_iptables_manager]</span>
+<span class="na">section_type</span> <span class="o">=</span> <span class="s">general</span>
+<span class="na">action</span> <span class="o">=</span> <span class="s">[&#39;accept&#39;]</span>
+<span class="na">default_chain</span> <span class="o">=</span> <span class="s">INPUT</span>
+<span class="na">ip_version</span> <span class="o">=</span> <span class="s">ipv4</span>
+<span class="na">interface</span> <span class="o">=</span> <span class="s">other</span>
+<span class="na">protocol</span> <span class="o">=</span> <span class="s">tcp,udp</span>
+<span class="na">set</span> <span class="o">=</span> <span class="s">triplet_set</span>
+<span class="na">set_directions</span> <span class="o">=</span> <span class="s">src,dst,dst</span>
+
+
+
+<span class="k">[triplet_set]</span>
+<span class="na">section_type</span> <span class="o">=</span> <span class="s">ipset</span>
+<span class="na">ipset_type</span> <span class="o">=</span> <span class="s">hash:ip,port,ip</span>
+<span class="na">netgroups_list</span> <span class="o">=</span> <span class="s">[&#39;CERNVM-CLUSTER-ESX,tcp:5530,CDS LB&#39;,&#39;DRUPAL,tcp:6677,FRONTIER-MONITORING&#39;]</span>
+<span class="na">set_name</span> <span class="o">=</span> <span class="s">[&#39;CERN_TEST_SET_LIST&#39;]</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The output of the above sections is the following:
+<strong>Kernel ipset</strong></p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>/usr/sbin/ipset create CERN_TEST_SET_LIST_v4 hash:ip,port,ip family inet hashsize <span class="m">1024</span> maxelem 65536
+
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 137.138.234.67,tcp:5530,188.184.3.51
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 188.184.37.208,tcp:6677,128.142.140.249
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 137.138.234.68,tcp:5530,188.184.3.51
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 188.184.37.206,tcp:6677,128.142.192.174
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 137.138.234.71,tcp:5530,188.184.3.51
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 137.138.234.72,tcp:5530,188.184.3.51
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 188.184.37.208,tcp:6677,128.142.192.174
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 137.138.234.68,tcp:5530,188.184.66.111
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 137.138.234.65,tcp:5530,188.184.3.51
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 188.184.37.206,tcp:6677,188.184.150.138
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 188.184.37.208,tcp:6677,128.142.192.53
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 137.138.234.65,tcp:5530,188.184.66.111
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 188.184.37.205,tcp:6677,128.142.192.53
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 188.184.37.206,tcp:6677,128.142.140.249
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 188.184.37.205,tcp:6677,188.184.150.138
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 137.138.234.67,tcp:5530,188.184.66.111
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 137.138.234.72,tcp:5530,188.184.66.111
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 188.184.37.208,tcp:6677,188.184.150.138
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 188.184.37.205,tcp:6677,128.142.140.249
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 137.138.234.71,tcp:5530,188.184.66.111
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 137.138.234.70,tcp:5530,188.184.66.111
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 137.138.234.66,tcp:5530,188.184.3.51
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 188.184.37.205,tcp:6677,128.142.192.174
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 188.184.37.206,tcp:6677,128.142.192.53
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 137.138.234.66,tcp:5530,188.184.66.111
+/usr/sbin/ipset add CERN_TEST_SET_LIST_v4 137.138.234.70,tcp:5530,188.184.3.51
+/etc/init.d/ipset save
+</pre></div>
+</div>
+</div></blockquote>
+<p><strong>Rules</strong></p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>/sbin/iptables -A INPUT -i lo -p tcp -m <span class="nb">set</span> --match-set CERN_TEST_SET_LIST_v4 src,dst,dst -j ACCEPT -m comment --comment test_triplet_from_iptables_manager
+/sbin/iptables -A INPUT -i lo -p udp -m <span class="nb">set</span> --match-set CERN_TEST_SET_LIST_v4 src,dst,dst -j ACCEPT -m comment --comment test_triplet_from_iptables_manager
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../examples.html">Examples</a><ul>
+      <li>Previous: <a href="two_way_rule.html" title="previous chapter">Bidirectional Rules</a></li>
+      <li>Next: <a href="log_rule.html" title="next chapter">Log rules</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/examples/one_way_rules.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/examples/one_way_rules.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

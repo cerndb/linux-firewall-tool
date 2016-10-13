@@ -1,0 +1,427 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ipset_manager &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Code" href="../code.html" />
+    <link rel="next" title="iptables_manager" href="iptables_manager.html" />
+    <link rel="prev" title="Code" href="../code.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-bin.ipset_manager">
+<span id="ipset-manager"></span><h1>ipset_manager<a class="headerlink" href="#module-bin.ipset_manager" title="Permalink to this headline">¶</a></h1>
+<p>Author: Athanasios Gkaraliakos
+email: <a class="reference external" href="mailto:a&#46;gkaraliakos&#37;&#52;&#48;gmail&#46;com">a<span>&#46;</span>gkaraliakos<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>The script is written on python &gt;=2.6</p>
+<p>Script to create/modify/delete ipsets on CentOS6.x and older of IPv4 and/or IPv6 (if exists)</p>
+<dl class="function">
+<dt id="bin.ipset_manager.create_ip_set">
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">create_ip_set</code><span class="sig-paren">(</span><em>simulate</em>, <em>ips</em>, <em>setname</em>, <em>iptype</em>, <em>settype</em>, <em>port</em>, <em>generate_file</em>, <em>file_override</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#create_ip_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.create_ip_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function receives a list of ip addresses and tries to create an ip set using the system &#8220;ipset&#8221; command</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>simulate</strong> &#8211; If is true just prints the actions on the screen and does not create a set</li>
+<li><strong>ips</strong> &#8211; List with ip addresses (IPv4 or IPv6)</li>
+<li><strong>setname</strong> &#8211; The name for the ipset</li>
+<li><strong>iptype</strong> &#8211; Type of ip addresses and set family (IPv4 -&gt; inet, IPv6 -&gt; inet6)</li>
+<li><strong>settype</strong> &#8211; Type of the ip set</li>
+<li><strong>port</strong> &#8211; Port number if the ipset uses ports</li>
+<li><strong>generate_file</strong> &#8211; Flag to write the ipset on the config file or not</li>
+<li><strong>file_override</strong> &#8211; Flag to write a new config file or append to the current one in the folder</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Does not return anything. Prints output messages and error messages if any</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.ipset_manager.destroy_ip_set">
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">destroy_ip_set</code><span class="sig-paren">(</span><em>simulate</em>, <em>setname</em>, <em>iptype</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#destroy_ip_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.destroy_ip_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function destroys a running ipset</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>simulate</strong> &#8211; If is true just prints the actions on the screen and does not create a set</li>
+<li><strong>setname</strong> &#8211; The name for the ipset</li>
+<li><strong>iptype</strong> &#8211; Type of ip addresses and set family (IPv4 -&gt; inet, IPv6 -&gt; inet6)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Does not return anything. Prints output messages and error messages if any</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.ipset_manager.extract_ips_from_ipset">
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">extract_ips_from_ipset</code><span class="sig-paren">(</span><em>set_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#extract_ips_from_ipset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.extract_ips_from_ipset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function receives the name of an ipset currently active on the kernel strips out the part that contains the
+ip addresses and creates a list of those ip address ( along with the ports if the ipset contains ports also )</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>set_name</strong> &#8211; Active kernel ipset</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">return a list with all the addresses inside this ipset of nothing if the ipset is empty or does not exist</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.ipset_manager.extract_ips_from_network_set">
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">extract_ips_from_network_set</code><span class="sig-paren">(</span><em>network_set</em>, <em>iptype</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#extract_ips_from_network_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.extract_ips_from_network_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function receives a list of host names and ip addresses and returns a list containing only ip addresses</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>network_set</strong> &#8211; List like machines[ [hostname, ipv4, ..., ipv6, ...], [hostname, ipv4, ..., ipv6, ...] ]</li>
+<li><strong>iptype</strong> &#8211; Define ip version (IPv4 or IPv6)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of ip addresses</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.ipset_manager.get_current_ipsets">
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">get_current_ipsets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#get_current_ipsets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.get_current_ipsets" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to get the current running ipsets in memory and print it to a file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.ipset_manager.get_network_sets">
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">get_network_sets</code><span class="sig-paren">(</span><em>set_names</em>, <em>iptype</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#get_network_sets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.get_network_sets" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function uses the ip_extraction.py python script to query LanDB service based on a network set name and extract
+all the ip addresses of each machine inside this network set.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>set_names</strong> &#8211; Network set names to queried on LanDB</li>
+<li><strong>iptype</strong> &#8211; define the ip version to use (IPv4 or IPv6)</li>
+<li><strong>username</strong> &#8211; optional username for the LanDB service authentication</li>
+<li><strong>password</strong> &#8211; mandatory if you specify username for the LanDB service authentication</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">String output containing all the ip address if they are successfully resolved</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.ipset_manager.handle_custom_set">
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">handle_custom_set</code><span class="sig-paren">(</span><em>simulate</em>, <em>action</em>, <em>setname</em>, <em>iptype</em>, <em>settype</em>, <em>ips=None</em>, <em>hostnames=None</em>, <em>port=None</em>, <em>netgroups_list=None</em>, <em>generate_file=False</em>, <em>file_override=False</em>, <em>cmd=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#handle_custom_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.handle_custom_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles the action to be performed based on the provided input action of the user. The main role of
+this function is to call the appropriate end function that performs the task.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>simulate</strong> &#8211; Flag to passed to the handling function</li>
+<li><strong>action</strong> &#8211; Action to be performed ( create, update, destroy )</li>
+<li><strong>setname</strong> &#8211; The name of set</li>
+<li><strong>iptype</strong> &#8211; IP type ( IPv4 or IPv6 )</li>
+<li><strong>settype</strong> &#8211; IPset type. Only the allowed sets</li>
+<li><strong>ips</strong> &#8211; Individual ips to be added or deleted from the ipset</li>
+<li><strong>hostnames</strong> &#8211; The hostnames of either single boxes or aliases ( to resolved via dns ) that will be added in
+the ipset</li>
+<li><strong>port</strong> &#8211; Port number if the set type contains port</li>
+<li><strong>netgroups_list</strong> &#8211; A list of network groups names to be added into the set.</li>
+<li><strong>generate_file</strong> &#8211; Flag whether or not to generate ipset file</li>
+<li><strong>file_override</strong> &#8211; Flag whether or not to override ipset file</li>
+<li><strong>cmd</strong> &#8211; Flag to save current ipset state if script was called vim the command line</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Does not return anything</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.ipset_manager.handle_netgroups_set">
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">handle_netgroups_set</code><span class="sig-paren">(</span><em>simulate</em>, <em>action</em>, <em>iptype</em>, <em>set_names</em>, <em>settype</em>, <em>port</em>, <em>custom_name=None</em>, <em>generate_file=False</em>, <em>file_override=False</em>, <em>cmd=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#handle_netgroups_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.handle_netgroups_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles the action to be performed based on the provided input action of the user. The main role of
+this function is to call the appropriate end function that performs the task.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>simulate</strong> &#8211; Flag to passed to the handling function</li>
+<li><strong>action</strong> &#8211; Action to be performed ( create, update, destroy )</li>
+<li><strong>iptype</strong> &#8211; IP type ( IPv4 or IPv6 )</li>
+<li><strong>set_names</strong> &#8211; A list of cern &#8216;s network sets names on which the defined action will be performed upon</li>
+<li><strong>settype</strong> &#8211; IPset type. Only the allowed sets</li>
+<li><strong>port</strong> &#8211; Port number if the set type contains port</li>
+<li><strong>custom_name</strong> &#8211; Custom ipset name if the regular name is to large of if the user wants a shorter one</li>
+<li><strong>generate_file</strong> &#8211; Flag whether or not to generate ipset file</li>
+<li><strong>file_override</strong> &#8211; Flag whether or not to override ipset file</li>
+<li><strong>cmd</strong> &#8211; Flag to save current ipset state if script was called vim the command line</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Does not return anything</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.ipset_manager.ip_validation_check">
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">ip_validation_check</code><span class="sig-paren">(</span><em>ips</em>, <em>iptype</em>, <em>settype</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#ip_validation_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.ip_validation_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the validity of the given ip list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ips</strong> &#8211; list of ip addresses provided</li>
+<li><strong>iptype</strong> &#8211; version of ip to check against</li>
+<li><strong>settype</strong> &#8211; determine if is a net or regular ip set</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">return True or False</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.ipset_manager.ipset_manager">
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">ipset_manager</code><span class="sig-paren">(</span><em>args=None</em>, <em>action=None</em>, <em>iptype=None</em>, <em>settype=None</em>, <em>port=None</em>, <em>setname=None</em>, <em>netgroups=None</em>, <em>netgroups_list=None</em>, <em>hostnames=None</em>, <em>ips=None</em>, <em>simul=False</em>, <em>generate_file=False</em>, <em>file_override=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#ipset_manager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.ipset_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles all the logic of running the script, both from terminal and as a module</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; Arguments if ran from terminal</li>
+<li><strong>action</strong> &#8211; action to perform</li>
+<li><strong>iptype</strong> &#8211; type of ip address</li>
+<li><strong>settype</strong> &#8211; type of ipset</li>
+<li><strong>port</strong> &#8211; port number (optional protocol) udp:53</li>
+<li><strong>setname</strong> &#8211; custom name for the ipset</li>
+<li><strong>netgroups</strong> &#8211; name of the cern networkset</li>
+<li><strong>netgroups_list</strong> &#8211; list of network groups to be added</li>
+<li><strong>hostnames</strong> &#8211; hostnames to resolve ips from</li>
+<li><strong>ips</strong> &#8211; ips to add</li>
+<li><strong>simul</strong> &#8211; simulate mode</li>
+<li><strong>generate_file</strong> &#8211; generate ipset file for use with ipset-restore</li>
+<li><strong>file_override</strong> &#8211; tell the script whether to override the ipset file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">0 if ok 1 if error</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.ipset_manager.main">
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the main function. It parses the command line arguments and calls the appropriate function to handle
+each the job.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Does not return anything</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.ipset_manager.save_current_ipset">
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">save_current_ipset</code><span class="sig-paren">(</span><em>simulate</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#save_current_ipset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.save_current_ipset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to save the ipset configuration currently in memory</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>simulate</strong> &#8211; Flag to tell the method whether to actually save or just print the command</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.ipset_manager.update_ip_set">
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">update_ip_set</code><span class="sig-paren">(</span><em>simulate</em>, <em>ips</em>, <em>set_name</em>, <em>ip_type</em>, <em>settype</em>, <em>port</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#update_ip_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.update_ip_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function receives a list of ip addresses and tries to update a current running ip set using the
+system &#8220;ipset&#8221; command</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>simulate</strong> &#8211; If is true just prints the actions on the screen and does not create a set</li>
+<li><strong>ips</strong> &#8211; List with ip addresses (IPv4 or IPv6)</li>
+<li><strong>set_name</strong> &#8211; The name for the ipset</li>
+<li><strong>ip_type</strong> &#8211; Type of ip addresses and set family (IPv4 -&gt; inet, IPv6 -&gt; inet6)</li>
+<li><strong>settype</strong> &#8211; Type of the ip set</li>
+<li><strong>port</strong> &#8211; Port number if the ipset uses ports</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Does not return anything. Prints output messages and error messages if any</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.ipset_manager.write_config_file">
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">write_config_file</code><span class="sig-paren">(</span><em>set_name</em>, <em>lines</em>, <em>override</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#write_config_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.write_config_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to write the generated ipsets configuration to a file for use with the ipset-restore command</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>set_name</strong> &#8211; Name of an ipset</li>
+<li><strong>lines</strong> &#8211; IPset elements to add to the set. Actually is the IPs or IPs with ports or triplets</li>
+<li><strong>override</strong> &#8211; Flag to tell to the function whether to write a new file or not</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">void</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../code.html">Code</a><ul>
+      <li>Previous: <a href="../code.html" title="previous chapter">Code</a></li>
+      <li>Next: <a href="iptables_manager.html" title="next chapter">iptables_manager</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/code_documentation/ipset_manager.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/code_documentation/ipset_manager.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

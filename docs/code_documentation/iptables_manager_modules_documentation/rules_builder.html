@@ -1,0 +1,293 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>rules_builder &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Code" href="../../code.html" />
+    <link rel="next" title="Config file options" href="../../config.html" />
+    <link rel="prev" title="generate_files" href="generate_files.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-iptables_manager_modules.rules_builder">
+<span id="rules-builder"></span><h1>rules_builder<a class="headerlink" href="#module-iptables_manager_modules.rules_builder" title="Permalink to this headline">¶</a></h1>
+<p>Author: Athanasios Gkaraliakos
+email: <a class="reference external" href="mailto:a&#46;gkaraliakos&#37;&#52;&#48;gmail&#46;com">a<span>&#46;</span>gkaraliakos<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>The script is written on python &gt;=2.6</p>
+<dl class="class">
+<dt id="iptables_manager_modules.rules_builder.FirewallRuleBuilder">
+<em class="property">class </em><code class="descclassname">iptables_manager_modules.rules_builder.</code><code class="descname">FirewallRuleBuilder</code><a class="reference internal" href="../../_modules/iptables_manager_modules/rules_builder.html#FirewallRuleBuilder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.rules_builder.FirewallRuleBuilder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Here we create the actual rules to be added to the final list.</p>
+<dl class="method">
+<dt id="iptables_manager_modules.rules_builder.FirewallRuleBuilder.check_ipset">
+<code class="descname">check_ipset</code><span class="sig-paren">(</span><em>iptype</em>, <em>ipset_name</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iptables_manager_modules/rules_builder.html#FirewallRuleBuilder.check_ipset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.rules_builder.FirewallRuleBuilder.check_ipset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method checks if an ipset is present in memory</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>iptype</strong> &#8211; ipv4 or ipv6</li>
+<li><strong>ipset_name</strong> &#8211; name of the ipset we want to check</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Message with the state of the check</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="iptables_manager_modules.rules_builder.FirewallRuleBuilder.handle_log_chain">
+<em class="property">static </em><code class="descname">handle_log_chain</code><span class="sig-paren">(</span><em>command_list</em>, <em>jump_chain</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iptables_manager_modules/rules_builder.html#FirewallRuleBuilder.handle_log_chain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.rules_builder.FirewallRuleBuilder.handle_log_chain" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a static method and is used to handle the LOG chain. It adds parameters to a rule(list) this jumps to
+the LOG chain</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>command_list</strong> &#8211; list that represents one command</li>
+<li><strong>jump_chain</strong> &#8211; extra parameter to add the rule(list)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the created rule(list) to be added to the rule list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="iptables_manager_modules.rules_builder.FirewallRuleBuilder.manage_custom_chain">
+<code class="descname">manage_custom_chain</code><span class="sig-paren">(</span><em>action</em>, <em>chain_name</em>, <em>iptype</em>, <em>new_chain_name=None</em>, <em>simul=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iptables_manager_modules/rules_builder.html#FirewallRuleBuilder.manage_custom_chain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.rules_builder.FirewallRuleBuilder.manage_custom_chain" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is managing user defined chains. Create, Delete, Rename</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>action</strong> &#8211; create, delete, rename</li>
+<li><strong>chain_name</strong> &#8211; name of the chain</li>
+<li><strong>iptype</strong> &#8211; ipv4 or ipv6 (iptables or ip6tables)</li>
+<li><strong>new_chain_name</strong> &#8211; name of the chain in case you rename</li>
+<li><strong>simul</strong> &#8211; flag to print the commands instead of applying</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">exit code and the actual command if simulate flag is True</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="iptables_manager_modules.rules_builder.FirewallRuleBuilder.manage_ipset">
+<em class="property">static </em><code class="descname">manage_ipset</code><span class="sig-paren">(</span><em>action=None</em>, <em>iptype=None</em>, <em>settype=None</em>, <em>port=None</em>, <em>setname=None</em>, <em>cern_networks=None</em>, <em>hostnames=None</em>, <em>ips=None</em>, <em>cern_set_list=None</em>, <em>simul=False</em>, <em>generate_files=False</em>, <em>file_override=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iptables_manager_modules/rules_builder.html#FirewallRuleBuilder.manage_ipset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.rules_builder.FirewallRuleBuilder.manage_ipset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method calls the scripts that manages all the operations regarding ipsets and pass all the arguments to
+other script in order to create/update/destroy an ipset.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>action</strong> &#8211; create or update or destroy</li>
+<li><strong>iptype</strong> &#8211; ipv4 or ipv6</li>
+<li><strong>settype</strong> &#8211; (e.g. hash:ip)</li>
+<li><strong>port</strong> &#8211; port number or
+&#8216;direct&#8217; &#8211;&gt; mostly used. Direct tell to the script that the ports are provided in the ips,hostnames</li>
+<li><strong>setname</strong> &#8211; the custom name that the set will take</li>
+<li><strong>cern_networks</strong> &#8211; Name of the CERN LanDB set</li>
+<li><strong>hostnames</strong> &#8211; list of hostnames to be resolved via DNS</li>
+<li><strong>ips</strong> &#8211; list of ips to be added into the ipset</li>
+<li><strong>cern_set_list</strong> &#8211; list of names with CERN LanDB network sets</li>
+<li><strong>simul</strong> &#8211; flag whether to print or apply the actions</li>
+<li><strong>generate_files</strong> &#8211; flag to generate the ipset.gen file to be user by the restore command</li>
+<li><strong>file_override</strong> &#8211; flag used to tell the script to override the generated file or not</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the response of the ipset_a</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="iptables_manager_modules.rules_builder.FirewallRuleBuilder.manage_rule">
+<code class="descname">manage_rule</code><span class="sig-paren">(</span><em>iptype</em>, <em>chain_name</em>, <em>jump_chain</em>, <em>comment</em>, <em>protocol=None</em>, <em>nic=None</em>, <em>modules=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iptables_manager_modules/rules_builder.html#FirewallRuleBuilder.manage_rule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.rules_builder.FirewallRuleBuilder.manage_rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to create an iptables rule.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>iptype</strong> &#8211; ipv4 or ipv6</li>
+<li><strong>chain_name</strong> &#8211; the chain that this rule will be added to</li>
+<li><strong>jump_chain</strong> &#8211; the chain that this rule will jump to</li>
+<li><strong>comment</strong> &#8211; comment on the rule</li>
+<li><strong>protocol</strong> &#8211; protocol of the rule</li>
+<li><strong>nic</strong> &#8211; network interface that the rule will be applied on</li>
+<li><strong>modules</strong> &#8211; the modules to be added on the rule</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a fully created rule</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="iptables_manager_modules.rules_builder.FirewallRuleBuilder.module_load_handler">
+<em class="property">static </em><code class="descname">module_load_handler</code><span class="sig-paren">(</span><em>command_list</em>, <em>module_list</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iptables_manager_modules/rules_builder.html#FirewallRuleBuilder.module_load_handler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.rules_builder.FirewallRuleBuilder.module_load_handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a static method and is used to add all the parameters to each rule extracting them from module_list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>command_list</strong> &#8211; list that represents one command</li>
+<li><strong>module_list</strong> &#8211; list of modules to be added to the command(rule)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the full command(rule/list) to be added to the rules list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="iptables_manager_modules.rules_builder.FirewallRuleBuilder.read_config_file">
+<em class="property">static </em><code class="descname">read_config_file</code><span class="sig-paren">(</span><em>parameter</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iptables_manager_modules/rules_builder.html#FirewallRuleBuilder.read_config_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.rules_builder.FirewallRuleBuilder.read_config_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is static and is used to read the &#8216;configuration_info.cfg&#8217; file that provides the paths of the OS
+commands we use to create the rules. If the file is not present the method tries to &#8220;guess&#8221; distro version so to
+run the appropriate command</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> &#8211; Parameter you want to extract from the file e.g.(iptables_script)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The value of the provided parameter e.g.(/etc/init.d/iptables)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="iptables_manager_modules.rules_builder.FirewallRuleBuilder.sys_process_executor">
+<em class="property">static </em><code class="descname">sys_process_executor</code><span class="sig-paren">(</span><em>command</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iptables_manager_modules/rules_builder.html#FirewallRuleBuilder.sys_process_executor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.rules_builder.FirewallRuleBuilder.sys_process_executor" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is static and is used to run OS commands across the other files. It tries to run all commands using
+system path($PATH). If the command/script is not in $PATH it tries to find it in its local helpers/ folder.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>command</strong> &#8211; A list that represents an OS command</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Response, Error, exit code from piping standard output and standard error</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../../code.html">Code</a><ul>
+      <li>Previous: <a href="generate_files.html" title="previous chapter">generate_files</a></li>
+      <li>Next: <a href="../../config.html" title="next chapter">Config file options</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/code_documentation/iptables_manager_modules_documentation/rules_builder.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../../_sources/code_documentation/iptables_manager_modules_documentation/rules_builder.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

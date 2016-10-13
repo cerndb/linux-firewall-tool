@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Bidirectional Rules &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Examples" href="../examples.html" />
+    <link rel="next" title="Single rules" href="one_way_rules.html" />
+    <link rel="prev" title="Examples" href="../examples.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="bidirectional-rules">
+<h1>Bidirectional Rules<a class="headerlink" href="#bidirectional-rules" title="Permalink to this headline">¶</a></h1>
+<p><strong>Example rule for INPUT and OUTPUT chains in one section</strong></p>
+<p><strong>Sections without an ipset</strong></p>
+<blockquote>
+<div><div class="highlight-ini"><div class="highlight"><pre><span></span><span class="k">[essential_services]</span>
+<span class="na">section_type</span> <span class="o">=</span> <span class="s">general</span>
+<span class="na">action</span> <span class="o">=</span> <span class="s">[&#39;accept&#39;,&#39;out&#39;,&#39;in&#39;]</span>
+<span class="na">ip_version</span> <span class="o">=</span> <span class="s">ipv6</span>
+<span class="na">interface</span> <span class="o">=</span> <span class="s">eth0</span>
+<span class="na">protocol</span> <span class="o">=</span> <span class="s">tcp</span>
+<span class="na">ports</span> <span class="o">=</span> <span class="s">22:32</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The section [essential_services] will create a kernel ipset called admin_workstations_x_v4 since its set to ipv4.
+The logic of the action is the following:</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">action</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;accept&#39;</span>,<span class="s1">&#39;out&#39;</span>,<span class="s1">&#39;in&#39;</span><span class="o">]</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>If the list has 3 elements it means that it will create two rules. One for INPUT and one for OUTPUT.
+Elements 2 and 3 define the &#8216;direction of the connection&#8217;. So the <cite>&#8216;out&#8217;</cite>,`&#8217;in&#8217;` means that new connections will be
+allowed initiating from an outside ip. This create two following rules.</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>/sbin/iptables -A INPUT -i eth0 -p tcp -m state --state **NEW,ESTABLISHED** -m multiport --dports 22,50 -j ACCEPT
+/sbin/iptables -A OUTPUT -o eth0 -p tcp -m state --state **ESTABLISHED** -j ACCEPT
+</pre></div>
+</div>
+<div class="highlight-ini"><div class="highlight"><pre><span></span><span class="k">[essential_services_4]</span>
+<span class="na">section_type</span> <span class="o">=</span> <span class="s">general</span>
+<span class="na">action</span> <span class="o">=</span> <span class="s">[&#39;accept&#39;,&#39;in&#39;,&#39;out&#39;]</span>
+<span class="na">ip_version</span> <span class="o">=</span> <span class="s">both</span>
+<span class="na">interface</span> <span class="o">=</span> <span class="s">main</span>
+<span class="na">protocol</span> <span class="o">=</span> <span class="s">tcp,udp</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p><strong>Sections with an ipset</strong></p>
+<blockquote>
+<div><div class="highlight-ini"><div class="highlight"><pre><span></span><span class="k">[essential_services]</span>
+<span class="na">section_type</span> <span class="o">=</span> <span class="s">general</span>
+<span class="na">action</span> <span class="o">=</span> <span class="s">[&#39;accept&#39;,&#39;out&#39;,&#39;in&#39;]</span>
+<span class="na">ip_version</span> <span class="o">=</span> <span class="s">ipv4</span>
+<span class="na">interface</span> <span class="o">=</span> <span class="s">eth0</span>
+<span class="na">protocol</span> <span class="o">=</span> <span class="s">tcp</span>
+<span class="na">ports</span> <span class="o">=</span> <span class="s">22,50</span>
+<span class="na">set</span> <span class="o">=</span> <span class="s">new_set</span>
+
+<span class="k">[new_set]</span>
+<span class="na">section_type</span> <span class="o">=</span> <span class="s">ipset</span>
+<span class="na">ipset_type</span> <span class="o">=</span> <span class="s">hash:ip</span>
+<span class="na">set_name</span> <span class="o">=</span> <span class="s">[&#39;admin_workstations_x&#39;]</span>
+<span class="c1">#set_ips_v4 = [&#39;137.138.142.166&#39;,&#39;137.138.25.22&#39;,&#39;10.18.2.204&#39;,&#39;137.138.160.37&#39;,&#39;137.138.142.156&#39;]</span>
+<span class="na">set_hostnames</span> <span class="o">=</span> <span class="s">[&#39;lxplus&#39;,&#39;pcthanos&#39;,&#39;syscontrol-dev&#39;,&#39;pcjcano2&#39;,&#39;kubernetes-node&#39;,&#39;kubernetes-master&#39;,&#39;agkara-train-2&#39;]</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The section [essential_services] will create a kernel ipset called admin_workstations_x_v4 since its set to ipv4.
+The logic of the action is the following:</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">action</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;accept&#39;</span>,<span class="s1">&#39;out&#39;</span>,<span class="s1">&#39;in&#39;</span><span class="o">]</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>If the list has 3 elements it means that it will create two rules. One for INPUT and one for OUTPUT.
+Elements 2 and 3 define the &#8216;direction of the connection&#8217;. So the <cite>&#8216;out&#8217;</cite>,`&#8217;in&#8217;` means that new connections will be
+allowed initiating from an outside ip. This create two following rules.</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>/sbin/iptables -A INPUT -i eth0 -p tcp -m state --state NEW,ESTABLISHED -m multiport --dports 22,50 -m <span class="nb">set</span> --match-set admin_workstations_x_v4 src -j ACCEPT
+/sbin/iptables -A OUTPUT -o eth0 -p tcp -m state --state ESTABLISHED -m <span class="nb">set</span> --match-set admin_workstations_x_v4 dst -j ACCEPT
+</pre></div>
+</div>
+</div></blockquote>
+<p>So new connections are allowed from the outside inside.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../examples.html">Examples</a><ul>
+      <li>Previous: <a href="../examples.html" title="previous chapter">Examples</a></li>
+      <li>Next: <a href="one_way_rules.html" title="next chapter">Single rules</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/examples/two_way_rule.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/examples/two_way_rule.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bin.ip_dns_resolve &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bin.ip_dns_resolve</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python</span>
+
+<span class="c1"># Copyright (C) 2016, CERN</span>
+<span class="c1"># This software is distributed under the terms of the GNU General Public</span>
+<span class="c1"># Licence version 3 (GPL Version 3), copied verbatim in the file &quot;LICENSE&quot;.</span>
+<span class="c1"># In applying this license, CERN does not waive the privileges and immunities</span>
+<span class="c1"># granted to it by virtue of its status as Intergovernmental Organization</span>
+<span class="c1"># or submit itself to any jurisdiction.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Author: Athanasios Gkaraliakos</span>
+<span class="sd">email: a.gkaraliakos@gmail.com</span>
+
+<span class="sd">The script is written on python &gt;=2.6</span>
+
+<span class="sd">Script to get IPv4 and/or IPv6 (if exists) for every machine in the given set</span>
+
+<span class="sd">Depends on python-dns &quot; yum install python-dns &quot;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">dns.resolver</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="nb">print</span> <span class="s2">&quot;Plase install python-dns rpm: &#39;yum install python-dns&#39; &quot;</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># create a new instance named &#39;my_resolver&#39;</span>
+<span class="n">my_resolver</span> <span class="o">=</span> <span class="n">dns</span><span class="o">.</span><span class="n">resolver</span><span class="o">.</span><span class="n">Resolver</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="ip_dns_resolver"><a class="viewcode-back" href="../../code_documentation/ip_dns_resolve.html#bin.ip_dns_resolve.ip_dns_resolver">[docs]</a><span class="k">def</span> <span class="nf">ip_dns_resolver</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function receives a host name and tries to resolve it via DNS and get the IPv4/IPv6 address/es</span>
+
+<span class="sd">    :param hostname: Hostname</span>
+<span class="sd">    :param iptype: Type of ip address ( IPv4 or IPv6 or both )</span>
+<span class="sd">    :return: IP addresses found ( IPv4 or IPv6 or both )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">iptype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;ipv4&#39;</span><span class="p">,</span> <span class="s1">&#39;ipv6&#39;</span><span class="p">,</span> <span class="s1">&#39;ip&#39;</span><span class="p">]:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">(</span><span class="s2">&quot;Not given ip type &quot;</span><span class="p">,</span> <span class="s1">&#39; ipv4&#39;</span><span class="p">,</span> <span class="s1">&#39; ipv6&#39;</span><span class="p">,</span> <span class="s1">&#39; ip&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">iplist</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">hostname</span> <span class="o">=</span> <span class="n">hostname</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
+        <span class="n">iplist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">hostname</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">iptype</span> <span class="o">==</span> <span class="s1">&#39;ipv4&#39;</span> <span class="ow">or</span> <span class="n">iptype</span> <span class="o">==</span> <span class="s1">&#39;ip&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ipv4</span> <span class="o">=</span> <span class="n">my_resolver</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="n">ipv4</span><span class="p">:</span>
+                <span class="n">iplist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">dns</span><span class="o">.</span><span class="n">resolver</span><span class="o">.</span><span class="n">NoAnswer</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
+                <span class="n">iplist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;IPv4NOTFOUND&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">dns</span><span class="o">.</span><span class="n">resolver</span><span class="o">.</span><span class="n">NXDOMAIN</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
+                <span class="n">iplist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;IPv4NOTFOUND&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">iptype</span> <span class="o">==</span> <span class="s1">&#39;ipv6&#39;</span> <span class="ow">or</span> <span class="n">iptype</span> <span class="o">==</span> <span class="s1">&#39;ip&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ipv6</span> <span class="o">=</span> <span class="n">my_resolver</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="s2">&quot;AAAA&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="n">ipv6</span><span class="p">:</span>
+                <span class="n">iplist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">dns</span><span class="o">.</span><span class="n">resolver</span><span class="o">.</span><span class="n">NoAnswer</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
+                <span class="n">iplist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;IPv6NOTFOUND&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">dns</span><span class="o">.</span><span class="n">resolver</span><span class="o">.</span><span class="n">NXDOMAIN</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
+                <span class="n">iplist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;IPv6NOTFOUND&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">iplist</span></div>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--iptype&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ipv4&#39;</span><span class="p">,</span> <span class="s1">&#39;ipv6&#39;</span><span class="p">,</span> <span class="s1">&#39;ip&#39;</span><span class="p">],</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;specify ipv4 or ipv6 or ip for both&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--hostname&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Define the hostname you want to resolve &#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--silent&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Print only ips&#39;</span><span class="p">)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">iptype</span><span class="p">:</span>
+        <span class="n">iptype</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">iptype</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">iptype</span> <span class="o">=</span> <span class="s1">&#39;ip&#39;</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">hostname</span><span class="p">:</span>
+        <span class="n">hostname</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">hostname</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="n">parser</span><span class="o">.</span><span class="n">print_usage</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">silent</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">ip_dns_resolver</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="kc">True</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">ip_dns_resolver</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">iptype</span><span class="p">)))</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

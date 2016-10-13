@@ -1,0 +1,561 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iptables_manager_modules.rules_builder &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for iptables_manager_modules.rules_builder</h1><div class="highlight"><pre>
+<span></span>
+<span class="c1"># Copyright (C) 2016, CERN</span>
+<span class="c1"># This software is distributed under the terms of the GNU General Public</span>
+<span class="c1"># Licence version 3 (GPL Version 3), copied verbatim in the file &quot;LICENSE&quot;.</span>
+<span class="c1"># In applying this license, CERN does not waive the privileges and immunities</span>
+<span class="c1"># granted to it by virtue of its status as Intergovernmental Organization</span>
+<span class="c1"># or submit itself to any jurisdiction.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Author: Athanasios Gkaraliakos</span>
+<span class="sd">email: a.gkaraliakos@gmail.com</span>
+
+<span class="sd">The script is written on python &gt;=2.6</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="c1"># import from outer folder</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))))</span>
+<span class="kn">from</span> <span class="nn">bin.ipset_manager</span> <span class="k">import</span> <span class="n">ipset_manager</span>
+<span class="kn">from</span> <span class="nn">bin.ipset_manager</span> <span class="k">import</span> <span class="n">save_current_ipset</span>
+
+
+<div class="viewcode-block" id="FirewallRuleBuilder"><a class="viewcode-back" href="../../code_documentation/iptables_manager_modules_documentation/rules_builder.html#iptables_manager_modules.rules_builder.FirewallRuleBuilder">[docs]</a><span class="k">class</span> <span class="nc">FirewallRuleBuilder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Here we create the actual rules to be added to the final list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="FirewallRuleBuilder.sys_process_executor"><a class="viewcode-back" href="../../code_documentation/iptables_manager_modules_documentation/rules_builder.html#iptables_manager_modules.rules_builder.FirewallRuleBuilder.sys_process_executor">[docs]</a>    <span class="k">def</span> <span class="nf">sys_process_executor</span><span class="p">(</span><span class="n">command</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is static and is used to run OS commands across the other files. It tries to run all commands using</span>
+<span class="sd">        system path($PATH). If the command/script is not in $PATH it tries to find it in its local helpers/ folder.</span>
+
+<span class="sd">        :param command: A list that represents an OS command</span>
+<span class="sd">        :return: Response, Error, exit code from piping standard output and standard error</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+            <span class="n">response</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+            <span class="n">exit_code</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">response</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">exit_code</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Script &quot;</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="s2">&quot; not in system path&quot;</span>
+            <span class="n">command_new</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="c1"># script = os.path.join(os.path.dirname(__file__), os.pardir) + &#39;/helpers/&#39; + command_new[0]</span>
+            <span class="n">script</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)))</span> <span class="o">+</span> <span class="s1">&#39;/helpers/&#39;</span> <span class="o">+</span> <span class="n">command_new</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="nb">print</span> <span class="s2">&quot;Trying herlpers:&quot;</span><span class="p">,</span> <span class="n">script</span>
+            <span class="n">command_new</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">script</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">command_new</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+                <span class="n">response</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+                <span class="n">exit_code</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s2">&quot;Script error: &quot;</span><span class="p">,</span> <span class="n">command</span>
+                <span class="k">return</span> <span class="n">response</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">exit_code</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Error on running command: &quot;</span><span class="p">,</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">command</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="nb">print</span> <span class="n">command</span><span class="p">[</span><span class="n">k</span><span class="p">],</span>
+                <span class="nb">print</span> <span class="n">command</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="nb">print</span> <span class="s2">&quot;Provide absolute path or place your script in helpers directory&quot;</span>
+                <span class="nb">print</span> <span class="s1">&#39;&#39;</span>
+                <span class="k">del</span> <span class="n">command_new</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="FirewallRuleBuilder.read_config_file"><a class="viewcode-back" href="../../code_documentation/iptables_manager_modules_documentation/rules_builder.html#iptables_manager_modules.rules_builder.FirewallRuleBuilder.read_config_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_config_file</span><span class="p">(</span><span class="n">parameter</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is static and is used to read the &#39;configuration_info.cfg&#39; file that provides the paths of the OS</span>
+<span class="sd">        commands we use to create the rules. If the file is not present the method tries to &quot;guess&quot; distro version so to</span>
+<span class="sd">        run the appropriate command</span>
+
+<span class="sd">        :param parameter: Parameter you want to extract from the file e.g.(iptables_script)</span>
+<span class="sd">        :return: The value of the provided parameter e.g.(/etc/init.d/iptables)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">project_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)))</span>
+
+        <span class="n">return_parameter</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">project_folder</span> <span class="o">+</span> <span class="s1">&#39;/default_conf_files&#39;</span> <span class="o">+</span> <span class="s1">&#39;/configuration_info.cfg&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="n">return_parameter</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">break</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Cannot read config file!!! Cannot read config file!!! </span><span class="se">\n</span><span class="s2">Path: &quot;</span> <span class="o">+</span> <span class="n">project_folder</span> <span class="o">+</span> \
+                  <span class="s1">&#39;/default_conf_files&#39;</span> <span class="o">+</span> <span class="s1">&#39;/configuration_info.cfg&#39;</span> <span class="o">+</span> <span class="s2">&quot; </span><span class="se">\n</span><span class="s2">Applying defaults&quot;</span>
+
+            <span class="n">call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s1">&#39;/bin/cat&#39;</span><span class="p">,</span> <span class="s1">&#39;/etc/redhat-release&#39;</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+            <span class="n">vers</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;iptables_command&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s2">&quot;Linux Distro Check FAILED!!&quot;</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">vers</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;release 6&#39;</span><span class="p">,</span> <span class="s1">&#39;release 7&#39;</span><span class="p">]:</span>
+                    <span class="n">return_parameter</span> <span class="o">=</span> <span class="s2">&quot;/sbin/iptables&quot;</span>
+
+            <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;ip6tables_command&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s2">&quot;Linux Distro Check FAILED!!&quot;</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">vers</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;release 6&#39;</span><span class="p">,</span> <span class="s1">&#39;release 7&#39;</span><span class="p">]:</span>
+                    <span class="n">return_parameter</span> <span class="o">=</span> <span class="s2">&quot;/sbin/ip6tables&quot;</span>
+
+            <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;iptables_script&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s2">&quot;Linux Distro Check FAILED!!&quot;</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s1">&#39;release 7&#39;</span> <span class="ow">in</span> <span class="n">vers</span><span class="p">:</span>
+                    <span class="n">return_parameter</span> <span class="o">=</span> <span class="s2">&quot;/usr/libexec/iptables/iptables.init&quot;</span>
+                <span class="k">elif</span> <span class="s1">&#39;release 6&#39;</span> <span class="ow">in</span> <span class="n">vers</span><span class="p">:</span>
+                    <span class="n">return_parameter</span> <span class="o">=</span> <span class="s2">&quot;/etc/init.d/iptables&quot;</span>
+
+            <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;ip6tables_script&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s2">&quot;Linux Distro Check FAILED!!&quot;</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s1">&#39;release 7&#39;</span> <span class="ow">in</span> <span class="n">vers</span><span class="p">:</span>
+                    <span class="n">return_parameter</span> <span class="o">=</span> <span class="s2">&quot;/usr/libexec/iptables/ip6tables.init&quot;</span>
+                <span class="k">elif</span> <span class="s1">&#39;release 6&#39;</span> <span class="ow">in</span> <span class="n">vers</span><span class="p">:</span>
+                    <span class="n">return_parameter</span> <span class="o">=</span> <span class="s2">&quot;/etc/init.d/ip6tables&quot;</span>
+
+            <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;ipset_command&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s2">&quot;Linux Distro Check FAILED!!&quot;</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s1">&#39;release 7&#39;</span> <span class="ow">in</span> <span class="n">vers</span><span class="p">:</span>
+                    <span class="n">return_parameter</span> <span class="o">=</span> <span class="s2">&quot;/sbin/ipset&quot;</span>
+
+                <span class="k">elif</span> <span class="s1">&#39;release 6&#39;</span> <span class="ow">in</span> <span class="n">vers</span><span class="p">:</span>
+                    <span class="n">return_parameter</span> <span class="o">=</span> <span class="s2">&quot;/usr/sbin/ipset&quot;</span>
+
+        <span class="k">return</span> <span class="n">return_parameter</span></div>
+
+
+<span class="c1">######################################################################################################</span>
+<div class="viewcode-block" id="FirewallRuleBuilder.check_ipset"><a class="viewcode-back" href="../../code_documentation/iptables_manager_modules_documentation/rules_builder.html#iptables_manager_modules.rules_builder.FirewallRuleBuilder.check_ipset">[docs]</a>    <span class="k">def</span> <span class="nf">check_ipset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">ipset_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method checks if an ipset is present in memory</span>
+
+<span class="sd">        :param iptype: ipv4 or ipv6</span>
+<span class="sd">        :param ipset_name: name of the ipset we want to check</span>
+<span class="sd">        :return: Message with the state of the check</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ipset_command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;ipset_command&#39;</span><span class="p">)</span>
+
+        <span class="n">ipset_name</span> <span class="o">=</span> <span class="n">ipset_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">iptype</span> <span class="o">==</span> <span class="s2">&quot;ipv4&quot;</span><span class="p">:</span>
+            <span class="n">ipset_name</span> <span class="o">+=</span> <span class="s2">&quot;_v4&quot;</span>
+        <span class="k">elif</span> <span class="n">iptype</span> <span class="o">==</span> <span class="s2">&quot;ipv6&quot;</span><span class="p">:</span>
+            <span class="n">ipset_name</span> <span class="o">+=</span> <span class="s2">&quot;_v6&quot;</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="n">ipset_command</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="n">ipset_name</span><span class="p">]</span>
+        <span class="n">response</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">exit_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_process_executor</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">exit_code</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">response</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;The set with the given name does not exist&quot;</span> <span class="ow">in</span> <span class="n">err</span><span class="p">):</span>
+                <span class="k">return</span> <span class="s2">&quot;SetDoNotExist&quot;</span>
+            <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;31&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="n">response</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;31&#39;</span><span class="p">)</span>
+                <span class="nb">print</span> <span class="s1">&#39;Setname &#39;</span> <span class="o">+</span> <span class="n">ipset_name</span> <span class="o">+</span> <span class="s1">&#39; is longer than 31 characters&#39;</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;IpsetCheckERROR&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;SetExists&quot;</span></div>
+
+
+<span class="c1">######################################################################################################</span>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="FirewallRuleBuilder.manage_ipset"><a class="viewcode-back" href="../../code_documentation/iptables_manager_modules_documentation/rules_builder.html#iptables_manager_modules.rules_builder.FirewallRuleBuilder.manage_ipset">[docs]</a>    <span class="k">def</span> <span class="nf">manage_ipset</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iptype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">settype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">setname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cern_networks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">hostnames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ips</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cern_set_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">simul</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">generate_files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">file_override</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method calls the scripts that manages all the operations regarding ipsets and pass all the arguments to</span>
+<span class="sd">        other script in order to create/update/destroy an ipset.</span>
+
+<span class="sd">        :param action: create or update or destroy</span>
+<span class="sd">        :param iptype: ipv4 or ipv6</span>
+<span class="sd">        :param settype: (e.g. hash:ip)</span>
+<span class="sd">        :param port: port number or</span>
+<span class="sd">                    &#39;direct&#39; --&gt; mostly used. Direct tell to the script that the ports are provided in the ips,hostnames</span>
+<span class="sd">        :param setname: the custom name that the set will take</span>
+<span class="sd">        :param cern_networks:  Name of the CERN LanDB set</span>
+<span class="sd">        :param hostnames: list of hostnames to be resolved via DNS</span>
+<span class="sd">        :param ips: list of ips to be added into the ipset</span>
+<span class="sd">        :param cern_set_list: list of names with CERN LanDB network sets</span>
+<span class="sd">        :param simul: flag whether to print or apply the actions</span>
+<span class="sd">        :param generate_files: flag to generate the ipset.gen file to be user by the restore command</span>
+<span class="sd">        :param file_override: flag used to tell the script to override the generated file or not</span>
+<span class="sd">        :return: the response of the ipset_a</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># print action, iptype, settype, port, setname, cern_networks, hostnames, ips</span>
+        <span class="c1"># print &quot;Hostnames: &quot;, hostnames</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">ipset_manager</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">settype</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">setname</span><span class="p">,</span> <span class="n">cern_networks</span><span class="p">,</span> <span class="n">cern_set_list</span><span class="p">,</span> <span class="n">hostnames</span><span class="p">,</span> <span class="n">ips</span><span class="p">,</span>
+                             <span class="n">simul</span><span class="p">,</span> <span class="n">generate_files</span><span class="p">,</span> <span class="n">file_override</span><span class="p">)</span>
+        <span class="c1"># print &quot;MANAGE IPSet resp: &quot;, resp</span>
+        <span class="k">return</span> <span class="n">resp</span></div>
+
+<span class="c1">######################################################################################################</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">save_ipset</span><span class="p">(</span><span class="n">simulate</span><span class="p">):</span>
+        <span class="n">save_current_ipset</span><span class="p">(</span><span class="n">simulate</span><span class="p">)</span>
+
+<span class="c1">######################################################################################################</span>
+<div class="viewcode-block" id="FirewallRuleBuilder.manage_custom_chain"><a class="viewcode-back" href="../../code_documentation/iptables_manager_modules_documentation/rules_builder.html#iptables_manager_modules.rules_builder.FirewallRuleBuilder.manage_custom_chain">[docs]</a>    <span class="k">def</span> <span class="nf">manage_custom_chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">chain_name</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">new_chain_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">simul</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is managing user defined chains. Create, Delete, Rename</span>
+
+<span class="sd">        :param action: create, delete, rename</span>
+<span class="sd">        :param chain_name: name of the chain</span>
+<span class="sd">        :param iptype: ipv4 or ipv6 (iptables or ip6tables)</span>
+<span class="sd">        :param new_chain_name: name of the chain in case you rename</span>
+<span class="sd">        :param simul: flag to print the commands instead of applying</span>
+<span class="sd">        :return: exit code and the actual command if simulate flag is True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">iptype</span> <span class="o">==</span> <span class="s1">&#39;ipv4&#39;</span><span class="p">:</span>
+            <span class="n">iptables_command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;iptables_command&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">iptype</span> <span class="o">==</span> <span class="s1">&#39;ipv6&#39;</span><span class="p">:</span>
+            <span class="n">iptables_command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;ip6tables_command&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;create&#39;</span><span class="p">:</span>
+
+            <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="n">iptables_command</span><span class="p">,</span> <span class="s1">&#39;-N&#39;</span><span class="p">,</span> <span class="n">chain_name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">simul</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="n">command</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">command</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">command</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">exit_code</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">response</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">exit_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_process_executor</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">exit_code</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">response</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;iptables: Chain already exists&quot;</span> <span class="ow">in</span> <span class="n">err</span><span class="p">):</span>
+                    <span class="nb">print</span> <span class="s2">&quot;Chain: &quot;</span> <span class="o">+</span> <span class="n">chain_name</span> <span class="o">+</span> <span class="s2">&quot; already exists&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="n">iptables_command</span> <span class="o">+</span> <span class="s2">&quot;|ERROR&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Chain: &quot;</span> <span class="o">+</span> <span class="n">chain_name</span> <span class="o">+</span> <span class="s2">&quot; created&quot;</span>
+
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;delete&#39;</span><span class="p">:</span>
+
+            <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="n">iptables_command</span><span class="p">,</span> <span class="s1">&#39;-X&#39;</span><span class="p">,</span> <span class="n">chain_name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">simul</span><span class="p">:</span>
+                <span class="n">response</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">exit_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_process_executor</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="n">command</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">command</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">command</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">exit_code</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="n">exit_code</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">response</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;iptables: No chain/target/match by that name&quot;</span> <span class="ow">in</span> <span class="n">err</span><span class="p">):</span>
+                    <span class="nb">print</span> <span class="s2">&quot;Chain: &quot;</span> <span class="o">+</span> <span class="n">chain_name</span> <span class="o">+</span> <span class="s2">&quot; does not exist&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="n">iptables_command</span> <span class="o">+</span> <span class="s2">&quot;|ERROR&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Chain: &quot;</span> <span class="o">+</span> <span class="n">chain_name</span> <span class="o">+</span> <span class="s2">&quot; deleted&quot;</span>
+
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;rename&#39;</span><span class="p">:</span>
+
+            <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="n">iptables_command</span><span class="p">,</span> <span class="s1">&#39;-E&#39;</span><span class="p">,</span> <span class="n">chain_name</span><span class="p">,</span> <span class="n">new_chain_name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">simul</span><span class="p">:</span>
+                <span class="n">response</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">exit_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_process_executor</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="n">command</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">command</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">command</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">command</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                <span class="n">exit_code</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="n">exit_code</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">response</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;iptables: File exists&quot;</span> <span class="ow">in</span> <span class="n">err</span><span class="p">):</span>
+                    <span class="nb">print</span> <span class="s2">&quot;Chain: &quot;</span> <span class="o">+</span> <span class="n">chain_name</span> <span class="o">+</span> <span class="s2">&quot; possibly do not exist&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="n">iptables_command</span> <span class="o">+</span> <span class="s2">&quot;|ERROR&quot;</span>
+
+            <span class="k">elif</span> <span class="n">exit_code</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="n">iptables_command</span> <span class="o">+</span> <span class="s2">&quot;|USAGE|ERROR&quot;</span>
+
+            <span class="k">elif</span> <span class="n">exit_code</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Chain: &quot;</span> <span class="o">+</span> <span class="n">chain_name</span> <span class="o">+</span> <span class="s2">&quot; renamed to &quot;</span> <span class="o">+</span> <span class="n">new_chain_name</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">simul</span><span class="p">:</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">exit_code</span><span class="p">,</span> <span class="n">command</span></div>
+
+
+<span class="c1">######################################################################################################</span>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="FirewallRuleBuilder.module_load_handler"><a class="viewcode-back" href="../../code_documentation/iptables_manager_modules_documentation/rules_builder.html#iptables_manager_modules.rules_builder.FirewallRuleBuilder.module_load_handler">[docs]</a>    <span class="k">def</span> <span class="nf">module_load_handler</span><span class="p">(</span><span class="n">command_list</span><span class="p">,</span> <span class="n">module_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is a static method and is used to add all the parameters to each rule extracting them from module_list</span>
+
+<span class="sd">        :param command_list: list that represents one command</span>
+<span class="sd">        :param module_list: list of modules to be added to the command(rule)</span>
+<span class="sd">        :return: the full command(rule/list) to be added to the rules list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="s1">&#39;state&#39;</span> <span class="ow">in</span> <span class="n">module_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;NEW&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;ESTABLISHED&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;RELATED&#39;</span><span class="p">):</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">)</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;state&#39;</span><span class="p">)</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--state&#39;</span><span class="p">)</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="s1">&#39;conntrack&#39;</span> <span class="ow">in</span> <span class="n">module_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;conntrack&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;NEW&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;conntrack&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;ESTABLISHED&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;conntrack&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;RELATED&#39;</span><span class="p">):</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">)</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;conntrack&#39;</span><span class="p">)</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--ctstate&#39;</span><span class="p">)</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;conntrack&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="s1">&#39;limit&#39;</span> <span class="ow">in</span> <span class="n">module_list</span><span class="p">:</span>
+            <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">)</span>
+            <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;limit&#39;</span><span class="p">)</span>
+            <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--limit&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;limit&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">opts</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;limit&#39;</span><span class="p">])):</span>
+                    <span class="k">if</span> <span class="s1">&#39;limit-burst&#39;</span> <span class="ow">in</span> <span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;limit&#39;</span><span class="p">][</span><span class="n">opts</span><span class="p">]:</span>
+                        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--limit-burst&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;limit&#39;</span><span class="p">][</span><span class="n">opts</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;limit&#39;</span><span class="p">])</span>
+
+        <span class="c1"># if &#39;length&#39; in module_list:</span>
+        <span class="c1">#     command_list.append(&#39;-m&#39;)</span>
+        <span class="c1">#     command_list.append(&#39;length&#39;)</span>
+        <span class="c1">#     command_list.append(&#39;--length&#39;)</span>
+        <span class="c1">#     command_list.append(module_list[&#39;length&#39;])</span>
+
+        <span class="k">if</span> <span class="s1">&#39;tcp&#39;</span> <span class="ow">in</span> <span class="n">module_list</span><span class="p">:</span>
+            <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">)</span>
+            <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;tcp&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;tcp&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">mod_opt</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;tcp&#39;</span><span class="p">])):</span>
+                    <span class="k">if</span> <span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;tcp&#39;</span><span class="p">][</span><span class="n">mod_opt</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;sport&#39;</span><span class="p">:</span>
+                        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--sport&#39;</span><span class="p">)</span>
+                        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;tcp&#39;</span><span class="p">][</span><span class="n">mod_opt</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="k">elif</span> <span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;tcp&#39;</span><span class="p">][</span><span class="n">mod_opt</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;dport&#39;</span><span class="p">:</span>
+                        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--dport&#39;</span><span class="p">)</span>
+                        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;tcp&#39;</span><span class="p">][</span><span class="n">mod_opt</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;tcp&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="s1">&#39;udp&#39;</span> <span class="ow">in</span> <span class="n">module_list</span><span class="p">:</span>
+            <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">)</span>
+            <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;udp&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;udp&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">mod_opt</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;udp&#39;</span><span class="p">])):</span>
+                    <span class="k">if</span> <span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;udp&#39;</span><span class="p">][</span><span class="n">mod_opt</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;sport&#39;</span><span class="p">:</span>
+                        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--sport&#39;</span><span class="p">)</span>
+                        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;udp&#39;</span><span class="p">][</span><span class="n">mod_opt</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="k">elif</span> <span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;udp&#39;</span><span class="p">][</span><span class="n">mod_opt</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;dport&#39;</span><span class="p">:</span>
+                        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--dport&#39;</span><span class="p">)</span>
+                        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;udp&#39;</span><span class="p">][</span><span class="n">mod_opt</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;udp&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="s1">&#39;multiport&#39;</span> <span class="ow">in</span> <span class="n">module_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;multiport&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;multiport&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;sports&#39;</span><span class="p">:</span>
+                    <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">)</span>
+                    <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;multiport&#39;</span><span class="p">)</span>
+                    <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--sports&#39;</span><span class="p">)</span>
+                    <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;multiport&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;multiport&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;dports&#39;</span><span class="p">:</span>
+                    <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">)</span>
+                    <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;multiport&#39;</span><span class="p">)</span>
+                    <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--dports&#39;</span><span class="p">)</span>
+                    <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;multiport&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Bad usage of multiport module&quot;</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;set&#39;</span> <span class="ow">in</span> <span class="n">module_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;set&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                <span class="c1"># print &quot;Inside set section&quot;</span>
+                <span class="c1"># for mod_opt in xrange(len(module_list[&#39;set&#39;])):</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">)</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;set&#39;</span><span class="p">)</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--match-set&#39;</span><span class="p">)</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;set&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;set&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;USAGE|ERROR&quot;</span><span class="p">)</span>
+                <span class="nb">print</span> <span class="s2">&quot;Sets modules options: &quot;</span> <span class="o">+</span> <span class="n">module_list</span><span class="p">[</span><span class="s1">&#39;set&#39;</span><span class="p">]</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<span class="c1">######################################################################################################</span>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="FirewallRuleBuilder.handle_log_chain"><a class="viewcode-back" href="../../code_documentation/iptables_manager_modules_documentation/rules_builder.html#iptables_manager_modules.rules_builder.FirewallRuleBuilder.handle_log_chain">[docs]</a>    <span class="k">def</span> <span class="nf">handle_log_chain</span><span class="p">(</span><span class="n">command_list</span><span class="p">,</span> <span class="n">jump_chain</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is a static method and is used to handle the LOG chain. It adds parameters to a rule(list) this jumps to</span>
+<span class="sd">        the LOG chain</span>
+
+<span class="sd">        :param command_list: list that represents one command</span>
+<span class="sd">        :param jump_chain: extra parameter to add the rule(list)</span>
+<span class="sd">        :return: the created rule(list) to be added to the rule list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jump_chain</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="s1">&#39;log-&#39;</span> <span class="ow">in</span> <span class="n">jump_chain</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="n">temp</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span> <span class="o">+</span> <span class="n">jump_chain</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jump_chain</span><span class="p">[</span><span class="n">i</span><span class="p">])</span></div>
+
+
+<span class="c1">######################################################################################################</span>
+<div class="viewcode-block" id="FirewallRuleBuilder.manage_rule"><a class="viewcode-back" href="../../code_documentation/iptables_manager_modules_documentation/rules_builder.html#iptables_manager_modules.rules_builder.FirewallRuleBuilder.manage_rule">[docs]</a>    <span class="k">def</span> <span class="nf">manage_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">chain_name</span><span class="p">,</span> <span class="n">jump_chain</span><span class="p">,</span> <span class="n">comment</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nic</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">modules</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is used to create an iptables rule.</span>
+
+<span class="sd">        :param iptype: ipv4 or ipv6</span>
+<span class="sd">        :param chain_name: the chain that this rule will be added to</span>
+<span class="sd">        :param jump_chain: the chain that this rule will jump to</span>
+<span class="sd">        :param comment: comment on the rule</span>
+<span class="sd">        :param protocol: protocol of the rule</span>
+<span class="sd">        :param nic: network interface that the rule will be applied on</span>
+<span class="sd">        :param modules: the modules to be added on the rule</span>
+<span class="sd">        :return: a fully created rule</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">command_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">iptype</span> <span class="o">==</span> <span class="s1">&#39;ipv4&#39;</span><span class="p">:</span>
+            <span class="n">iptables_command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;iptables_command&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">iptype</span> <span class="o">==</span> <span class="s1">&#39;ipv6&#39;</span><span class="p">:</span>
+            <span class="n">iptables_command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;ip6tables_command&#39;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Wrong usage of method manage_rule&quot;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iptables_command</span><span class="p">)</span>
+        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-C&#39;</span><span class="p">)</span>
+        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chain_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">nic</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">chain_name</span> <span class="o">==</span> <span class="s1">&#39;INPUT&#39;</span><span class="p">:</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-i&#39;</span><span class="p">)</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nic</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">chain_name</span> <span class="o">==</span> <span class="s1">&#39;OUTPUT&#39;</span><span class="p">:</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-o&#39;</span><span class="p">)</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nic</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">protocol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">protocol</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;tcp&#39;</span><span class="p">,</span> <span class="s1">&#39;udp&#39;</span><span class="p">]:</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-p&#39;</span><span class="p">)</span>
+                <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Wrong protocol &quot;</span> <span class="o">+</span> <span class="n">protocol</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">modules</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">module_load_handler</span><span class="p">(</span><span class="n">command_list</span><span class="p">,</span> <span class="n">modules</span><span class="p">)</span>
+        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-j&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">jump_chain</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;LOG&#39;</span> <span class="ow">in</span> <span class="n">jump_chain</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jump_chain</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">del</span> <span class="n">jump_chain</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handle_log_chain</span><span class="p">(</span><span class="n">command_list</span><span class="p">,</span> <span class="n">jump_chain</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">jump_chain</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jump_chain</span><span class="p">)</span>
+
+        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">)</span>
+        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">)</span>
+        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--comment&#39;</span><span class="p">)</span>
+        <span class="n">command_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;[&quot;</span> <span class="o">+</span> <span class="n">comment</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">command_list</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Explanation of the config files for creating rules &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Config file options" href="../config.html" />
+    <link rel="next" title="Explanation of the config files for creating ipsets" href="config_file_usage_ipsets.html" />
+    <link rel="prev" title="Config file options" href="../config.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="explanation-of-the-config-files-for-creating-rules">
+<h1>Explanation of the config files for creating rules<a class="headerlink" href="#explanation-of-the-config-files-for-creating-rules" title="Permalink to this headline">¶</a></h1>
+<p><strong>Allowed options on each section</strong></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">section_type:</th><td class="field-body"><code class="docutils literal"><span class="pre">general</span></code> / <code class="docutils literal"><span class="pre">ipset</span></code> / <code class="docutils literal"><span class="pre">policy</span></code></td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">general</span></code> This value indicates this section defines rule/s</li>
+<li><code class="docutils literal"><span class="pre">ipset</span></code>   This value indicates this section defines a kernel ipset</li>
+<li><code class="docutils literal"><span class="pre">policy</span></code>  This value indicates this section defines policy we want to apply (ACCEPT, DROP)</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">general:</th><td class="field-body"><p class="first"><strong>Section for rules</strong></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">description:</th><td class="field-body"><p class="first"><em>Free text to add description to each rule</em></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">action:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">['accept','out','in']</span></code> / <code class="docutils literal"><span class="pre">['log','drop']</span></code> / <code class="docutils literal"><span class="pre">['drop']</span></code></p>
+<ol class="arabic">
+<li><dl class="first docutils">
+<dt><code class="docutils literal"><span class="pre">['accept'/'drop','out','in']</span></code> or <code class="docutils literal"><span class="pre">['accept'/'drop','in','out']</span></code>:</dt>
+<dd><p class="first last">This value indicates this section is a <strong>bidirectional rules</strong></p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><code class="docutils literal"><span class="pre">['log','drop'/'accept']</span></code>:</dt>
+<dd><p class="first last">This value indicates this section is a <strong>log rule</strong></p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><code class="docutils literal"><span class="pre">['accept'/'drop']</span></code>:</dt>
+<dd><p class="first last">This value indicates this section is a <strong>single rule/s</strong></p>
+</dd>
+</dl>
+</li>
+</ol>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">default_chain:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">INPUT</span></code></p>
+<ul>
+<li><dl class="first docutils">
+<dt><code class="docutils literal"><span class="pre">INPUT</span> <span class="pre">/</span> <span class="pre">OUTPUT</span></code></dt>
+<dd><p class="first last">Here we state at which chain the rule is going to be added</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">ip_version:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">ipv6</span></code></p>
+<ul>
+<li><dl class="first docutils">
+<dt><code class="docutils literal"><span class="pre">ipv4</span> <span class="pre">/</span> <span class="pre">ipv6</span> <span class="pre">/</span> <span class="pre">both</span></code></dt>
+<dd><p class="first last">Here we define the version of the iptables we want the rules to be applied on.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">interface:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">main</span></code></p>
+<p>Here we define the nic card that the rule will be using.</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">main</span> <span class="pre">/</span> <span class="pre">all</span> <span class="pre">/</span> <span class="pre">other</span> <span class="pre">/</span> <span class="pre">name_of_real_interface(eth1)</span></code></li>
+<li><code class="docutils literal"><span class="pre">main</span></code> returns the interface that has a routeable address and can be resolved via DNS</li>
+<li><code class="docutils literal"><span class="pre">all</span></code> return all the interfaces of a machine</li>
+<li><code class="docutils literal"><span class="pre">other</span></code> returns all the interfaces of a machine excpet the <code class="docutils literal"><span class="pre">main</span></code></li>
+<li><code class="docutils literal"><span class="pre">['main','+interface_name']</span></code> return tha main plus specified interface e.g.(eth2), so we configure rules for both</li>
+<li><code class="docutils literal"><span class="pre">['other','-interface_name']</span></code> return all except main and also omits the specified interface, so there will be rules for all the other</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">protocol:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">tcp,udp</span></code></p>
+<p>Here we define the protocol on which the rule will be applied on. We can define either one e.g. <code class="docutils literal"><span class="pre">tcp</span></code> or both
+<code class="docutils literal"><span class="pre">udp,tcp</span></code> to create rule for both.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">jump_chain:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">DROP</span></code></p>
+<p>Here we define the chain we want to jump to when a packet matches on a rule</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">ports:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">443</span></code> / <code class="docutils literal"><span class="pre">22:35</span></code> / <code class="docutils literal"><span class="pre">443,547,80,..</span></code> / <code class="docutils literal"><span class="pre">&quot;/sbin/port_script.sh&quot;</span></code></p>
+<p class="last">Here we define the ports we want this rule to be applied on. We add a tell the option to run a script and return
+one of the previous formats of ports.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">general:</th><td class="field-body"><p class="first"><strong>Section for log,accept/drop</strong></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">custom_chain:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">NAME_OF_CHAIN</span></code></p>
+<p>Here we define a user chain we want the packets to jump into so we perform logging and the accept or drop</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">limit:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">1/sec</span></code></p>
+<p>Followed by a number. This determines the maximum number of matches to allow per unit time (default is per second).
+The number can explicitly units determined by &#8216;/ second /&#8217;, &#8216;/ minute /&#8217;, &#8216;/ hour /&#8217; or &#8216;/ day /&#8217; or parts of
+them (so &#8216;5 / second&#8217; is the same as&#8217; 5 / s &#8216;).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">log-level:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">info</span></code></p>
+<p>Followed by a level number or name. Valid names are (case-insensitive) &#8216;debug&#8217;, &#8216;info&#8217;, &#8216;notice&#8217;, &#8216;warning&#8217;,
+&#8216;err&#8217;, &#8216;crit&#8217;, &#8216;alert&#8217; and &#8216;emerg&#8217;, corresponding to numbers 7 through 0. See the man page for syslog.conf for
+an explanation of these levels. The default is &#8216;warning&#8217;.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">log-prefix:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">DROP:</span></code></p>
+<p>Followed by a string of up to 29 characters, this message is sent at the start of the log message, to allow it
+to be uniquely identified.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">log-specific-options:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">['log-tcp-sequence','log-tcp-options','log-ip-options']</span></code></p>
+<p>Use this options inside a list without the double dash &#8211;</p>
+<ul class="last">
+<li><dl class="first docutils">
+<dt>log-tcp-sequence</dt>
+<dd><p class="first last">Log TCP sequence numbers. This is a security risk if the log is readable by users.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>log-tcp-options</dt>
+<dd><p class="first last">Log options from the TCP packet header.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>log-ip-options</dt>
+<dd><p class="first last">Log options from the IP packet header.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>log-uid</dt>
+<dd><p class="first last">Log the userid of the process which generated the packet.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">general:</th><td class="field-body"><p class="first"><strong>Section for single way rule</strong></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">set:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">name_of_the_ipset_section</span></code></p>
+<p>Here we define the name of the section that describes an ipset to be used with this rule</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">set_directions:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">src</span></code> or <code class="docutils literal"><span class="pre">src,dst</span></code> or <code class="docutils literal"><span class="pre">dst,dst,src</span></code></p>
+<p>Here we define the &#8216;direction&#8217; for each element of the ipset. Each element of an ipset can have 3 types</p>
+<ul>
+<li><p class="first">single: ipsets that hold only IPs or net ranges</p>
+</li>
+<li><dl class="first docutils">
+<dt>double: ipsets that hold IPs or net ranges along with ports</dt>
+<dd><p class="first last">e.g. <strong>192.168.1.1,tcp:443</strong></p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>triple: ipsets that hold IPs or net ranges along with ports and IPs net ranges</dt>
+<dd><p class="first last">e.g. <strong>192.168.1.1,tcp:80,192.168.2.1</strong></p>
+</dd>
+</dl>
+</li>
+</ul>
+<p class="last">So each part of an element should have a &#8216;direction&#8217; on each rule</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">policy:</th><td class="field-body"><p class="first"><strong>Section to define the policy of our firewall. Only one section is allowed</strong></p>
+<table class="last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">INPUT:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">ACCEPT</span></code> or <code class="docutils literal"><span class="pre">DROP</span></code></p>
+<ul class="simple">
+<li>Define the policy of the INPUT default chain</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">OUTPUT:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">ACCEPT</span></code> or <code class="docutils literal"><span class="pre">DROP</span></code></p>
+<ul class="simple">
+<li>Define the policy of the OUTPUT default chain</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">FORWARD:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">ACCEPT</span></code> or <code class="docutils literal"><span class="pre">DROP</span></code></p>
+<ul class="last simple">
+<li>Define the policy of the FORWARD default chain</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../config.html">Config file options</a><ul>
+      <li>Previous: <a href="../config.html" title="previous chapter">Config file options</a></li>
+      <li>Next: <a href="config_file_usage_ipsets.html" title="next chapter">Explanation of the config files for creating ipsets</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/config_files_usage/config_file_usage_rules.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/config_files_usage/config_file_usage_rules.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

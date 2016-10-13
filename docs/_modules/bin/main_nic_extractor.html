@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bin.main_nic_extractor &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bin.main_nic_extractor</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python</span>
+
+<span class="c1"># Copyright (C) 2016, CERN</span>
+<span class="c1"># This software is distributed under the terms of the GNU General Public</span>
+<span class="c1"># Licence version 3 (GPL Version 3), copied verbatim in the file &quot;LICENSE&quot;.</span>
+<span class="c1"># In applying this license, CERN does not waive the privileges and immunities</span>
+<span class="c1"># granted to it by virtue of its status as Intergovernmental Organization</span>
+<span class="c1"># or submit itself to any jurisdiction.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Author: Athanasios Gkaraliakos</span>
+<span class="sd">email: a.gkaraliakos@gmail.com</span>
+
+<span class="sd">The script is written on python &gt;=2.6</span>
+
+<span class="sd">Script to identify which is the main network interface used by the current box.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">ip_dns_resolve</span> <span class="k">import</span> <span class="n">ip_dns_resolver</span>
+
+
+<div class="viewcode-block" id="main_nic_extractor"><a class="viewcode-back" href="../../code_documentation/main_nic_extractor.html#bin.main_nic_extractor.main_nic_extractor">[docs]</a><span class="k">def</span> <span class="nf">main_nic_extractor</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This script tries to identify which is the main network interface used by the current box using the machine</span>
+<span class="sd">    host name. It resolves the host name via DNS and returns the interface ( nic ) that uses this IPv4/IPv6</span>
+<span class="sd">    address</span>
+
+<span class="sd">    :return: Returns only the name of the interface ( e.g. eth0 )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Call to get machine &#39;s hostname</span>
+    <span class="n">hostname_call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s1">&#39;/bin/hostname&#39;</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+    <span class="n">hostname</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">hostname_call</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+    <span class="n">hostname</span> <span class="o">=</span> <span class="n">hostname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">machine</span> <span class="o">=</span> <span class="n">ip_dns_resolver</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="s1">&#39;ip&#39;</span><span class="p">)</span>
+
+    <span class="n">box_ipv4</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">box_ipv6</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">machine</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;IPv4NOTFOUND&#39;</span><span class="p">:</span>
+        <span class="n">box_ipv4</span> <span class="o">=</span> <span class="n">machine</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">machine</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;IPv4NOTFOUND&#39;</span><span class="p">:</span>
+        <span class="n">box_ipv6</span> <span class="o">=</span> <span class="n">machine</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1"># Call to get the list of available network interfaces</span>
+    <span class="n">interfaces_call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s1">&#39;/bin/ls&#39;</span><span class="p">,</span> <span class="s1">&#39;-1&#39;</span><span class="p">,</span> <span class="s1">&#39;/sys/class/net&#39;</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                                       <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+    <span class="n">interfaces</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">interfaces_call</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+    <span class="n">interfaces</span> <span class="o">=</span> <span class="n">interfaces</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">interfaces</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">main_interface</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="c1"># Check if interface uses the current dns ipv4 and/or ipv6 and return it as the main interface</span>
+    <span class="k">if</span> <span class="n">box_ipv4</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="n">box_ipv6</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">interfaces</span><span class="p">)):</span>
+            <span class="n">interface_call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s1">&#39;/sbin/ip&#39;</span><span class="p">,</span> <span class="s1">&#39;addr&#39;</span><span class="p">,</span> <span class="s1">&#39;show&#39;</span><span class="p">,</span> <span class="n">interfaces</span><span class="p">[</span><span class="n">inter</span><span class="p">]],</span>
+                                              <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+            <span class="n">interface_info</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">interface_call</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">box_ipv4</span> <span class="ow">in</span> <span class="n">interface_info</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">box_ipv6</span> <span class="ow">in</span> <span class="n">interface_info</span><span class="p">):</span>
+                <span class="n">main_interface</span> <span class="o">=</span> <span class="n">inter</span>
+                <span class="k">break</span>
+
+    <span class="c1"># Return the main interface</span>
+    <span class="k">if</span> <span class="n">main_interface</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">interfaces</span><span class="p">[</span><span class="n">main_interface</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../code_documentation/main_nic_extractor.html#bin.main_nic_extractor.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># pylint: disable=C0301</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This script tries to identify which is the main network interface used by the current box using the machine</span>
+<span class="sd">    host name. It resolves the host name via DNS and returns the interface ( nic ) that uses this IPv4/IPv6</span>
+<span class="sd">    address</span>
+
+<span class="sd">    :return: Returns only the name of the interface ( e.g. eth0 )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span> <span class="n">main_nic_extractor</span><span class="p">()</span></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

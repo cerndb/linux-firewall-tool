@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Host config &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Examples" href="../examples.html" />
+    <link rel="next" title="Code" href="../code.html" />
+    <link rel="prev" title="Policy" href="policy.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="host-config">
+<h1>Host config<a class="headerlink" href="#host-config" title="Permalink to this headline">¶</a></h1>
+<p><strong>Example of applying a configuration to a host</strong></p>
+<blockquote>
+<div><div class="highlight-ini"><div class="highlight"><pre><span></span><span class="k">[apache]</span>
+<span class="na">machines</span> <span class="o">=</span> <span class="s">&quot;test.sh&quot;</span>
+<span class="na">default_parameters</span> <span class="o">=</span> <span class="s">[&#39;no_default_config&#39;,&#39;deploy&#39;]</span>
+<span class="na">default_interface</span> <span class="o">=</span> <span class="s">main</span>
+<span class="na">config_folder</span> <span class="o">=</span> <span class="s">/root/cerndb-infra-firewall/custom_conf_files</span>
+<span class="na">config_folder_files</span> <span class="o">=</span> <span class="s">[&#39;example_config_1.cfg&#39;,&#39;example_config_3.cfg&#39;,&#39;example_config_6.cfg&#39;]</span>
+<span class="na">config_files</span> <span class="o">=</span> <span class="s">[&#39;/root/cerndb-infra-firewall/custom_conf_files/example_config_7.cfg&#39;]</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../examples.html">Examples</a><ul>
+      <li>Previous: <a href="policy.html" title="previous chapter">Policy</a></li>
+      <li>Next: <a href="../code.html" title="next chapter">Code</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/examples/host_config.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/examples/host_config.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

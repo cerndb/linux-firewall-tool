@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>generate_files &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Code" href="../../code.html" />
+    <link rel="next" title="rules_builder" href="rules_builder.html" />
+    <link rel="prev" title="default_rules" href="default_rules.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-iptables_manager_modules.generate_files">
+<span id="generate-files"></span><h1>generate_files<a class="headerlink" href="#module-iptables_manager_modules.generate_files" title="Permalink to this headline">¶</a></h1>
+<p>Author: Athanasios Gkaraliakos
+email: <a class="reference external" href="mailto:a&#46;gkaraliakos&#37;&#52;&#48;gmail&#46;com">a<span>&#46;</span>gkaraliakos<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>The script is written on python &gt;=2.6</p>
+<dl class="class">
+<dt id="iptables_manager_modules.generate_files.IPTablesFileGenerator">
+<em class="property">class </em><code class="descclassname">iptables_manager_modules.generate_files.</code><code class="descname">IPTablesFileGenerator</code><a class="reference internal" href="../../_modules/iptables_manager_modules/generate_files.html#IPTablesFileGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.generate_files.IPTablesFileGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Here we generate iptables.gen and ip6tables.gen files to be used with the restore command.
+The class objects receives two lists for iptables and ip6tables and generates the files.</p>
+<dl class="staticmethod">
+<dt id="iptables_manager_modules.generate_files.IPTablesFileGenerator.get_current_rules">
+<em class="property">static </em><code class="descname">get_current_rules</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iptables_manager_modules/generate_files.html#IPTablesFileGenerator.get_current_rules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.generate_files.IPTablesFileGenerator.get_current_rules" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method copies the current iptables and ip6tables configuration that is in memory and write it to files
+with &#8216;.orig&#8217; extension.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="iptables_manager_modules.generate_files.IPTablesFileGenerator.write_iptables_files">
+<code class="descname">write_iptables_files</code><span class="sig-paren">(</span><em>default_rules</em>, <em>user_rules</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iptables_manager_modules/generate_files.html#IPTablesFileGenerator.write_iptables_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.generate_files.IPTablesFileGenerator.write_iptables_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method receives 2 lists. By applying proper formatting on the lists it extracts the info to populate the
+&#8216;final&#8217; lists so to write their contents in the &#8216;iptables.gen&#8217; and &#8216;ip6tables.gen&#8217; generated rule files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>default_rules</strong> &#8211; This list contains all the rules that will be applied on each machine</li>
+<li><strong>user_rules</strong> &#8211; This list contains all the rules generated from the user that are defined in the provided
+config files</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../../code.html">Code</a><ul>
+      <li>Previous: <a href="default_rules.html" title="previous chapter">default_rules</a></li>
+      <li>Next: <a href="rules_builder.html" title="next chapter">rules_builder</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/code_documentation/iptables_manager_modules_documentation/generate_files.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../../_sources/code_documentation/iptables_manager_modules_documentation/generate_files.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

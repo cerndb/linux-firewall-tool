@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Explanation of the config files for creating ipsets &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Config file options" href="../config.html" />
+    <link rel="next" title="Explanation of the config files for applying a set of config files to host" href="config_file_usage_host.html" />
+    <link rel="prev" title="Explanation of the config files for creating rules" href="config_file_usage_rules.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="explanation-of-the-config-files-for-creating-ipsets">
+<h1>Explanation of the config files for creating ipsets<a class="headerlink" href="#explanation-of-the-config-files-for-creating-ipsets" title="Permalink to this headline">¶</a></h1>
+<p><strong>Allowed options on ipset section</strong></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">ipset:</th><td class="field-body"><p class="first"><strong>Section for ipset</strong></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">description:</th><td class="field-body"><p class="first"><em>Free text to add description to each ipset</em></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">ipset_type:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">hash:net,port</span></code> or <code class="docutils literal"><span class="pre">hash:ip,port</span></code> or <code class="docutils literal"><span class="pre">hash:net</span></code> or <code class="docutils literal"><span class="pre">hash:ip</span></code> or <code class="docutils literal"><span class="pre">hash:ip,port,net</span></code> or <code class="docutils literal"><span class="pre">hash:ip,port,ip</span></code></p>
+<p>The above types are allowed to be defined when describing an ipset.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">set_name:</th><td class="field-body"><p class="first">Here we define the name this ipset</p>
+<p>Please note that depending for each IP protocol version <code class="docutils literal"><span class="pre">_v4</span></code> or <code class="docutils literal"><span class="pre">_v6</span></code> will be appended when the set is
+actually created on the kernel side.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">netgroup_name:</th><td class="field-body"><p class="first">Here we define the name of a netgroup from which host we will create the ipset</p>
+<p>Note that if we don&#8217;t specify a name the set will take the LanDB name if its smaller than 29 chars</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">netgroups_list:</th><td class="field-body"><p class="first">Here we define a list of netgroups so we can create ipsets based on many LanDB sets</p>
+<p>Note that depending on the ipset type each element of the list should in the appropriate format</p>
+<ul class="simple">
+<li>e.g. <code class="docutils literal"><span class="pre">[&quot;script:test_port.sh&quot;,&quot;script:test_port_2.sh&quot;,&quot;agkara-train,6178&quot;]</span></code></li>
+<li>e.g. <code class="docutils literal"><span class="pre">['CERNVM-CLUSTER-ESX,tcp:5530,CDS</span> <span class="pre">LB','DRUPAL,tcp:6677,FRONTIER-MONITORING']</span></code></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">set_hostnames:</th><td class="field-body"><p class="first">Here we define the hostname or list of hostnames or script that returns list of hostnames</p>
+<p>This option is used on almost all set types to define the appropriate data depending on the set type.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">set_ips_v4:</th><td class="field-body"><p class="first">Here we define ip or ip,port or list of ips or ips,ports or script that returns list of each type for IPv4 ipset</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">set_ips_v6:</th><td class="field-body"><p class="first">Here we define ip or ip,port or list of ips or ips,ports or script that returns list of each type for IPv6 ipset</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">set_net_ranges_v4:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">Here we define network range and/or port or list of network ranges and/or ports or script that returns list of each type for IPv4 ipset</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">set_net_ranges_v6:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">Here we define network range and/or port or list of network ranges and/or ports or script that returns list of each type for IPv6 ipset</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">set_ip_port_ip_v4:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">Here we define ip,port,ip for IPv4 ipset</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">set_ip_port_ip_v6:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">Here we define ip,port,ip for IPv6 ipset</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">set_ip_port_net_v4:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">Here we define ip,port,net_range for IPv4 ipset</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">set_ip_port_net_v6:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">Here we define ip,port,net_range for IPv6 ipset</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">script:</th><td class="field-body"><p class="first last">When you want to use a script inside the ipset for either <strong>hostnames</strong> or <strong>cern_set_list</strong> you have to define
+the <strong>script:</strong> &#8220;<em>keyword</em>&#8221; and then the script as you would normally type in the command line.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../config.html">Config file options</a><ul>
+      <li>Previous: <a href="config_file_usage_rules.html" title="previous chapter">Explanation of the config files for creating rules</a></li>
+      <li>Next: <a href="config_file_usage_host.html" title="next chapter">Explanation of the config files for applying a set of config files to host</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/config_files_usage/config_file_usage_ipsets.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/config_files_usage/config_file_usage_ipsets.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

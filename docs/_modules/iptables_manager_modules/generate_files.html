@@ -1,0 +1,333 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iptables_manager_modules.generate_files &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for iptables_manager_modules.generate_files</h1><div class="highlight"><pre>
+<span></span>
+<span class="c1"># Copyright (C) 2016, CERN</span>
+<span class="c1"># This software is distributed under the terms of the GNU General Public</span>
+<span class="c1"># Licence version 3 (GPL Version 3), copied verbatim in the file &quot;LICENSE&quot;.</span>
+<span class="c1"># In applying this license, CERN does not waive the privileges and immunities</span>
+<span class="c1"># granted to it by virtue of its status as Intergovernmental Organization</span>
+<span class="c1"># or submit itself to any jurisdiction.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Author: Athanasios Gkaraliakos</span>
+<span class="sd">email: a.gkaraliakos@gmail.com</span>
+
+<span class="sd">The script is written on python &gt;=2.6</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+
+
+<div class="viewcode-block" id="IPTablesFileGenerator"><a class="viewcode-back" href="../../code_documentation/iptables_manager_modules_documentation/generate_files.html#iptables_manager_modules.generate_files.IPTablesFileGenerator">[docs]</a><span class="k">class</span> <span class="nc">IPTablesFileGenerator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Here we generate iptables.gen and ip6tables.gen files to be used with the restore command.</span>
+<span class="sd">    The class objects receives two lists for iptables and ip6tables and generates the files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Does not take any parameters. Just add some initial stuff</span>
+<span class="sd">        Empty list to used during the process of creating the final rule set to be put in the file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iptables_custom_chains</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_custom_chains</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iptables_rules</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_rules</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Setting the initial contents of the final lists. The 3 default chains</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iptables_rules_final</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;*filter&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;:INPUT&#39;</span><span class="p">,</span> <span class="s1">&#39;ACCEPT&#39;</span><span class="p">,</span> <span class="s1">&#39;[0:0]&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;:FORWARD&#39;</span><span class="p">,</span> <span class="s1">&#39;ACCEPT&#39;</span><span class="p">,</span> <span class="s1">&#39;[0:0]&#39;</span><span class="p">],</span>
+                                     <span class="p">[</span><span class="s1">&#39;:OUTPUT&#39;</span><span class="p">,</span> <span class="s1">&#39;ACCEPT&#39;</span><span class="p">,</span> <span class="s1">&#39;[0:0]&#39;</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_rules_final</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;*filter&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;:INPUT&#39;</span><span class="p">,</span> <span class="s1">&#39;ACCEPT&#39;</span><span class="p">,</span> <span class="s1">&#39;[0:0]&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;:FORWARD&#39;</span><span class="p">,</span> <span class="s1">&#39;ACCEPT&#39;</span><span class="p">,</span> <span class="s1">&#39;[0:0]&#39;</span><span class="p">],</span>
+                                      <span class="p">[</span><span class="s1">&#39;:OUTPUT&#39;</span><span class="p">,</span> <span class="s1">&#39;ACCEPT&#39;</span><span class="p">,</span> <span class="s1">&#39;[0:0]&#39;</span><span class="p">]]</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="IPTablesFileGenerator.get_current_rules"><a class="viewcode-back" href="../../code_documentation/iptables_manager_modules_documentation/generate_files.html#iptables_manager_modules.generate_files.IPTablesFileGenerator.get_current_rules">[docs]</a>    <span class="k">def</span> <span class="nf">get_current_rules</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method copies the current iptables and ip6tables configuration that is in memory and write it to files</span>
+<span class="sd">        with &#39;.orig&#39; extension.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">file_path</span> <span class="o">=</span> <span class="s2">&quot;/var/tmp/firewall_files&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="n">call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s1">&#39;/bin/mkdir&#39;</span><span class="p">,</span> <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+            <span class="n">response</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+            <span class="n">exit_code</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">exit_code</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="n">err</span>
+                <span class="nb">print</span> <span class="s2">&quot;Cannot create file path!!&quot;</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="n">response</span>
+        <span class="c1"># Calls the iptables-save command and redirects the exit on the file</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="s1">&#39;/sbin/iptables-save &gt; &#39;</span> <span class="o">+</span> <span class="n">file_path</span> <span class="o">+</span> <span class="s1">&#39;/iptables.orig&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+        <span class="n">response</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+        <span class="n">exit_code</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">exit_code</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="n">err</span>
+            <span class="nb">print</span> <span class="s2">&quot;Cannot get iptables configuration!!!!!&quot;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="n">response</span>
+        <span class="c1"># Calls the ip6tables-save command and redirects the exit on the file</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="s1">&#39;/sbin/ip6tables-save &gt; &#39;</span> <span class="o">+</span> <span class="n">file_path</span> <span class="o">+</span> <span class="s1">&#39;/ip6tables.orig&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+        <span class="n">response</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+        <span class="n">exit_code</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">exit_code</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="n">err</span>
+            <span class="nb">print</span> <span class="s2">&quot;Cannot get ip6tables configuration!!!!!&quot;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="n">response</span></div>
+
+<div class="viewcode-block" id="IPTablesFileGenerator.write_iptables_files"><a class="viewcode-back" href="../../code_documentation/iptables_manager_modules_documentation/generate_files.html#iptables_manager_modules.generate_files.IPTablesFileGenerator.write_iptables_files">[docs]</a>    <span class="k">def</span> <span class="nf">write_iptables_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default_rules</span><span class="p">,</span> <span class="n">user_rules</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method receives 2 lists. By applying proper formatting on the lists it extracts the info to populate the</span>
+<span class="sd">        &#39;final&#39; lists so to write their contents in the &#39;iptables.gen&#39; and &#39;ip6tables.gen&#39; generated rule files.</span>
+
+<span class="sd">        :param default_rules: This list contains all the rules that will be applied on each machine</span>
+<span class="sd">        :param user_rules: This list contains all the rules generated from the user that are defined in the provided</span>
+<span class="sd">                           config files</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_current_rules</span><span class="p">()</span>
+
+        <span class="c1"># Make default rules be in list format</span>
+        <span class="c1"># Make each line of the default rule a new list for better manipulation of the contents</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">default_rules</span><span class="p">)):</span>
+            <span class="n">default_rules</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_rules</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+
+        <span class="c1"># Get default rules</span>
+        <span class="c1"># Change &#39;-C&#39; (check if rule exists) to &#39;-A&#39; (add the rule) and put it in a rule only list</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">default_rules</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;iptables&#39;</span> <span class="ow">in</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">del</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-C&#39;</span><span class="p">:</span>
+                    <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;-A&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">iptables_rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s1">&#39;ip6tables&#39;</span> <span class="ow">in</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">del</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-C&#39;</span><span class="p">:</span>
+                    <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;-A&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="c1"># Get user defined rules</span>
+        <span class="c1"># Change &#39;-C&#39; (check if rule exists) to &#39;-A&#39; (add the rule) and put it in a rule only list</span>
+        <span class="c1"># Replace [comment] with &quot;comment&quot; so the comments on the rules are inserted properly</span>
+        <span class="k">if</span> <span class="n">user_rules</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">user_rules</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">j</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s1">&#39;iptables&#39;</span> <span class="ow">in</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="k">del</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-C&#39;</span><span class="p">:</span>
+                            <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;-A&#39;</span>
+                        <span class="n">i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+                        <span class="n">i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">iptables_rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="s1">&#39;ip6tables&#39;</span> <span class="ow">in</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="k">del</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-C&#39;</span><span class="p">:</span>
+                            <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;-A&#39;</span>
+                        <span class="n">i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+                        <span class="n">i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="c1"># Handling chains for iptables</span>
+        <span class="c1"># First apply the policy and if its set to DROP we change the default ACCEPT</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iptables_rules</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-P&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;INPUT&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DROP&#39;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">iptables_rules_final</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;DROP&#39;</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;FORWARD&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DROP&#39;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">iptables_rules_final</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;DROP&#39;</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;OUTPUT&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DROP&#39;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">iptables_rules_final</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;DROP&#39;</span>
+            <span class="c1"># Check for user defined chains so to create them</span>
+            <span class="k">elif</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-N&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">iptables_custom_chains</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>  <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;[0:0]&#39;</span><span class="p">])</span>
+
+        <span class="c1"># The custom chains are sorted by name so we will apply this order to rules also</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iptables_custom_chains</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iptables_rules_final</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iptables_custom_chains</span><span class="p">)</span>
+
+        <span class="c1"># Add all chains to a temp list removing &#39;:&#39; from the front so to add the rules in the order the chains appear</span>
+        <span class="c1"># in this list (trying to imitate iptables ordering)</span>
+        <span class="n">chains_v4</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;INPUT&#39;</span><span class="p">,</span> <span class="s1">&#39;FORWARD&#39;</span><span class="p">,</span> <span class="s1">&#39;OUTPUT&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iptables_custom_chains</span><span class="p">:</span>
+            <span class="n">chains_v4</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">chains_v4</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iptables_rules</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">rule</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-A&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">rule</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">chain</span><span class="p">):</span>
+                        <span class="c1"># Exception on some rules that specify table. There is no point in this because all the rules</span>
+                        <span class="c1"># belong to the *filter table we define in the begining of the file</span>
+                        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rule</span><span class="p">)):</span>
+                            <span class="k">if</span> <span class="n">rule</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-t&#39;</span><span class="p">:</span>
+                                <span class="k">del</span> <span class="n">rule</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+                                <span class="k">del</span> <span class="n">rule</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+                                <span class="k">break</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">iptables_rules_final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iptables_rules_final</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;COMMIT&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Handling chains for ip6tables</span>
+        <span class="c1"># First apply the policy and if its set to DROP we change the default ACCEPT</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_rules</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-P&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;INPUT&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DROP&#39;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_rules_final</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;DROP&#39;</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;FORWARD&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DROP&#39;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_rules_final</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;DROP&#39;</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;OUTPUT&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DROP&#39;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_rules_final</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;DROP&#39;</span>
+            <span class="c1"># Check for user defined chains so to create them</span>
+            <span class="k">elif</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-N&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_custom_chains</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>  <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;[0:0]&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_custom_chains</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_rules_final</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_custom_chains</span><span class="p">)</span>
+
+        <span class="c1"># Add all chains to a temp list removing &#39;:&#39; from the front so to add the rules in the order the chains appear</span>
+        <span class="c1"># in this list (trying to imitate iptables ordering)</span>
+        <span class="n">chains_v6</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;INPUT&#39;</span><span class="p">,</span> <span class="s1">&#39;FORWARD&#39;</span><span class="p">,</span> <span class="s1">&#39;OUTPUT&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_custom_chains</span><span class="p">:</span>
+            <span class="n">chains_v6</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">chains_v6</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_rules</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">rule</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-A&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">rule</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">chain</span><span class="p">):</span>
+                        <span class="c1"># Exception on some rules that specify table. There is no point in this because all the rules</span>
+                        <span class="c1"># belong to the *filter table we define in the begining of the file</span>
+                        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rule</span><span class="p">)):</span>
+                            <span class="k">if</span> <span class="n">rule</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-t&#39;</span><span class="p">:</span>
+                                <span class="k">del</span> <span class="n">rule</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+                                <span class="k">del</span> <span class="n">rule</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+                                <span class="k">break</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_rules_final</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_rules_final</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;COMMIT&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Writing the iptables.gen files using the final list generated above</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="s2">&quot;/var/tmp/firewall_files&quot;</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span> <span class="o">+</span> <span class="s1">&#39;/iptables.gen&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_handler</span><span class="p">:</span>
+                <span class="n">file_handler</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# Generated by iptables_manager.py&quot;</span><span class="p">)</span>
+                <span class="n">_rule_</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iptables_rules_final</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">ru</span> <span class="ow">in</span> <span class="n">rule</span><span class="p">:</span>
+                        <span class="n">_rule_</span> <span class="o">+=</span> <span class="n">ru</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span>
+                    <span class="n">file_handler</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_rule_</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+                    <span class="n">_rule_</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="n">file_handler</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"># Completed by iptables_manager.py&quot;</span><span class="p">)</span>
+            <span class="n">file_handler</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Cannot write iptables configuration file!!!!!&quot;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Writing the ip6tables.gen files using the final list generated above</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="s2">&quot;/var/tmp/firewall_files&quot;</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span> <span class="o">+</span> <span class="s1">&#39;/ip6tables.gen&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_handler</span><span class="p">:</span>
+                <span class="n">file_handler</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# Generated by iptables_manager.py&quot;</span><span class="p">)</span>
+                <span class="n">_rule_</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip6tables_rules_final</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">ru</span> <span class="ow">in</span> <span class="n">rule</span><span class="p">:</span>
+                        <span class="n">_rule_</span> <span class="o">+=</span> <span class="n">ru</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span>
+                    <span class="n">file_handler</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_rule_</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+                    <span class="n">_rule_</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="n">file_handler</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"># Completed by iptables_manager.py&quot;</span><span class="p">)</span>
+            <span class="n">file_handler</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Cannot write ip6tables configuration file!!!!!&quot;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

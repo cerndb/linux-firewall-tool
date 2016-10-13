@@ -1,0 +1,407 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iptables_manager &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Code" href="../code.html" />
+    <link rel="next" title="host_manager" href="host_manager.html" />
+    <link rel="prev" title="ipset_manager" href="ipset_manager.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-bin.iptables_manager">
+<span id="iptables-manager"></span><h1>iptables_manager<a class="headerlink" href="#module-bin.iptables_manager" title="Permalink to this headline">¶</a></h1>
+<p>Author: Athanasios Gkaraliakos
+email: <a class="reference external" href="mailto:a&#46;gkaraliakos&#37;&#52;&#48;gmail&#46;com">a<span>&#46;</span>gkaraliakos<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>The script is written on python &gt;=2.6</p>
+<dl class="class">
+<dt id="bin.iptables_manager.ManageRules">
+<em class="property">class </em><code class="descclassname">bin.iptables_manager.</code><code class="descname">ManageRules</code><span class="sig-paren">(</span><em>parser</em>, <em>simul=True</em>, <em>generate=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main class of this script. It handles the whole process of validating config files then parse them and create
+the kernel ipsets and rules to be applied.
+It create a list of all the rules to be applied and at the end runs all the iptables commands both for IPv4/IPv6</p>
+<dl class="method">
+<dt id="bin.iptables_manager.ManageRules.apply_firewall_rules">
+<code class="descname">apply_firewall_rules</code><span class="sig-paren">(</span><em>command_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.apply_firewall_rules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.apply_firewall_rules" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to apply the firewall rules. It receives a list of iptables commands and runs all the
+commands one after the other.
+The iptables rules come with &#8216;-C&#8217; param in order to check if the exist. If not the &#8216;-C&#8217; becomes &#8216;-A&#8217; so we can
+add them to the configuration.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>command_list</strong> &#8211; The final commands list to run.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bin.iptables_manager.ManageRules.config_integrity_check">
+<code class="descname">config_integrity_check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.config_integrity_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.config_integrity_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method add all the section loaded from config files to a list for better handling. Its main purpose is to
+check the &#8216;integrity&#8217; of the config files in terms of specifying the right things of avoid logical errors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bin.iptables_manager.ManageRules.handle_bidirectional_rules">
+<code class="descname">handle_bidirectional_rules</code><span class="sig-paren">(</span><em>general_section</em>, <em>ip_version</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.handle_bidirectional_rules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.handle_bidirectional_rules" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to build rules serving both INPUT and OUTPUT chains.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>general_section</strong> &#8211; Name of the rule section</li>
+<li><strong>ip_version</strong> &#8211; IPv4/IPv6</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of iptables and ip6tables commands to be run so the rules are applied.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bin.iptables_manager.ManageRules.handle_ipsets">
+<code class="descname">handle_ipsets</code><span class="sig-paren">(</span><em>ipset_setction</em>, <em>ip_version</em>, <em>update_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.handle_ipsets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.handle_ipsets" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to handle the ipsets. It parses ipset sections by extracting the values from the options
+provided in the files. It is used to create or update(if set exists) an ipset so to be later used by the
+iptable rules.</p>
+<p>:param ipset_setction:Name of the ipset section to be parsed
+:param ip_version: IPv4/IPv6
+:param update_only: Bool variable to tell the method to do an update of the existing set.
+:return: It returns two values. 1. The exit code of the other script that handles ipsets 2. The actual name of the created ipset to be used by the rule/s</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="bin.iptables_manager.ManageRules.handle_nic_cards">
+<em class="property">static </em><code class="descname">handle_nic_cards</code><span class="sig-paren">(</span><em>query</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.handle_nic_cards"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.handle_nic_cards" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to return a list of network interfaces in order for the rules to be applied to all of them
+It has 3 modes and can add or subtract interfaces from the list depending on which interfaces you want to apply
+firewall rules on.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query</strong> &#8211; list of commands to perform e.g. [&#8216;main&#8217;,&#8217;+en5&#8217;, &#8216;+en4&#8217;] or [&#8216;all&#8217;, &#8216;-en5&#8217;, &#8216;-en4&#8217;]</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the list of interfaces</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bin.iptables_manager.ManageRules.ipsets_update">
+<code class="descname">ipsets_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.ipsets_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.ipsets_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to update existing kernel ipsets. It checks for rules that sections and on those that have an ipset
+defined calls the &#8211;&gt; handle_ipsets() method to update the sets.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bin.iptables_manager.ManageRules.iptables_policy">
+<code class="descname">iptables_policy</code><span class="sig-paren">(</span><em>policy</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.iptables_policy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.iptables_policy" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to create the rules that set the policy of the default chains.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>policy</strong> &#8211; Name of the section that contains the policy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of rule/rules depending on the action.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bin.iptables_manager.ManageRules.log_with_custom_chain">
+<code class="descname">log_with_custom_chain</code><span class="sig-paren">(</span><em>general_section</em>, <em>ip_version</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.log_with_custom_chain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.log_with_custom_chain" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to create rules that jump to the LOG chain. It is mainly used by defining a custom chain to
+jump after INPUT or OUTPUT chain.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>general_section</strong> &#8211; Name of the section</li>
+<li><strong>ip_version</strong> &#8211; IPv4/IPv6</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of rule/rules to create the user defined chain and the rules for the default chains that jum to the user defined chain.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bin.iptables_manager.ManageRules.parse_file">
+<code class="descname">parse_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.parse_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.parse_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to distinguish if a section is rule or policy and</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">returns the final rules list - actual list of commands</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bin.iptables_manager.ManageRules.rules_logic_parse">
+<code class="descname">rules_logic_parse</code><span class="sig-paren">(</span><em>general_section</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.rules_logic_parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.rules_logic_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to decide which rule building method will be called for each section on the config
+files using the &#8216;action&#8217; option list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>general_section</strong> &#8211; The name iof the section</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of rule/rules depending on the action.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bin.iptables_manager.ManageRules.sect_general_options_list">
+<code class="descname">sect_general_options_list</code><em class="property"> = ['description', 'section_type', 'action', 'default_chain', 'md5', 'ip_version', 'interface', 'protocol', 'ports', 'custom_chain', 'limit', 'log-level', 'log-prefix', 'set', 'set_directions', 'log-specific-options']</em><a class="headerlink" href="#bin.iptables_manager.ManageRules.sect_general_options_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>All the allowed option of a section that defines ipsets.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bin.iptables_manager.ManageRules.sect_set_option_list">
+<code class="descname">sect_set_option_list</code><em class="property"> = ['description', 'section_type', 'ipset_type', 'set_name', 'netgroup_name', 'set_hostnames', 'set_ips_v4', 'set_ips_v6', 'set_net_ranges_v4', 'set_net_ranges_v6', 'netgroups_list', 'set_ip_port_ip_v4', 'set_ip_port_ip_v6', 'set_ip_port_net_v4', 'set_ip_port_net_v6']</em><a class="headerlink" href="#bin.iptables_manager.ManageRules.sect_set_option_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>All the allowed option of a section that defines Policy.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bin.iptables_manager.ManageRules.sections">
+<code class="descname">sections</code><em class="property"> = []</em><a class="headerlink" href="#bin.iptables_manager.ManageRules.sections" title="Permalink to this definition">¶</a></dt>
+<dd><p>All the allowed option of a section that defines iptables rules.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bin.iptables_manager.ManageRules.single_chain_rule">
+<code class="descname">single_chain_rule</code><span class="sig-paren">(</span><em>general_section</em>, <em>ip_version</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.single_chain_rule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.single_chain_rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to create signle rules on one of/both the default chains. Tries to extract the values of the
+possible options in order to build the rule</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>general_section</strong> &#8211; Name of the section</li>
+<li><strong>ip_version</strong> &#8211; IPv4/IPv6</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of rule/rules (2 rules if tcp and udp are defined)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bin.iptables_manager.ReadWriteConfigFiles">
+<em class="property">class </em><code class="descclassname">bin.iptables_manager.</code><code class="descname">ReadWriteConfigFiles</code><a class="reference internal" href="../_modules/bin/iptables_manager.html#ReadWriteConfigFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ReadWriteConfigFiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the config files using python config parser module. It then creates an object(dict)
+and adds all the sections of the file as key and its options as value.
+It contains all the methods to parse extract info from the config files and then build and add the rules to both
+the &#8216;iptables&#8217; and &#8216;ip6tables&#8217; so you configure both IP protocols with the same tool.</p>
+<dl class="method">
+<dt id="bin.iptables_manager.ReadWriteConfigFiles.read_config_file">
+<code class="descname">read_config_file</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ReadWriteConfigFiles.read_config_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ReadWriteConfigFiles.read_config_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads all the files on the file path list and creates a unique object to be returned to the Managed Rules
+class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filepath</strong> &#8211; List of config file paths to read</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">object of config parser to access the configuration</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bin.iptables_manager.ReadWriteConfigFiles.write_config_file">
+<code class="descname">write_config_file</code><span class="sig-paren">(</span><em>file_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ReadWriteConfigFiles.write_config_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ReadWriteConfigFiles.write_config_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to write back the current config from memory to the files. (It is not in use for now)
+:param file_path: list of the files</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.iptables_manager.iptables_manager">
+<code class="descclassname">bin.iptables_manager.</code><code class="descname">iptables_manager</code><span class="sig-paren">(</span><em>args=None</em>, <em>config=None</em>, <em>interface='main'</em>, <em>no_default_config=False</em>, <em>allow=False</em>, <em>drop_all=False</em>, <em>update_sets=False</em>, <em>deploy=False</em>, <em>generate_files=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#iptables_manager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.iptables_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is the actual main function. It is used as &#8216;proxy&#8217; method so you can either use this script from a
+another python script or directly from command line. This method is being called with either the &#8216;args&#8217; param or the
+all others depending if its being called from the main function or from another python script.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; Basically all the other params but in arguments format.</li>
+<li><strong>config</strong> &#8211; List of the config file paths to load for the configuration.</li>
+<li><strong>interface</strong> &#8211; Network card to use for the default config</li>
+<li><strong>no_default_config</strong> &#8211; If set it applies the default configuration</li>
+<li><strong>allow</strong> &#8211; If set it sets the policy of all the default chains to ACCEPT.</li>
+<li><strong>drop_all</strong> &#8211; If set it sets the policy of all the default chains to DROP.</li>
+<li><strong>update_sets</strong> &#8211; If set it reads the config and updates all the existing kernel ipsets</li>
+<li><strong>deploy</strong> &#8211; If set it applies the configuration. If not all the rules are being displayed instead of run.</li>
+<li><strong>generate_files</strong> &#8211; It create the actual rule files for iptables and ip6tables to be used with the restore option</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">0 if everything goes smoothly</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.iptables_manager.main">
+<code class="descclassname">bin.iptables_manager.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function use to expose all the parameters to the command line and call iptables_manager function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../code.html">Code</a><ul>
+      <li>Previous: <a href="ipset_manager.html" title="previous chapter">ipset_manager</a></li>
+      <li>Next: <a href="host_manager.html" title="next chapter">host_manager</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/code_documentation/iptables_manager.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/code_documentation/iptables_manager.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

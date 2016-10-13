@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>default_rules &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Code" href="../../code.html" />
+    <link rel="next" title="generate_files" href="generate_files.html" />
+    <link rel="prev" title="other_nic_extractor" href="../other_nic_extractor.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-iptables_manager_modules.default_rules">
+<span id="default-rules"></span><h1>default_rules<a class="headerlink" href="#module-iptables_manager_modules.default_rules" title="Permalink to this headline">¶</a></h1>
+<p>Author: Athanasios Gkaraliakos
+email: <a class="reference external" href="mailto:a&#46;gkaraliakos&#37;&#52;&#48;gmail&#46;com">a<span>&#46;</span>gkaraliakos<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>The script is written on python &gt;=2.6</p>
+<dl class="class">
+<dt id="iptables_manager_modules.default_rules.DefaultConfiguration">
+<em class="property">class </em><code class="descclassname">iptables_manager_modules.default_rules.</code><code class="descname">DefaultConfiguration</code><span class="sig-paren">(</span><em>mode</em>, <em>path</em>, <em>interface</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iptables_manager_modules/default_rules.html#DefaultConfiguration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.default_rules.DefaultConfiguration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Here is defined the default configuration that is gonna be applied on all the machines, if there no other additional
+configuration to be added.</p>
+<dl class="method">
+<dt id="iptables_manager_modules.default_rules.DefaultConfiguration.perform_action">
+<code class="descname">perform_action</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iptables_manager_modules/default_rules.html#DefaultConfiguration.perform_action"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.default_rules.DefaultConfiguration.perform_action" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method calls almost all the other methods to apply the default configuration on a machine.
+If the member &#8216;self.action&#8217; is &#8216;deploy&#8217; it creates and run all the rules specified above.
+If the member &#8216;self.action&#8217; is &#8216;simulate&#8217; it creates a list with all the rules that will be applied in case you
+make &#8216;self.action&#8217; deploy
+:return: Void or list of rules to be applied</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../../code.html">Code</a><ul>
+      <li>Previous: <a href="../other_nic_extractor.html" title="previous chapter">other_nic_extractor</a></li>
+      <li>Next: <a href="generate_files.html" title="next chapter">generate_files</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/code_documentation/iptables_manager_modules_documentation/default_rules.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../../_sources/code_documentation/iptables_manager_modules_documentation/default_rules.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

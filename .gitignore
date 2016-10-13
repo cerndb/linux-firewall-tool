@@ -1,0 +1,7 @@
+.idea/
+*.pyc
+*.pyo
+env/
+temp.py
+temp_text.txt
+*.tar.gz

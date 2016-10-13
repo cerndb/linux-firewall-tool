@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>host_manager &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Code" href="../code.html" />
+    <link rel="next" title="netset_extraction" href="netset_extraction.html" />
+    <link rel="prev" title="iptables_manager" href="iptables_manager.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-bin.host_manager">
+<span id="host-manager"></span><h1>host_manager<a class="headerlink" href="#module-bin.host_manager" title="Permalink to this headline">¶</a></h1>
+<p>Author: Athanasios Gkaraliakos
+email: <a class="reference external" href="mailto:a&#46;gkaraliakos&#37;&#52;&#48;gmail&#46;com">a<span>&#46;</span>gkaraliakos<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>The script is written on python &gt;=2.6</p>
+<dl class="class">
+<dt id="bin.host_manager.ManageHosts">
+<em class="property">class </em><code class="descclassname">bin.host_manager.</code><code class="descname">ManageHosts</code><span class="sig-paren">(</span><em>parser</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/host_manager.html#ManageHosts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.host_manager.ManageHosts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that reads the config files using python config parser module. It then creates an object(dict)
+and adds all the sections of the file as key and its options as value</p>
+<dl class="method">
+<dt id="bin.host_manager.ManageHosts.config_integrity_check">
+<code class="descname">config_integrity_check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/host_manager.html#ManageHosts.config_integrity_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.host_manager.ManageHosts.config_integrity_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method add all the section loaded from config files to a list for better handling. Its main purpose is to
+check the &#8216;integrity&#8217; of the config files in terms of specifying the right things of avoid logical errors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bin.host_manager.ManageHosts.parse_config_file">
+<code class="descname">parse_config_file</code><span class="sig-paren">(</span><em>deploy=False</em>, <em>no_default_config=False</em>, <em>update_sets=False</em>, <em>allow=False</em>, <em>drop_all=False</em>, <em>generate_files=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/host_manager.html#ManageHosts.parse_config_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.host_manager.ManageHosts.parse_config_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to parse  the config files. It checks if the hostname of the machine is defined in the list
+of hostnames that this configuration will be applied. Then it calls the &#8216;iptables_manager&#8217; function from the
+iptables_manager script instructing which config files to load and provides all the other arguments.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bin.host_manager.ManageHosts.sections">
+<code class="descname">sections</code><em class="property"> = []</em><a class="headerlink" href="#bin.host_manager.ManageHosts.sections" title="Permalink to this definition">¶</a></dt>
+<dd><p>This list holds all the allowed option you can define under a section on the config files</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bin.host_manager.ReadWriteConfigFiles">
+<em class="property">class </em><code class="descclassname">bin.host_manager.</code><code class="descname">ReadWriteConfigFiles</code><a class="reference internal" href="../_modules/bin/host_manager.html#ReadWriteConfigFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.host_manager.ReadWriteConfigFiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that reads the config files using python config parser module. It then creates an object(dict)
+and adds all the sections of the file as key and its options as value</p>
+<dl class="method">
+<dt id="bin.host_manager.ReadWriteConfigFiles.read_config_file">
+<code class="descname">read_config_file</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/host_manager.html#ReadWriteConfigFiles.read_config_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.host_manager.ReadWriteConfigFiles.read_config_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads all the files on the file path list and creates a unique object to be returned to the Managed Rules
+class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filepath</strong> &#8211; List of config file paths to read</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">object of config parser to access the configuration</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bin.host_manager.ReadWriteConfigFiles.write_config_file">
+<code class="descname">write_config_file</code><span class="sig-paren">(</span><em>file_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/host_manager.html#ReadWriteConfigFiles.write_config_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.host_manager.ReadWriteConfigFiles.write_config_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to write back the current config from memory to the files. (It is not in use for now)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file_path</strong> &#8211; list of the files</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bin.host_manager.main">
+<code class="descclassname">bin.host_manager.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/host_manager.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.host_manager.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function use to expose all the parameters to the command line and call parse_config_file function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../code.html">Code</a><ul>
+      <li>Previous: <a href="iptables_manager.html" title="previous chapter">iptables_manager</a></li>
+      <li>Next: <a href="netset_extraction.html" title="next chapter">netset_extraction</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/code_documentation/host_manager.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/code_documentation/host_manager.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

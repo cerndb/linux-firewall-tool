@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Log rules &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Examples" href="../examples.html" />
+    <link rel="next" title="Policy" href="policy.html" />
+    <link rel="prev" title="Single rules" href="one_way_rules.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="log-rules">
+<h1>Log rules<a class="headerlink" href="#log-rules" title="Permalink to this headline">¶</a></h1>
+<p><strong>Example rule for jumping to the LOG chain</strong></p>
+<blockquote>
+<div><div class="highlight-ini"><div class="highlight"><pre><span></span><span class="k">[essential_services_5]</span>
+<span class="na">section_type</span> <span class="o">=</span> <span class="s">general</span>
+<span class="na">action</span> <span class="o">=</span> <span class="s">[&#39;log&#39;,&#39;drop&#39;]</span>
+<span class="na">ip_version</span> <span class="o">=</span> <span class="s">both</span>
+<span class="na">interface</span> <span class="o">=</span> <span class="s">main</span>
+<span class="na">default_chain</span> <span class="o">=</span> <span class="s">INPUT</span>
+<span class="na">protocol</span> <span class="o">=</span> <span class="s">tcp,udp</span>
+<span class="na">custom_chain</span> <span class="o">=</span> <span class="s">TEST_DROP_CHAIN</span>
+<span class="na">limit</span> <span class="o">=</span> <span class="s">1/sec</span>
+<span class="na">log-level</span> <span class="o">=</span> <span class="s">6</span>
+<span class="na">log-prefix</span> <span class="o">=</span> <span class="s">TEST_DROP_CUSTOM_CHAIN</span>
+<span class="na">log-specific-options</span> <span class="o">=</span> <span class="s">[&#39;log-tcp-sequence&#39;,&#39;log-tcp-options&#39;,&#39;log-ip-options&#39;]</span>
+</pre></div>
+</div>
+</div></blockquote>
+<dl class="docutils">
+<dt>The logic of the action is the following:</dt>
+<dd><div class="first last highlight-ini"><div class="highlight"><pre><span></span><span class="na">action</span> <span class="o">=</span> <span class="s">[&#39;log&#39;,&#39;drop&#39;]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>If the list has 2 elements it means that it will create rules for logging the traffic of the input.
+First element tells the script that it will create logging rules.
+Second element tells the action of the packet after logging to either <cite>&#8216;allow&#8217;</cite> or <cite>&#8216;drop&#8217;</cite></p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>/sbin/iptables -N TEST_DROP_CHAIN
+/sbin/ip6tables -N TEST_DROP_CHAIN
+
+/sbin/iptables -A INPUT -i eth0 -p tcp -j TEST_DROP_CHAIN
+/sbin/iptables -A INPUT -i eth0 -p udp -j TEST_DROP_CHAIN
+/sbin/iptables -A TEST_DROP_CHAIN -m limit --limit 1/sec -j LOG --log-prefix TEST_DROP_CUSTOM_CHAIN --log-level <span class="m">6</span> --log-tcp-sequence --log-tcp-options
+/sbin/iptables -A TEST_DROP_CHAIN -j DROP
+
+
+/sbin/ip6tables -A INPUT -i eth0 -p tcp -j TEST_DROP_CHAIN
+/sbin/ip6tables -A INPUT -i eth0 -p udp -j TEST_DROP_CHAIN
+/sbin/ip6tables -A TEST_DROP_CHAIN -m limit --limit 1/sec -j LOG --log-prefix TEST_DROP_CUSTOM_CHAIN --log-level <span class="m">6</span> --log-tcp-sequence --log-tcp-options
+/sbin/ip6tables -A TEST_DROP_CHAIN -j DROP
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../examples.html">Examples</a><ul>
+      <li>Previous: <a href="one_way_rules.html" title="previous chapter">Single rules</a></li>
+      <li>Next: <a href="policy.html" title="next chapter">Policy</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/examples/log_rule.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/examples/log_rule.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
