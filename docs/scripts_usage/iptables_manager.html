@@ -1,0 +1,260 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>IPtables Manager &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Script Usage" href="../scripts.html" />
+    <link rel="prev" title="Host Manager" href="host_manager.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="iptables-manager">
+<h1>IPtables Manager<a class="headerlink" href="#iptables-manager" title="Permalink to this headline">¶</a></h1>
+<p><strong>iptables_manager.py</strong></p>
+<p>We use the argument <strong>&#8211;no_default_config</strong> so we can see only what we generated. In order to deploy the configuration use the
+<strong>&#8211;deploy</strong> argument. If you start the firewall for the first time is better to also apply the default config also.</p>
+<p>Command usage:</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/iptables_manager.py -h
+usage: iptables_manager.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--config CONFIG <span class="o">[</span>CONFIG ...<span class="o">]]</span>
+                           <span class="o">[</span>--no_default_config<span class="o">]</span> <span class="o">[</span>--allow<span class="o">]</span> <span class="o">[</span>--drop_all<span class="o">]</span>
+                           <span class="o">[</span>--interface INTERFACE<span class="o">]</span> <span class="o">[</span>--update_sets<span class="o">]</span> <span class="o">[</span>--deploy<span class="o">]</span>
+                           <span class="o">[</span>--generate_files<span class="o">]</span>
+
+optional arguments:
+  -h, --help            show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  --config CONFIG <span class="o">[</span>CONFIG ...<span class="o">]</span>
+                        Type the location of your config file to parse<span class="o">(</span>absolut
+                        path<span class="o">)</span>
+  --no_default_config   Apply default configuration from scratch
+  --allow               Apply ACCEPT policy to everything
+  --drop_all            Apply DROP policy to everything
+  --interface INTERFACE
+                        Type the name of nic card you want the default rules
+                        to be applied <span class="k">for</span>
+  --update_sets         Update only the ipsets
+  --deploy              Deploy the configuration
+  --generate_files      Generate iptables and ip6tables files
+</pre></div>
+</div>
+</div></blockquote>
+<dl class="docutils">
+<dt>Check what we will apply.</dt>
+<dd><div class="first highlight-bash"><div class="highlight"><pre><span></span>bin/iptables_manager.py --no_default_config --config custom_conf_files/example_config_14.cfg
+</pre></div>
+</div>
+<div class="last highlight-bash"><div class="highlight"><pre><span></span>Set <span class="nb">type</span> is:  hash:ip
+/usr/sbin/ipset create admin_workstations_x_v4 hash:ip family inet hashsize <span class="m">1024</span> maxelem 65536
+Set  admin_workstations_x_v4  created
+/usr/sbin/ipset add admin_workstations_x_v4 128.142.159.200
+/usr/sbin/ipset add admin_workstations_x_v4 188.184.88.15
+/usr/sbin/ipset add admin_workstations_x_v4 188.184.92.172
+/usr/sbin/ipset add admin_workstations_x_v4 10.18.16.58
+/usr/sbin/ipset add admin_workstations_x_v4 128.142.147.69
+/usr/sbin/ipset add admin_workstations_x_v4 188.184.90.241
+/usr/sbin/ipset add admin_workstations_x_v4 188.184.92.51
+/usr/sbin/ipset add admin_workstations_x_v4 188.184.92.181
+/usr/sbin/ipset add admin_workstations_x_v4 188.184.94.26
+/usr/sbin/ipset add admin_workstations_x_v4 188.184.92.253
+/usr/sbin/ipset add admin_workstations_x_v4 188.184.90.205
+/usr/sbin/ipset add admin_workstations_x_v4 188.184.90.217
+/usr/sbin/ipset add admin_workstations_x_v4 188.184.92.114
+/usr/sbin/ipset add admin_workstations_x_v4 188.184.92.101
+/usr/sbin/ipset add admin_workstations_x_v4 188.184.90.55
+/usr/sbin/ipset add admin_workstations_x_v4 188.184.91.95
+/usr/sbin/ipset add admin_workstations_x_v4 188.184.92.218
+/usr/sbin/ipset add admin_workstations_x_v4 188.184.91.164
+/usr/sbin/ipset add admin_workstations_x_v4 128.142.153.55
+admin_workstations_x_v4
+Script  <span class="o">[</span><span class="s1">&#39;test_nets_v4.sh&#39;</span><span class="o">]</span>  not in system path
+Trying herlpers: /root/cerndb-infra-firewall/helpers/test_nets_v4.sh
+<span class="o">[</span><span class="s1">&#39;100.64.0.0/10&#39;</span>, <span class="s1">&#39;192.91.242.0/24&#39;</span>, <span class="s1">&#39;188.184.0.0/15&#39;</span><span class="o">]</span>
+Set <span class="nb">type</span> is:  hash:net
+/usr/sbin/ipset create static_dns_servers4_v4 hash:net family inet hashsize <span class="m">1024</span> maxelem 65536
+Set  static_dns_servers4_v4  created
+/usr/sbin/ipset add static_dns_servers4_v4 100.64.0.0/10
+/usr/sbin/ipset add static_dns_servers4_v4 188.184.0.0/15
+/usr/sbin/ipset add static_dns_servers4_v4 192.91.242.0/24
+static_dns_servers4_v4
+Script  <span class="o">[</span><span class="s1">&#39;test_nets_v6.sh&#39;</span><span class="o">]</span>  not in system path
+Trying herlpers: /root/cerndb-infra-firewall/helpers/test_nets_v6.sh
+<span class="o">[</span><span class="s1">&#39;2001:1458::/32&#39;</span>, <span class="s1">&#39;FD01:1459::/32&#39;</span><span class="o">]</span>
+Set <span class="nb">type</span> is:  hash:net
+/usr/sbin/ipset create static_dns_servers4_v6 hash:net family inet6 hashsize <span class="m">1024</span> maxelem 65536
+Set  static_dns_servers4_v6  created
+/usr/sbin/ipset add static_dns_servers4_v6 2001:1458::/32
+/usr/sbin/ipset add static_dns_servers4_v6 FD01:1459::/32
+static_dns_servers4_v6
+/etc/init.d/ipset save
+
+<span class="c1">######### USER DEFINED FIREWALL RULES #########</span>
+/sbin/iptables -A INPUT -i eth0 -p tcp -m state --state ESTABLISHED -m <span class="nb">set</span> --match-set admin_workstations_x_v4 src -j ACCEPT -m comment --comment essential_services
+/sbin/iptables -A OUTPUT -o eth0 -p tcp -m state --state NEW,ESTABLISHED -m multiport --dports 22,50 -m <span class="nb">set</span> --match-set admin_workstations_x_v4 dst -j ACCEPT -m comment --comment essential_services
+/sbin/iptables -A INPUT -i eth0 -p tcp -m state --state NEW,ESTABLISHED -m <span class="nb">set</span> --match-set static_dns_servers4_v4 src -j ACCEPT -m comment --comment access_outgoing_ports_tcp
+/sbin/iptables -A INPUT -i eth0 -p udp -m state --state NEW,ESTABLISHED -m <span class="nb">set</span> --match-set static_dns_servers4_v4 src -j ACCEPT -m comment --comment access_outgoing_ports_tcp
+/sbin/iptables -A OUTPUT -o eth0 -p tcp -m state --state ESTABLISHED -m <span class="nb">set</span> --match-set static_dns_servers4_v4 dst -j ACCEPT -m comment --comment access_outgoing_ports_tcp
+/sbin/iptables -A OUTPUT -o eth0 -p udp -m state --state ESTABLISHED -m <span class="nb">set</span> --match-set static_dns_servers4_v4 dst -j ACCEPT -m comment --comment access_outgoing_ports_tcp
+/sbin/ip6tables -A INPUT -i eth0 -p tcp -m state --state NEW,ESTABLISHED -m <span class="nb">set</span> --match-set static_dns_servers4_v6 src -j ACCEPT -m comment --comment access_outgoing_ports_tcp
+/sbin/ip6tables -A INPUT -i eth0 -p udp -m state --state NEW,ESTABLISHED -m <span class="nb">set</span> --match-set static_dns_servers4_v6 src -j ACCEPT -m comment --comment access_outgoing_ports_tcp
+/sbin/ip6tables -A OUTPUT -o eth0 -p tcp -m state --state ESTABLISHED -m <span class="nb">set</span> --match-set static_dns_servers4_v6 dst -j ACCEPT -m comment --comment access_outgoing_ports_tcp
+/sbin/ip6tables -A OUTPUT -o eth0 -p udp -m state --state ESTABLISHED -m <span class="nb">set</span> --match-set static_dns_servers4_v6 dst -j ACCEPT -m comment --comment access_outgoing_ports_tcp
+<span class="c1">######### USER DEFINED FIREWALL RULES #########</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>This way we deploy the configuration. On each deploy is better <strong>not to</strong> specify the <strong>&#8211;no_default_config</strong> so the default
+rules apply. It cleans also everything and the ipsets so you have a clean deploy from scratch.</p>
+<p>If you are absolutely certain that you applied the default before and just want what you defined then use the argument</p>
+<p>Like this we deploy the configuration</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --deploy
+</pre></div>
+</div>
+</div></blockquote>
+<p>If you have a running firewall and just want to update ipsets that are in use you have to use the <strong>&#8211;update_sets</strong>
+argument.</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets
+</pre></div>
+</div>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>UPDATE IPsets ONLY
+Set <span class="nb">type</span> is:  hash:ip
+admin_workstations_x_v4
+
+
+To be added:  <span class="o">[]</span>
+
+
+To be removed:  <span class="o">[]</span>
+
+
+<span class="m">0</span> <span class="o">[</span><span class="s1">&#39;admin_workstations_x&#39;</span><span class="o">]</span>
+Script  <span class="o">[</span><span class="s1">&#39;test_nets_v4.sh&#39;</span><span class="o">]</span>  not in system path
+Trying herlpers: /root/cerndb-infra-firewall/helpers/test_nets_v4.sh
+<span class="o">[</span><span class="s1">&#39;100.64.0.0/10&#39;</span>, <span class="s1">&#39;192.91.242.0/24&#39;</span>, <span class="s1">&#39;188.184.0.0/15&#39;</span><span class="o">]</span>
+Set <span class="nb">type</span> is:  hash:net
+static_dns_servers4_v4
+
+
+To be added:  <span class="o">[]</span>
+
+
+To be removed:  <span class="o">[]</span>
+
+
+<span class="m">0</span> <span class="o">[</span><span class="s1">&#39;static_dns_servers4&#39;</span><span class="o">]</span>
+Script  <span class="o">[</span><span class="s1">&#39;test_nets_v6.sh&#39;</span><span class="o">]</span>  not in system path
+Trying herlpers: /root/cerndb-infra-firewall/helpers/test_nets_v6.sh
+<span class="o">[</span><span class="s1">&#39;2001:1458::/32&#39;</span>, <span class="s1">&#39;FD01:1459::/32&#39;</span><span class="o">]</span>
+Set <span class="nb">type</span> is:  hash:net
+static_dns_servers4_v6
+
+
+To be added:  <span class="o">[</span><span class="s1">&#39;FD01:1459::/32&#39;</span><span class="o">]</span>
+
+
+To be removed:  <span class="o">[</span><span class="s1">&#39;fd01:1459::/32&#39;</span><span class="o">]</span>
+
+
+/usr/sbin/ipset  add  static_dns_servers4_v6   FD01:1459::/32
+/usr/sbin/ipset  del  static_dns_servers4_v6   fd01:1459::/32
+<span class="m">0</span> <span class="o">[</span><span class="s1">&#39;static_dns_servers4&#39;</span><span class="o">]</span>
+/etc/init.d/ipset save
+</pre></div>
+</div>
+</div></blockquote>
+<p>Like this we deploy the update of the ipsets</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --deploy
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../scripts.html">Script Usage</a><ul>
+      <li>Previous: <a href="host_manager.html" title="previous chapter">Host Manager</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/scripts_usage/iptables_manager.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/scripts_usage/iptables_manager.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Host Manager &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Script Usage" href="../scripts.html" />
+    <link rel="next" title="IPtables Manager" href="iptables_manager.html" />
+    <link rel="prev" title="Script Usage" href="../scripts.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="host-manager">
+<h1>Host Manager<a class="headerlink" href="#host-manager" title="Permalink to this headline">¶</a></h1>
+<p><strong>host_manager.py</strong></p>
+<p>We use the argument <strong>&#8211;no_default_config</strong> so we can see only what we generated. In order to deploy the configuration use the
+<strong>&#8211;deploy</strong> argument. If you start the firewall for the first time is better to also apply the default config also.</p>
+<dl class="docutils">
+<dt>Check what we will apply.</dt>
+<dd><div class="first highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --no_default_config --config /root/cerndb-infra-firewall-tool/custom_conf_files/test_hosts.cfg
+</pre></div>
+</div>
+<div class="last highlight-bash"><div class="highlight"><pre><span></span><span class="c1">####### SECTION matched: &#39;itdb_test_2&#39; ################</span>
+Deploy is: False
+Section name: access_incoming_sshd
+Set <span class="nb">type</span> is:  hash:net
+/usr/sbin/ipset create static_cern_networks_v4 hash:net family inet hashsize <span class="m">1024</span> maxelem 65536
+Set  static_cern_networks_v4  created
+/usr/sbin/ipset add static_cern_networks_v4 172.16.0.0/12
+/usr/sbin/ipset add static_cern_networks_v4 10.0.0.0/8
+/usr/sbin/ipset add static_cern_networks_v4 188.184.0.0/15
+/usr/sbin/ipset add static_cern_networks_v4 192.91.242.0/24
+/usr/sbin/ipset add static_cern_networks_v4 137.138.0.0/16
+/usr/sbin/ipset add static_cern_networks_v4 194.12.128.0/18
+/usr/sbin/ipset add static_cern_networks_v4 192.16.155.0/24
+/usr/sbin/ipset add static_cern_networks_v4 192.16.165.0/24
+/usr/sbin/ipset add static_cern_networks_v4 192.168.0.0/16
+/usr/sbin/ipset add static_cern_networks_v4 128.142.0.0/16
+/usr/sbin/ipset add static_cern_networks_v4 128.141.0.0/16
+/usr/sbin/ipset add static_cern_networks_v4 100.64.0.0/10
+Section name: access_incoming_sshd
+Set <span class="nb">type</span> is:  hash:net
+/usr/sbin/ipset create static_cern_networks_v6 hash:net family inet6 hashsize <span class="m">1024</span> maxelem 65536
+Set  static_cern_networks_v6  created
+/usr/sbin/ipset add static_cern_networks_v6 fd01:1459::/32
+/usr/sbin/ipset add static_cern_networks_v6 2001:1458::/32
+/usr/sbin/ipset add static_cern_networks_v6 2001:1459::/32
+/usr/sbin/ipset add static_cern_networks_v6 fd01:1458::/32
+/etc/init.d/ipset save
+
+<span class="c1">######### USER DEFINED FIREWALL RULES #########</span>
+/sbin/iptables -A INPUT -i eth0 -p tcp -m multiport --dports <span class="m">22</span> -m <span class="nb">set</span> --match-set static_cern_networks_v4 src -j ACCEPT -m comment --comment access_incoming_sshd
+/sbin/ip6tables -A INPUT -i eth0 -p tcp -m multiport --dports <span class="m">22</span> -m <span class="nb">set</span> --match-set static_cern_networks_v6 src -j ACCEPT -m comment --comment access_incoming_sshd
+<span class="c1">######### USER DEFINED FIREWALL RULES #########</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>This way we deploy the configuration. On each deploy is better <strong>not to</strong> specify the <strong>&#8211;no_default_config</strong> so the default
+rules apply. It cleans also everything and the ipsets so you have a clean deploy from scratch.</p>
+<p>If you are absolutely certain that you applied the default before and just want what you defined then use the argument</p>
+<p>Like this we deploy the configuration</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --config /root/cerndb-infra-firewall-tool/custom_conf_files/test_hosts.cfg --deploy
+</pre></div>
+</div>
+</div></blockquote>
+<p>If you have a running firewall and just want to update ipsets that are in use you have to use the <strong>&#8211;update_sets</strong>
+argument.</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --config /root/cerndb-infra-firewall-tool/custom_conf_files/test_hosts.cfg --update_sets
+</pre></div>
+</div>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1">####### SECTION matched: &#39;itdb_test_2&#39; ################</span>
+Deploy is: False
+UPDATE IPsets ONLY
+Set <span class="nb">type</span> is:  hash:net
+static_cern_networks_v4
+
+
+To be added:  <span class="o">[]</span>
+
+
+To be removed:  <span class="o">[]</span>
+
+
+<span class="m">0</span> <span class="o">[</span><span class="s1">&#39;static_cern_networks&#39;</span><span class="o">]</span>
+Set <span class="nb">type</span> is:  hash:net
+static_cern_networks_v6
+
+
+To be added:  <span class="o">[]</span>
+
+
+To be removed:  <span class="o">[]</span>
+
+
+<span class="m">0</span> <span class="o">[</span><span class="s1">&#39;static_cern_networks&#39;</span><span class="o">]</span>
+/etc/init.d/ipset save
+</pre></div>
+</div>
+</div></blockquote>
+<p>Like this we deploy the update of the ipsets</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --config /root/cerndb-infra-firewall-tool/custom_conf_files/test_hosts.cfg --update_sets --deploy
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../scripts.html">Script Usage</a><ul>
+      <li>Previous: <a href="../scripts.html" title="previous chapter">Script Usage</a></li>
+      <li>Next: <a href="iptables_manager.html" title="next chapter">IPtables Manager</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/scripts_usage/host_manager.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Athanasios Gkaraliakos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/scripts_usage/host_manager.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
