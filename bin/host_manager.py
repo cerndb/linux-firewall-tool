@@ -21,8 +21,6 @@ import configparser
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from iptables_manager import iptables_manager
 from iptables_manager_modules.rules_builder import FirewallRuleBuilder
-from ip_dns_resolve import ip_dns_resolver
-from netset_extraction import netset_extractor
 
 
 class ReadWriteConfigFiles(object):
@@ -31,7 +29,6 @@ class ReadWriteConfigFiles(object):
     and adds all the sections of the file as key and its options as value
     """
 
-    # parser = configparser.RawConfigParser()
     parser = configparser.ConfigParser()
 
     def read_config_file(self, filepath):
@@ -234,7 +231,6 @@ def main():
         try:
             file_reader = ReadWriteConfigFiles()
             file_parser = file_reader.read_config_file(args.config)
-            # print file_parser.sections()
         except RuntimeError:
             sys.stderr.write("Error reading the files")
             print "Please check the files are under the provided path/s"

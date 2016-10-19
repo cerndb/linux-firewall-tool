@@ -1013,6 +1013,7 @@ class ManageRules(object):
             limit = None
         try:
             log_prefix = self.parser.get(general_section, 'log-prefix').encode('utf-8')
+            log_prefix += " "
         except configparser.NoOptionError:
             log_prefix = None
         try:
