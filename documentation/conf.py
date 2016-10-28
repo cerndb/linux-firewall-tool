@@ -55,7 +55,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'linux-firewall-tool'
-copyright = u'2016, Athanasios Gkaraliakos'
+copyright = u'2016, CERN'
 author = u'Athanasios Gkaraliakos'
 
 # The version info for the project you're documenting, acts as replacement for

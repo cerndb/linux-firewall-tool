@@ -23,6 +23,8 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
     <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
    
@@ -64,8 +66,6 @@
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))))</span>
 <span class="kn">from</span> <span class="nn">iptables_manager</span> <span class="k">import</span> <span class="n">iptables_manager</span>
 <span class="kn">from</span> <span class="nn">iptables_manager_modules.rules_builder</span> <span class="k">import</span> <span class="n">FirewallRuleBuilder</span>
-<span class="kn">from</span> <span class="nn">ip_dns_resolve</span> <span class="k">import</span> <span class="n">ip_dns_resolver</span>
-<span class="kn">from</span> <span class="nn">netset_extraction</span> <span class="k">import</span> <span class="n">netset_extractor</span>
 
 
 <div class="viewcode-block" id="ReadWriteConfigFiles"><a class="viewcode-back" href="../../code_documentation/host_manager.html#bin.host_manager.ReadWriteConfigFiles">[docs]</a><span class="k">class</span> <span class="nc">ReadWriteConfigFiles</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -74,7 +74,6 @@
 <span class="sd">    and adds all the sections of the file as key and its options as value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># parser = configparser.RawConfigParser()</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ReadWriteConfigFiles.read_config_file"><a class="viewcode-back" href="../../code_documentation/host_manager.html#bin.host_manager.ReadWriteConfigFiles.read_config_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
@@ -277,7 +276,6 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">file_reader</span> <span class="o">=</span> <span class="n">ReadWriteConfigFiles</span><span class="p">()</span>
             <span class="n">file_parser</span> <span class="o">=</span> <span class="n">file_reader</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
-            <span class="c1"># print file_parser.sections()</span>
         <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Error reading the files&quot;</span><span class="p">)</span>
             <span class="nb">print</span> <span class="s2">&quot;Please check the files are under the provided path/s&quot;</span>
@@ -326,10 +324,10 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2016, Athanasios Gkaraliakos.
+      &copy;2016, CERN.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>
