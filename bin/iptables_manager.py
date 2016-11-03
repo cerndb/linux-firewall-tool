@@ -439,7 +439,7 @@ class ManageRules(object):
                 for hst in hostnames:
                     if (',' in hst) and (ipset_type == "custom"):
                         print "\nSection '" + ipset_setction + "' type is 'custom' but you provided ports also. " \
-                                                                 " type should be 'custom_port' "
+                                                                 " type should including port"
                         sys.exit(1)
             else:
                 print err
@@ -663,7 +663,7 @@ class ManageRules(object):
                         set_name[0] += '_v4'
                     elif ip_version == 'ipv6':
                         set_name[0] += '_v6'
-                    if self.parser.get(set_section, 'ipset_type').encode('utf-8') == 'custom_port':
+                    if 'port' in self.parser.get(set_section, 'ipset_type').encode('utf-8'):
                         modules['set'] = [set_name[0], 'src,dst']
                     else:
                         modules['set'] = [set_name[0], 'src']
@@ -698,7 +698,7 @@ class ManageRules(object):
             modules['state'] = 'ESTABLISHED'
             if self.parser.has_option(general_section, 'set'):
                 if response_set == 0:
-                    if self.parser.get(set_section, 'ipset_type').encode('utf-8') == 'custom_port':
+                    if 'port' in self.parser.get(set_section, 'ipset_type').encode('utf-8'):
                         modules['set'][1] = 'dst,dst'
                     else:
                         modules['set'][1] = 'dst'
@@ -738,7 +738,7 @@ class ManageRules(object):
                         set_name[0] += '_v4'
                     elif ip_version == 'ipv6':
                         set_name[0] += '_v6'
-                    if self.parser.get(set_section, 'ipset_type').encode('utf-8') == 'custom_port':
+                    if 'port' in self.parser.get(set_section, 'ipset_type').encode('utf-8'):
                         modules['set'] = [set_name[0], 'src,dst']
                     else:
                         modules['set'] = [set_name[0], 'src']
@@ -777,7 +777,7 @@ class ManageRules(object):
             modules['state'] = 'NEW,ESTABLISHED'
             if self.parser.has_option(general_section, 'set'):
                 if response_set == 0:
-                    if self.parser.get(set_section, 'ipset_type').encode('utf-8') == 'custom_port':
+                    if 'port' in self.parser.get(set_section, 'ipset_type').encode('utf-8'):
                         modules['set'][1] = 'dst,dst'
                     else:
                         modules['set'][1] = 'dst'
