@@ -47,7 +47,7 @@
   <div class="section" id="module-bin.iptables_manager">
 <span id="iptables-manager"></span><h1>iptables_manager<a class="headerlink" href="#module-bin.iptables_manager" title="Permalink to this headline">¶</a></h1>
 <p>Author: Athanasios Gkaraliakos
-email: <a class="reference external" href="mailto:a&#46;gkaraliakos&#37;&#52;&#48;gmail&#46;com">a<span>&#46;</span>gkaraliakos<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+email: <a class="reference external" href="mailto:athanasios&#46;gkaraliakos&#37;&#52;&#48;cern&#46;ch">athanasios<span>&#46;</span>gkaraliakos<span>&#64;</span>cern<span>&#46;</span>ch</a></p>
 <p>The script is written on python &gt;=2.6</p>
 <dl class="class">
 <dt id="bin.iptables_manager.ManageRules">
@@ -112,14 +112,37 @@ check the &#8216;integrity&#8217; of the config files in terms of specifying the
 
 <dl class="method">
 <dt id="bin.iptables_manager.ManageRules.handle_ipsets">
-<code class="descname">handle_ipsets</code><span class="sig-paren">(</span><em>ipset_setction</em>, <em>ip_version</em>, <em>update_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.handle_ipsets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.handle_ipsets" title="Permalink to this definition">¶</a></dt>
+<code class="descname">handle_ipsets</code><span class="sig-paren">(</span><em>ipset_section</em>, <em>ip_version</em>, <em>update_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.handle_ipsets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.handle_ipsets" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is used to handle the ipsets. It parses ipset sections by extracting the values from the options
 provided in the files. It is used to create or update(if set exists) an ipset so to be later used by the
 iptable rules.</p>
-<p>:param ipset_setction:Name of the ipset section to be parsed
+<p>:param ipset_section:Name of the ipset section to be parsed
 :param ip_version: IPv4/IPv6
 :param update_only: Bool variable to tell the method to do an update of the existing set.
 :return: It returns two values. 1. The exit code of the other script that handles ipsets 2. The actual name of the created ipset to be used by the rule/s</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bin.iptables_manager.ManageRules.handle_list_set">
+<code class="descname">handle_list_set</code><span class="sig-paren">(</span><em>ipset_setction</em>, <em>ip_version</em>, <em>update_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.handle_list_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.handle_list_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to create a list:set type of ipset. This includes other already in memory sets.
+Works by reading the sections that define the other sets, builds them first and then adds them to it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ipset_setction</strong> &#8211; Section of the list set</li>
+<li><strong>ip_version</strong> &#8211; ip version to build on IPv4 or IPv6</li>
+<li><strong>update_only</strong> &#8211; flag to update sets only to be passed to handle ipsets method</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the response and the name of the set</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
@@ -135,6 +158,29 @@ firewall rules on.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query</strong> &#8211; list of commands to perform e.g. [&#8216;main&#8217;,&#8217;+en5&#8217;, &#8216;+en4&#8217;] or [&#8216;all&#8217;, &#8216;-en5&#8217;, &#8216;-en4&#8217;]</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the list of interfaces</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bin.iptables_manager.ManageRules.handle_script_runs">
+<code class="descname">handle_script_runs</code><span class="sig-paren">(</span><em>ipset_section</em>, <em>hostname</em>, <em>ipset_type</em>, <em>ip_version</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.handle_script_runs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.handle_script_runs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to handle set triplets to be used in ipsets.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ipset_section</strong> &#8211; </li>
+<li><strong>hostname</strong> &#8211; </li>
+<li><strong>ipset_type</strong> &#8211; </li>
+<li><strong>ip_version</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -226,13 +272,13 @@ files using the &#8216;action&#8217; option list.</p>
 
 <dl class="attribute">
 <dt id="bin.iptables_manager.ManageRules.sect_general_options_list">
-<code class="descname">sect_general_options_list</code><em class="property"> = ['description', 'section_type', 'action', 'default_chain', 'md5', 'ip_version', 'interface', 'protocol', 'ports', 'custom_chain', 'limit', 'log-level', 'log-prefix', 'set', 'set_directions', 'log-specific-options']</em><a class="headerlink" href="#bin.iptables_manager.ManageRules.sect_general_options_list" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sect_general_options_list</code><em class="property"> = ['description', 'section_type', 'action', 'default_chain', 'ip_version', 'interface', 'protocol', 'ports', 'custom_chain', 'limit', 'log-level', 'log-prefix', 'set', 'set_directions', 'log-specific-options']</em><a class="headerlink" href="#bin.iptables_manager.ManageRules.sect_general_options_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>All the allowed option of a section that defines ipsets.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="bin.iptables_manager.ManageRules.sect_set_option_list">
-<code class="descname">sect_set_option_list</code><em class="property"> = ['description', 'section_type', 'ipset_type', 'set_name', 'netgroup_name', 'set_hostnames', 'set_ips_v4', 'set_ips_v6', 'set_net_ranges_v4', 'set_net_ranges_v6', 'netgroups_list', 'set_ip_port_ip_v4', 'set_ip_port_ip_v6', 'set_ip_port_net_v4', 'set_ip_port_net_v6']</em><a class="headerlink" href="#bin.iptables_manager.ManageRules.sect_set_option_list" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sect_set_option_list</code><em class="property"> = ['description', 'section_type', 'ipset_type', 'set_name', 'netgroup_set_name', 'set_hostnames', 'set_ips_v4', 'set_ips_v6', 'set_net_ranges_v4', 'set_net_ranges_v6', 'netgroup_set_list', 'set_ip_port_ip_v4', 'set_ip_port_ip_v6', 'set_ip_port_net_v4', 'set_ip_port_net_v6', 'list_set_sections']</em><a class="headerlink" href="#bin.iptables_manager.ManageRules.sect_set_option_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>All the allowed option of a section that defines Policy.</p>
 </dd></dl>
 

@@ -54,13 +54,15 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Author: Athanasios Gkaraliakos</span>
-<span class="sd">email: a.gkaraliakos@gmail.com</span>
+<span class="sd">email: athanasios.gkaraliakos@cern.ch</span>
 
 <span class="sd">The script is written on python &gt;=2.6</span>
 
 <span class="sd">Script to get IPv4 and/or IPv6 (if exists) for every machine in the given set</span>
 
 <span class="sd">Depends on python-dns &quot; yum install python-dns &quot;</span>
+
+<span class="sd">Script uses as default username the --&gt; dbsystem</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -90,7 +92,6 @@
     <span class="n">iplist</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">hostname</span> <span class="o">=</span> <span class="n">hostname</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-
     <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
         <span class="n">iplist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">hostname</span><span class="p">))</span>
 

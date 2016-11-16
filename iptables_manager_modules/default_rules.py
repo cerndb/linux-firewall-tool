@@ -8,11 +8,11 @@
 
 """
 Author: Athanasios Gkaraliakos
-email: a.gkaraliakos@gmail.com
+email: athanasios.gkaraliakos@cern.ch
 
 The script is written on python >=2.6
-"""
 
+"""
 
 import os
 import subprocess
@@ -20,6 +20,7 @@ import sys
 
 # import from outer folder
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bin.ipset_manager import ipset_manager
 from bin.main_nic_extractor import main_nic_extractor
 
 

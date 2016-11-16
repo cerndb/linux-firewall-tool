@@ -44,7 +44,6 @@
             
   <h1>Source code for bin.ipset_manager</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/python</span>
-<span class="c1"># pylint: disable=C0301</span>
 
 <span class="c1"># Copyright (C) 2016, CERN</span>
 <span class="c1"># This software is distributed under the terms of the GNU General Public</span>
@@ -53,13 +52,14 @@
 <span class="c1"># granted to it by virtue of its status as Intergovernmental Organization</span>
 <span class="c1"># or submit itself to any jurisdiction.</span>
 
+<span class="c1"># pylint: disable=C0301</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Author: Athanasios Gkaraliakos</span>
-<span class="sd">email: a.gkaraliakos@gmail.com</span>
+<span class="sd">email: athanasios.gkaraliakos@cern.ch</span>
 
 <span class="sd">The script is written on python &gt;=2.6</span>
 
-<span class="sd">Script to create/modify/delete ipsets on CentOS6.x and older of IPv4 and/or IPv6 (if exists)</span>
+<span class="sd">Script to create/modify/delete ipsets on CentOS6.x and older of IPv4 and/or IPv6 (if exists) from CERN&#39;s network sets.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -67,14 +67,10 @@
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">ipaddress</span>
 <span class="kn">from</span> <span class="nn">ip_dns_resolve</span> <span class="k">import</span> <span class="n">ip_dns_resolver</span>
-<span class="kn">from</span> <span class="nn">netset_extraction</span> <span class="k">import</span> <span class="n">netset_extractor</span>
-
-<span class="c1"># path, fl = os.path.split(os.path.realpath(__file__+&#39;..&#39;))</span>
-<span class="c1"># del fl</span>
-<span class="c1"># sys.path.append(path + &#39;../&#39;)</span>
-<span class="c1"># sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))</span>
+<span class="kn">from</span> <span class="nn">netgroups_set_extraction</span> <span class="k">import</span> <span class="n">netgroup_set_extractor</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))))</span>
+<span class="kn">import</span> <span class="nn">ipaddress</span>
 
 
 <span class="c1">######################################################################################</span>
@@ -131,7 +127,7 @@
 <span class="c1">######################################################################################</span>
 <span class="c1"># Extract Network sets using set name from the CERN network service</span>
 <span class="c1"># Call the python script that handles the soap parsing and set extraction from the network service</span>
-<div class="viewcode-block" id="get_network_sets"><a class="viewcode-back" href="../../code_documentation/ipset_manager.html#bin.ipset_manager.get_network_sets">[docs]</a><span class="k">def</span> <span class="nf">get_network_sets</span><span class="p">(</span><span class="n">set_names</span><span class="p">,</span> <span class="n">iptype</span><span class="p">):</span>
+<div class="viewcode-block" id="get_network_sets"><a class="viewcode-back" href="../../code_documentation/ipset_manager.html#bin.ipset_manager.get_network_sets">[docs]</a><span class="k">def</span> <span class="nf">get_network_sets</span><span class="p">(</span><span class="n">set_names</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="c1"># pylint: disable=C0301</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The function uses the ip_extraction.py python script to query LanDB service based on a network set name and extract</span>
@@ -143,9 +139,15 @@
 <span class="sd">    :param password: mandatory if you specify username for the LanDB service authentication</span>
 <span class="sd">    :return: String output containing all the ip address if they are successfully resolved</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">cern_net_set</span> <span class="o">=</span> <span class="n">netset_extractor</span><span class="p">(</span><span class="n">iptype</span><span class="p">,</span> <span class="n">set_names</span><span class="p">)</span>
-    <span class="c1"># print &quot;Temp: &quot;, temp</span>
-    <span class="k">return</span> <span class="n">cern_net_set</span></div>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">username</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">password</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">netgroup_set</span> <span class="o">=</span> <span class="n">netgroup_set_extractor</span><span class="p">(</span><span class="n">iptype</span><span class="p">,</span> <span class="n">set_names</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+        <span class="c1"># print &quot;Temp cred: &quot;, temp</span>
+        <span class="k">return</span> <span class="n">netgroup_set</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">netgroup_set</span> <span class="o">=</span> <span class="n">netgroup_set_extractor</span><span class="p">(</span><span class="n">iptype</span><span class="p">,</span> <span class="n">set_names</span><span class="p">)</span>
+        <span class="c1"># print &quot;Temp: &quot;, temp</span>
+        <span class="k">return</span> <span class="n">netgroup_set</span></div>
 
 
 <span class="c1">######################################################################################</span>
@@ -228,7 +230,6 @@
     <span class="k">if</span> <span class="n">iptype</span> <span class="o">==</span> <span class="s2">&quot;ipv4&quot;</span><span class="p">:</span>
         <span class="n">setname</span> <span class="o">+=</span> <span class="s2">&quot;_v4&quot;</span>
         <span class="k">if</span> <span class="n">simulate</span><span class="p">:</span>
-            <span class="c1"># print ipset_command, &#39; create &#39;, setname, &#39; &#39;, settype, &#39; family &#39;, &#39;inet&#39;</span>
             <span class="k">if</span> <span class="n">generate_file</span><span class="p">:</span>
                 <span class="n">file_lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="n">setname</span><span class="p">,</span> <span class="n">settype</span><span class="p">,</span> <span class="s1">&#39;family&#39;</span><span class="p">,</span> <span class="s1">&#39;inet&#39;</span><span class="p">,</span> <span class="s1">&#39;hashsize&#39;</span><span class="p">,</span> <span class="s1">&#39;1024&#39;</span><span class="p">,</span> <span class="s1">&#39;maxelem&#39;</span><span class="p">,</span> <span class="s1">&#39;65536&#39;</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
@@ -239,7 +240,6 @@
     <span class="k">elif</span> <span class="n">iptype</span> <span class="o">==</span> <span class="s2">&quot;ipv6&quot;</span><span class="p">:</span>
         <span class="n">setname</span> <span class="o">+=</span> <span class="s2">&quot;_v6&quot;</span>
         <span class="k">if</span> <span class="n">simulate</span><span class="p">:</span>
-            <span class="c1"># print ipset_command, &#39; create &#39;, setname, &#39; &#39;, settype, &#39; family &#39;, &#39;inet6&#39;</span>
             <span class="k">if</span> <span class="n">generate_file</span><span class="p">:</span>
                 <span class="n">file_lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="n">setname</span><span class="p">,</span> <span class="n">settype</span><span class="p">,</span> <span class="s1">&#39;family&#39;</span><span class="p">,</span> <span class="s1">&#39;inet6&#39;</span><span class="p">,</span> <span class="s1">&#39;hashsize&#39;</span><span class="p">,</span> <span class="s1">&#39;1024&#39;</span><span class="p">,</span> <span class="s1">&#39;maxelem&#39;</span><span class="p">,</span> <span class="s1">&#39;65536&#39;</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
@@ -308,18 +308,14 @@
 
     <span class="k">if</span> <span class="n">iptype</span> <span class="o">==</span> <span class="s2">&quot;ipv4&quot;</span><span class="p">:</span>
         <span class="n">setname</span> <span class="o">+=</span> <span class="s2">&quot;_v4&quot;</span>
-        <span class="k">if</span> <span class="n">simulate</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="n">ipset_command</span><span class="p">,</span> <span class="s1">&#39; destroy &#39;</span><span class="p">,</span> <span class="n">setname</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">ipset_command</span><span class="p">,</span> <span class="s1">&#39;destroy&#39;</span><span class="p">,</span> <span class="n">setname</span><span class="p">],</span>
-                                    <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">iptype</span> <span class="o">==</span> <span class="s2">&quot;ipv6&quot;</span><span class="p">:</span>
         <span class="n">setname</span> <span class="o">+=</span> <span class="s2">&quot;_v6&quot;</span>
-        <span class="k">if</span> <span class="n">simulate</span><span class="p">:</span>
-             <span class="nb">print</span> <span class="n">ipset_command</span><span class="p">,</span> <span class="s1">&#39; destroy &#39;</span><span class="p">,</span> <span class="n">setname</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">ipset_command</span><span class="p">,</span> <span class="s1">&#39;destroy&#39;</span><span class="p">,</span> <span class="n">setname</span><span class="p">],</span>
-                                    <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">simulate</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="n">ipset_command</span><span class="p">,</span> <span class="s1">&#39; destroy &#39;</span><span class="p">,</span> <span class="n">setname</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">ipset_command</span><span class="p">,</span> <span class="s1">&#39;destroy&#39;</span><span class="p">,</span> <span class="n">setname</span><span class="p">],</span>
+                                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">simulate</span><span class="p">:</span>
         <span class="n">response</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
@@ -417,9 +413,9 @@
         <span class="n">in_set_not_in_network</span> <span class="o">=</span> <span class="n">lr_diff</span><span class="p">(</span><span class="n">ips_of_set</span><span class="p">,</span> <span class="n">ips</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_network_not_in_set</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;in_network_not_in_set: &quot;</span><span class="p">,</span> <span class="n">in_network_not_in_set</span>
+            <span class="nb">print</span> <span class="s2">&quot;To be added: &quot;</span><span class="p">,</span> <span class="n">in_network_not_in_set</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_set_not_in_network</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;in_set_not_in_network: &quot;</span><span class="p">,</span> <span class="n">in_set_not_in_network</span></div>
+            <span class="nb">print</span> <span class="s2">&quot;To be removed: &quot;</span><span class="p">,</span> <span class="n">in_set_not_in_network</span></div>
 
 
 <span class="c1">######################################################################################</span>
@@ -432,8 +428,6 @@
 <span class="sd">    :return: void</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ipset_script</span> <span class="o">=</span> <span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;ipset_script&#39;</span><span class="p">)</span>
-    <span class="c1"># ipset_command = read_config_file(&#39;ipset_command&#39;)</span>
-    <span class="c1"># ipset_file = read_config_file(&#39;ipset_file&#39;)</span>
 
     <span class="k">if</span> <span class="n">simulate</span><span class="p">:</span>
         <span class="nb">print</span> <span class="n">ipset_script</span> <span class="o">+</span> <span class="s2">&quot; save&quot;</span>
@@ -453,9 +447,102 @@
 
 
 <span class="c1">######################################################################################</span>
-<span class="c1"># create/modify/delete ip sets based on network groups of either IPv4 or IPv6</span>
-<div class="viewcode-block" id="handle_netgroups_set"><a class="viewcode-back" href="../../code_documentation/ipset_manager.html#bin.ipset_manager.handle_netgroups_set">[docs]</a><span class="k">def</span> <span class="nf">handle_netgroups_set</span><span class="p">(</span><span class="n">simulate</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">set_names</span><span class="p">,</span> <span class="n">settype</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">custom_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">generate_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                         <span class="n">file_override</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cmd</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="handle_list_set"><a class="viewcode-back" href="../../code_documentation/ipset_manager.html#bin.ipset_manager.handle_list_set">[docs]</a><span class="k">def</span> <span class="nf">handle_list_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">set_name</span><span class="p">,</span> <span class="n">set_names_list</span><span class="p">,</span> <span class="n">generate_file</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is used to handle the operation on list:set type of ipset.</span>
+
+<span class="sd">    :param simul: Flag to print or not</span>
+<span class="sd">    :param action: the action to perform</span>
+<span class="sd">    :param set_name: name of the set</span>
+<span class="sd">    :param set_names_list: list of names of other existing ipsets to add</span>
+<span class="sd">    :param generate_file: Flag to write to the ipset generated file or not</span>
+<span class="sd">    :return: 0 if ok or 1 if not ok</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ipset_command</span> <span class="o">=</span> <span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;ipset_command&#39;</span><span class="p">)</span>
+
+    <span class="n">file_lines</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;create&#39;</span><span class="p">:</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">ipset_command</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="n">set_name</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+        <span class="n">response</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+        <span class="n">exit_code</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">exit_code</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">simul</span><span class="p">:</span>
+                <span class="n">call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">ipset_command</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="n">set_name</span><span class="p">,</span> <span class="s1">&#39;list:set&#39;</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                                        <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+                <span class="n">response</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+                <span class="n">exit_code</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">generate_file</span><span class="p">:</span>
+                    <span class="n">file_lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="n">set_name</span><span class="p">,</span> <span class="s1">&#39;list:set&#39;</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="n">ipset_command</span><span class="p">,</span> <span class="s1">&#39; create &#39;</span><span class="p">,</span> <span class="n">set_name</span><span class="p">,</span> <span class="s1">&#39; list:set&#39;</span>
+                <span class="n">exit_code</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">exit_code</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Error creating the specified set, exit code: &quot;</span><span class="p">,</span> <span class="n">exit_code</span>
+                <span class="nb">print</span> <span class="n">err</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Set &#39;&quot;</span> <span class="o">+</span> <span class="n">set_name</span> <span class="o">+</span> <span class="s2">&quot;&#39; created&quot;</span>
+                <span class="k">if</span> <span class="n">set_names_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">simul</span><span class="p">:</span>
+                        <span class="n">call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">ipset_command</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;-n&#39;</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+                        <span class="n">response</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+                        <span class="n">exit_code</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">exit_code</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">if</span> <span class="n">exit_code</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="nb">print</span> <span class="s2">&quot;Error listing ipsets, exit code: &quot;</span><span class="p">,</span> <span class="n">exit_code</span>
+                        <span class="nb">print</span> <span class="n">err</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">simul</span><span class="p">:</span>
+                            <span class="n">current_sets</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">_set_</span> <span class="ow">in</span> <span class="n">set_names_list</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">_set_</span> <span class="ow">in</span> <span class="n">current_sets</span><span class="p">:</span>
+                                        <span class="n">call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">ipset_command</span><span class="p">,</span> <span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">set_name</span><span class="p">,</span> <span class="n">_set_</span><span class="p">],</span>
+                                                                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+                                        <span class="n">response</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+                                        <span class="n">exit_code</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+                                        <span class="k">if</span> <span class="n">exit_code</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                                            <span class="nb">print</span> <span class="s2">&quot;Error adding the specified set to the list set, exit code: &quot;</span><span class="p">,</span> <span class="n">exit_code</span>
+                                            <span class="nb">print</span> <span class="n">err</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="nb">print</span> <span class="s2">&quot;Set name: &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">_set_</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; does not exist. Omitting&quot;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">_set_</span> <span class="ow">in</span> <span class="n">set_names_list</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="n">generate_file</span><span class="p">:</span>
+                                    <span class="nb">print</span> <span class="n">ipset_command</span> <span class="o">+</span> <span class="s1">&#39; add &#39;</span> <span class="o">+</span> <span class="n">set_name</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">_set_</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">file_lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">set_name</span><span class="p">,</span> <span class="n">_set_</span><span class="p">])</span>
+                            <span class="k">if</span> <span class="n">generate_file</span><span class="p">:</span>
+                                <span class="n">write_config_file</span><span class="p">(</span><span class="n">set_name</span><span class="p">,</span> <span class="n">file_lines</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Set &#39;&quot;</span> <span class="o">+</span> <span class="n">set_name</span> <span class="o">+</span> <span class="s2">&quot;&#39; already exists. Cannot create&quot;</span>
+            <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;update&#39;</span><span class="p">:</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">ipset_command</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="n">set_name</span><span class="p">,</span> <span class="s1">&#39;-n&#39;</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+        <span class="n">exit_code</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">exit_code</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">update_ip_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">set_names_list</span><span class="p">,</span> <span class="n">set_name</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;list:set&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Set &#39;&quot;</span> <span class="o">+</span> <span class="n">set_name</span> <span class="o">+</span> <span class="s2">&quot;&#39; does not exist. Cannot update&quot;</span>
+            <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;destroy&#39;</span><span class="p">:</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">ipset_command</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="n">set_name</span><span class="p">,</span> <span class="s1">&#39;-n&#39;</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+        <span class="n">exit_code</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">exit_code</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">destroy_ip_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">set_name</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Set &#39;&quot;</span> <span class="o">+</span> <span class="n">set_name</span> <span class="o">+</span> <span class="s2">&quot;&#39; does not exist. Cannot delete&quot;</span>
+            <span class="k">return</span> <span class="mi">0</span></div>
+
+
+<span class="c1">######################################################################################</span>
+
+<span class="c1"># create/modify/delete ip sets based on cern network service of either IPv4 or IPv6</span>
+<div class="viewcode-block" id="handle_netgroups_set"><a class="viewcode-back" href="../../code_documentation/ipset_manager.html#bin.ipset_manager.handle_netgroups_set">[docs]</a><span class="k">def</span> <span class="nf">handle_netgroups_set</span><span class="p">(</span><span class="n">simulate</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">set_names</span><span class="p">,</span> <span class="n">settype</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">custom_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                         <span class="n">generate_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">file_override</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cmd</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="c1"># pylint: disable=C0301</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function handles the action to be performed based on the provided input action of the user. The main role of</span>
@@ -468,6 +555,8 @@
 <span class="sd">    :param settype: IPset type. Only the allowed sets</span>
 <span class="sd">    :param port: Port number if the set type contains port</span>
 <span class="sd">    :param custom_name: Custom ipset name if the regular name is to large of if the user wants a shorter one</span>
+<span class="sd">    :param username: optional username for the LanDB service authentication</span>
+<span class="sd">    :param password: mandatory if you specify username for the LanDB service authentication</span>
 <span class="sd">    :param generate_file: Flag whether or not to generate ipset file</span>
 <span class="sd">    :param file_override: Flag whether or not to override ipset file</span>
 <span class="sd">    :param cmd: Flag to save current ipset state if script was called vim the command line</span>
@@ -475,8 +564,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;create&#39;</span><span class="p">:</span>
-
-        <span class="n">output</span> <span class="o">=</span> <span class="n">get_network_sets</span><span class="p">(</span><span class="n">set_names</span><span class="p">,</span> <span class="n">iptype</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">username</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">password</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">get_network_sets</span><span class="p">(</span><span class="n">set_names</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">get_network_sets</span><span class="p">(</span><span class="n">set_names</span><span class="p">,</span> <span class="n">iptype</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s2">&quot;SETNOTFOUND&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
             <span class="c1"># print output</span>
@@ -509,7 +600,10 @@
 
     <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;update&#39;</span><span class="p">:</span>
 
-        <span class="n">output</span> <span class="o">=</span> <span class="n">get_network_sets</span><span class="p">(</span><span class="n">set_names</span><span class="p">,</span> <span class="n">iptype</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">username</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">password</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">get_network_sets</span><span class="p">(</span><span class="n">set_names</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">get_network_sets</span><span class="p">(</span><span class="n">set_names</span><span class="p">,</span> <span class="n">iptype</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s2">&quot;SETNOTFOUND&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
             <span class="c1"># print output</span>
@@ -529,7 +623,7 @@
 <span class="c1">######################################################################################</span>
 <span class="c1"># create/modify/delete custom ip sets of either IPv4 or IPv6</span>
 <div class="viewcode-block" id="handle_custom_set"><a class="viewcode-back" href="../../code_documentation/ipset_manager.html#bin.ipset_manager.handle_custom_set">[docs]</a><span class="k">def</span> <span class="nf">handle_custom_set</span><span class="p">(</span><span class="n">simulate</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">setname</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">settype</span><span class="p">,</span> <span class="n">ips</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hostnames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                      <span class="n">netgroups_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">generate_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">file_override</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cmd</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                      <span class="n">netgroup_net_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">generate_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">file_override</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cmd</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="c1"># pylint: disable=C0301</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function handles the action to be performed based on the provided input action of the user. The main role of</span>
@@ -544,7 +638,7 @@
 <span class="sd">    :param hostnames: The hostnames of either single boxes or aliases ( to resolved via dns ) that will be added in</span>
 <span class="sd">                      the ipset</span>
 <span class="sd">    :param port: Port number if the set type contains port</span>
-<span class="sd">    :param netgroups_list: A list of network groups names to be added into the set.</span>
+<span class="sd">    :param netgroup_net_list: A list of cern network set names to be added into the set.</span>
 <span class="sd">    :param generate_file: Flag whether or not to generate ipset file</span>
 <span class="sd">    :param file_override: Flag whether or not to override ipset file</span>
 <span class="sd">    :param cmd: Flag to save current ipset state if script was called vim the command line</span>
@@ -552,7 +646,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="s1">&#39;update&#39;</span><span class="p">]:</span>
-        <span class="c1"># hostset = &#39;&#39;</span>
         <span class="n">hostsetfinal</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">if</span> <span class="n">settype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hash:ip,port,net&#39;</span><span class="p">,</span> <span class="s1">&#39;hash:ip,port,ip&#39;</span><span class="p">]:</span>
@@ -560,19 +653,20 @@
             <span class="n">triplet_port</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">triplet_ip2</span> <span class="o">=</span> <span class="p">[]</span>
 
-            <span class="k">if</span> <span class="n">netgroups_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">cern_nets</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">netgroups_list</span><span class="p">)):</span>
-                    <span class="n">name1</span><span class="p">,</span> <span class="n">prt</span><span class="p">,</span> <span class="n">name2</span> <span class="o">=</span> <span class="n">netgroups_list</span><span class="p">[</span><span class="n">cern_nets</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
-                    <span class="n">triplet_ip1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">netset_extractor</span><span class="p">(</span><span class="n">iptype</span><span class="p">,</span> <span class="n">name1</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">netgroup_net_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">netgroups</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">netgroup_net_list</span><span class="p">)):</span>
+                    <span class="n">name1</span><span class="p">,</span> <span class="n">prt</span><span class="p">,</span> <span class="n">name2</span> <span class="o">=</span> <span class="n">netgroup_net_list</span><span class="p">[</span><span class="n">netgroups</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                    <span class="n">triplet_ip1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">netgroup_set_extractor</span><span class="p">(</span><span class="n">iptype</span><span class="p">,</span> <span class="n">name1</span><span class="p">))</span>
                     <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">prt</span><span class="p">:</span>
                         <span class="n">prt</span> <span class="o">=</span> <span class="s1">&#39;tcp:&#39;</span> <span class="o">+</span> <span class="n">prt</span>
                     <span class="n">triplet_port</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prt</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">settype</span> <span class="o">==</span> <span class="s1">&#39;hash:ip,port,ip&#39;</span><span class="p">:</span>
-                        <span class="n">triplet_ip2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">netset_extractor</span><span class="p">(</span><span class="n">iptype</span><span class="p">,</span> <span class="n">name2</span><span class="p">))</span>
+                        <span class="n">triplet_ip2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">netgroup_set_extractor</span><span class="p">(</span><span class="n">iptype</span><span class="p">,</span> <span class="n">name2</span><span class="p">))</span>
                     <span class="k">elif</span> <span class="n">settype</span> <span class="o">==</span> <span class="s1">&#39;hash:ip,port,net&#39;</span><span class="p">:</span>
                         <span class="n">triplet_ip2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name2</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">hostnames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">_host_</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hostnames</span><span class="p">)):</span>
+                    <span class="c1"># print &quot;::::::::::::::::&quot;, hostnames[_host_]</span>
                     <span class="n">ip1</span><span class="p">,</span> <span class="n">prt</span><span class="p">,</span> <span class="n">ip2</span> <span class="o">=</span> <span class="n">hostnames</span><span class="p">[</span><span class="n">_host_</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
                     <span class="n">triplet_ip1</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ip_dns_resolver</span><span class="p">(</span><span class="n">ip1</span><span class="p">,</span> <span class="n">iptype</span><span class="p">)])</span>
                     <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">prt</span><span class="p">:</span>
@@ -630,19 +724,19 @@
                                 <span class="n">tmp_addr</span><span class="p">[</span><span class="n">t_addr</span><span class="p">]</span> <span class="o">+=</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="n">port</span><span class="p">[</span><span class="n">hst</span><span class="p">]</span>
                             <span class="n">hostsetfinal</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp_addr</span><span class="p">)</span>
                 <span class="n">setname</span> <span class="o">=</span> <span class="n">setname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
-                <span class="c1"># hostset = format_network_set(hostset)</span>
+
                 <span class="n">hostsetfinal</span> <span class="o">=</span> <span class="n">extract_ips_from_network_set</span><span class="p">(</span><span class="n">hostsetfinal</span><span class="p">,</span> <span class="n">iptype</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">netgroups_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">netgroup_net_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s1">&#39;port&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">settype</span><span class="p">:</span>
-                    <span class="n">cern_net_ips</span> <span class="o">=</span> <span class="p">[]</span>
-                    <span class="k">for</span> <span class="n">_set_</span> <span class="ow">in</span> <span class="n">netgroups_list</span><span class="p">:</span>
+                    <span class="n">netgroup_net_ips</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">_set_</span> <span class="ow">in</span> <span class="n">netgroup_net_list</span><span class="p">:</span>
                         <span class="n">ips_tmp</span> <span class="o">=</span> <span class="n">get_network_sets</span><span class="p">(</span><span class="n">_set_</span><span class="p">,</span> <span class="n">iptype</span><span class="p">)</span>
-                        <span class="n">cern_net_ips</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">extract_ips_from_network_set</span><span class="p">(</span><span class="n">ips_tmp</span><span class="p">,</span> <span class="n">iptype</span><span class="p">))</span>
+                        <span class="n">netgroup_net_ips</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">extract_ips_from_network_set</span><span class="p">(</span><span class="n">ips_tmp</span><span class="p">,</span> <span class="n">iptype</span><span class="p">))</span>
 
-                    <span class="n">hostsetfinal</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">cern_net_ips</span><span class="p">)</span>
-                    <span class="k">del</span> <span class="n">cern_net_ips</span><span class="p">[:]</span>
-                    <span class="k">del</span> <span class="n">cern_net_ips</span>
+                    <span class="n">hostsetfinal</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">netgroup_net_ips</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="n">netgroup_net_ips</span><span class="p">[:]</span>
+                    <span class="k">del</span> <span class="n">netgroup_net_ips</span>
 
             <span class="k">if</span> <span class="n">ips</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="n">ips</span><span class="p">:</span>
@@ -829,6 +923,8 @@
             <span class="nb">print</span> <span class="s2">&quot;Cannot create file path!!&quot;</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_path</span><span class="o">+</span><span class="s2">&quot;/ipset.gen&quot;</span><span class="p">):</span>
+                <span class="n">override</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="nb">print</span> <span class="n">response</span>
 
     <span class="k">if</span> <span class="n">override</span><span class="p">:</span>
@@ -848,13 +944,23 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span> <span class="s2">&quot;Do not override ipset file&quot;</span>
         <span class="n">set_exits</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">set_name</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span> <span class="o">+</span> <span class="s1">&#39;/ipset.gen&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">():</span>
-                <span class="n">set_exits</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;Cannot read generated ipset configuration file!!!!!&quot;</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-
+        <span class="k">if</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;list:set&quot;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">file_contents</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span> <span class="o">+</span> <span class="s1">&#39;/ipset.gen&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">set_name</span> <span class="ow">in</span> <span class="n">file_contents</span><span class="p">:</span>
+                    <span class="n">set_exits</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">del</span> <span class="n">file_contents</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Cannot read generated ipset configuration file!!!!!&quot;</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_contents</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span> <span class="o">+</span> <span class="s1">&#39;/ipset.gen&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">set_exits</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Lines:&quot;</span><span class="p">,</span> <span class="n">lines</span>
+                <span class="k">for</span> <span class="n">_set_</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                    <span class="k">if</span> <span class="n">_set_</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">file_contents</span><span class="p">:</span>
+                        <span class="nb">print</span> <span class="s2">&quot;Set: &quot;</span> <span class="o">+</span> <span class="n">_set_</span> <span class="o">+</span> <span class="s2">&quot; has not been created. Exiting...&quot;</span>
+                        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">set_exits</span><span class="p">:</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span> <span class="o">+</span> <span class="s1">&#39;/ipset.gen&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_handler</span><span class="p">:</span>
@@ -871,8 +977,11 @@
 
 
 <span class="c1">######################################################################################</span>
-<div class="viewcode-block" id="ipset_manager"><a class="viewcode-back" href="../../code_documentation/ipset_manager.html#bin.ipset_manager.ipset_manager">[docs]</a><span class="k">def</span> <span class="nf">ipset_manager</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iptype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">settype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">setname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">netgroups</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                  <span class="n">netgroups_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hostnames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ips</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">simul</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">generate_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">file_override</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+
+<div class="viewcode-block" id="ipset_manager"><a class="viewcode-back" href="../../code_documentation/ipset_manager.html#bin.ipset_manager.ipset_manager">[docs]</a><span class="k">def</span> <span class="nf">ipset_manager</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iptype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">settype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">setname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">netgroup_networks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">netgroup_set_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hostnames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ips</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">simul</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">generate_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">file_override</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                  <span class="n">set_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="c1"># type: (object, object, object, object, object, object, object, object, object) -&gt; object</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
@@ -884,13 +993,14 @@
 <span class="sd">    :param settype: type of ipset</span>
 <span class="sd">    :param port: port number (optional protocol) udp:53</span>
 <span class="sd">    :param setname: custom name for the ipset</span>
-<span class="sd">    :param netgroups: name of the cern networkset</span>
-<span class="sd">    :param netgroups_list: list of network groups to be added</span>
+<span class="sd">    :param netgroup_networks: name of the netgroups networkset</span>
+<span class="sd">    :param netgroup_set_list: list of netgroups network sets to be added</span>
 <span class="sd">    :param hostnames: hostnames to resolve ips from</span>
 <span class="sd">    :param ips: ips to add</span>
 <span class="sd">    :param simul: simulate mode</span>
 <span class="sd">    :param generate_file: generate ipset file for use with ipset-restore</span>
 <span class="sd">    :param file_override: tell the script whether to override the ipset file</span>
+<span class="sd">    :param set_names: Names of existing sets to be added inside a list:set ipset</span>
 <span class="sd">    :return: 0 if ok 1 if error</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -908,47 +1018,52 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">1</span>
 
-        <span class="c1"># Catch ip type IPv4 or IPv6</span>
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">iptype</span><span class="p">:</span>
-            <span class="n">iptype</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">iptype</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">setname</span><span class="p">:</span>
+            <span class="n">setname</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">setname</span>
 
         <span class="c1"># Catch ipset type</span>
         <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">settype</span><span class="p">:</span>
             <span class="n">settype</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">settype</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">settype</span> <span class="o">!=</span> <span class="s2">&quot;list:set&quot;</span><span class="p">:</span>
+                <span class="c1"># Catch ip type IPv4 or IPv6</span>
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">iptype</span><span class="p">:</span>
+                    <span class="n">iptype</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">iptype</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">port</span><span class="p">:</span>
+                    <span class="c1"># port = args.port[0]</span>
+                    <span class="n">port</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">port</span>
+
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">netgroups_networks</span><span class="p">:</span>
+                    <span class="n">netgroup_networks</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">netgroups_networks</span>
+
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">hostnames</span><span class="p">:</span>
+                    <span class="n">hostnames</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">hostnames</span>
+
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">ips</span><span class="p">:</span>
+                    <span class="n">ips</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">ips</span>
+
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">netgroups_set_list</span><span class="p">:</span>
+                    <span class="n">netgroup_set_list</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">netgroups_set_list</span>
+
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">generate_file</span><span class="p">:</span>
+                    <span class="n">generate_file</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">generate_file</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">file_override</span><span class="p">:</span>
+                    <span class="n">file_override</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">file_override</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">set_names</span><span class="p">:</span>
+                    <span class="n">set_names</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">set_names</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">set_names</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">1</span>
-
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">port</span><span class="p">:</span>
-            <span class="c1"># port = args.port[0]</span>
-            <span class="n">port</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">port</span>
-
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">netgroups</span><span class="p">:</span>
-            <span class="n">netgroups</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">netgroups</span>
-
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">setname</span><span class="p">:</span>
-            <span class="n">setname</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">setname</span>
-
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">hostnames</span><span class="p">:</span>
-            <span class="n">hostnames</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">hostnames</span>
-
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">ips</span><span class="p">:</span>
-            <span class="n">ips</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">ips</span>
-
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">netgroups_list</span><span class="p">:</span>
-            <span class="n">netgroups_list</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">netgroups_list</span>
-
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">generate_file</span><span class="p">:</span>
-            <span class="n">generate_file</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">generate_file</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">file_override</span><span class="p">:</span>
-            <span class="n">file_override</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">file_override</span> <span class="o">=</span> <span class="kc">False</span>
-
     <span class="k">else</span><span class="p">:</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -956,112 +1071,126 @@
         <span class="n">action</span> <span class="o">=</span> <span class="s1">&#39;create&#39;</span>
         <span class="n">simul</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="c1"># Check for port argument if the given ipset type uses a port number</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">action</span> <span class="o">!=</span> <span class="s1">&#39;destroy&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;port&#39;</span> <span class="ow">in</span> <span class="n">settype</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">port</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s1">&#39;direct&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">port</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">prt</span> <span class="ow">in</span> <span class="n">port</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">prt</span><span class="p">:</span>
-                        <span class="n">prot</span><span class="p">,</span> <span class="n">port_num</span> <span class="o">=</span> <span class="n">prt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="n">prot</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;tcp&#39;</span><span class="p">,</span> <span class="s1">&#39;udp&#39;</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">port_num</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">65536</span><span class="p">):</span>
-                            <span class="nb">print</span> <span class="s2">&quot;IPset port number &quot;</span> <span class="o">+</span> <span class="n">prot</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">port_num</span> <span class="o">+</span> <span class="s2">&quot; not valid&quot;</span>
-                            <span class="k">return</span> <span class="mi">1</span>
-                    <span class="k">elif</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">prt</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">65536</span><span class="p">:</span>
-                        <span class="nb">print</span> <span class="s2">&quot;IPset port number &quot;</span> <span class="o">+</span> <span class="n">port</span> <span class="o">+</span> <span class="s2">&quot; not valid&quot;</span>
-                        <span class="k">return</span> <span class="mi">1</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;Ports not set!!!!&quot;</span>
-            <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">settype</span> <span class="o">==</span> <span class="s1">&#39;list:set&#39;</span><span class="p">:</span>
+        <span class="n">handle_list_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">setname</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">set_names</span><span class="p">,</span> <span class="n">generate_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># port = &#39;&#39;</span>
-        <span class="n">port</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">if</span> <span class="n">netgroups</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">setname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">setname</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">netgroups</span><span class="p">)):</span>
-            <span class="nb">print</span> <span class="s2">&quot;Custom setnames if specified should be as many as the netgroups&quot;</span>
-            <span class="k">return</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">settype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">settype</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hash:net&#39;</span><span class="p">,</span> <span class="s1">&#39;hash:net,port&#39;</span><span class="p">]):</span>
-            <span class="k">for</span> <span class="n">nset</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">netgroups</span><span class="p">)):</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">netgroups</span><span class="p">[</span><span class="n">nset</span><span class="p">])</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">setname</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
-                        <span class="k">try</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">setname</span><span class="p">[</span><span class="n">nset</span><span class="p">])</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
-                                <span class="nb">print</span> <span class="s2">&quot;Please choose smaller name &lt; 31 chars for &quot;</span><span class="p">,</span> <span class="n">netgroups</span><span class="p">[</span><span class="n">nset</span><span class="p">]</span>
+        <span class="c1"># Check for port argument if the given ipset type uses a port number</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">action</span> <span class="o">!=</span> <span class="s1">&#39;destroy&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;port&#39;</span> <span class="ow">in</span> <span class="n">settype</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">port</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;direct&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">port</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">prt</span> <span class="ow">in</span> <span class="n">port</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">prt</span><span class="p">:</span>
+                            <span class="n">prot</span><span class="p">,</span> <span class="n">port_num</span> <span class="o">=</span> <span class="n">prt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="n">prot</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;tcp&#39;</span><span class="p">,</span> <span class="s1">&#39;udp&#39;</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">port_num</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">65536</span><span class="p">):</span>
+                                <span class="nb">print</span> <span class="s2">&quot;IPset port number &quot;</span> <span class="o">+</span> <span class="n">prot</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">port_num</span> <span class="o">+</span> <span class="s2">&quot; not valid&quot;</span>
                                 <span class="k">return</span> <span class="mi">1</span>
+                        <span class="k">elif</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">prt</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">65536</span><span class="p">:</span>
+                            <span class="nb">print</span> <span class="s2">&quot;IPset port number &quot;</span> <span class="o">+</span> <span class="n">port</span> <span class="o">+</span> <span class="s2">&quot; not valid&quot;</span>
+                            <span class="k">return</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Ports not set!!!!&quot;</span>
+                <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># port = &#39;&#39;</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">netgroup_networks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">setname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">setname</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">netgroup_networks</span><span class="p">)):</span>
+                <span class="nb">print</span> <span class="s2">&quot;Custom setnames if specified should be as many as the networksets&quot;</span>
+                <span class="k">return</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">settype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">settype</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hash:net&#39;</span><span class="p">,</span> <span class="s1">&#39;hash:net,port&#39;</span><span class="p">]):</span>
+                <span class="c1"># Authentication information</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">username</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="n">username</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">username</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">password</span><span class="p">:</span>
+                        <span class="n">password</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">password</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">nset</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">netgroup_networks</span><span class="p">)):</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">netgroup_networks</span><span class="p">[</span><span class="n">nset</span><span class="p">])</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">setname</span><span class="p">[</span><span class="n">nset</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                                    <span class="n">handle_netgroups_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">netgroup_networks</span><span class="p">[</span><span class="n">nset</span><span class="p">],</span> <span class="n">settype</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span>
+                                                         <span class="n">setname</span><span class="p">[</span><span class="n">nset</span><span class="p">],</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">generate_file</span><span class="p">,</span> <span class="n">file_override</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
+                                    <span class="k">return</span> <span class="mi">0</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="nb">print</span> <span class="s2">&quot;Name for network set &quot;</span> <span class="o">+</span> <span class="n">netgroup_networks</span><span class="p">[</span><span class="n">nset</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; does not exist&quot;</span>
+                                    <span class="k">return</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span> <span class="s2">&quot;Password is missing to access the network service&quot;</span>
+                        <span class="k">return</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">nset</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">netgroup_networks</span><span class="p">)):</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">netgroup_networks</span><span class="p">[</span><span class="n">nset</span><span class="p">])</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">setname</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">setname</span><span class="p">[</span><span class="n">nset</span><span class="p">])</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
+                                        <span class="nb">print</span> <span class="s2">&quot;Please choose smaller name &lt; 31 chars for &quot;</span><span class="p">,</span> <span class="n">netgroup_networks</span><span class="p">[</span><span class="n">nset</span><span class="p">]</span>
+                                        <span class="k">return</span> <span class="mi">1</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">output</span> <span class="o">=</span> <span class="n">handle_netgroups_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">netgroup_networks</span><span class="p">[</span><span class="n">nset</span><span class="p">],</span> <span class="n">settype</span><span class="p">,</span>
+                                                                      <span class="n">port</span><span class="p">,</span> <span class="n">setname</span><span class="p">[</span><span class="n">nset</span><span class="p">],</span> <span class="n">generate_file</span><span class="p">,</span> <span class="n">file_override</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
+                                        <span class="k">if</span> <span class="n">output</span> <span class="o">==</span> <span class="s1">&#39;SETNOTFOUND&#39;</span><span class="p">:</span>
+                                            <span class="k">return</span> <span class="n">output</span>
+                                        <span class="k">return</span> <span class="mi">0</span>
+                                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                                    <span class="nb">print</span> <span class="s2">&quot;Setname longer than 31 chars please specify a shorter custom one using --setname&quot;</span>
+                                    <span class="k">return</span> <span class="mi">1</span>
                             <span class="k">else</span><span class="p">:</span>
-                                <span class="n">output</span> <span class="o">=</span> <span class="n">handle_netgroups_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">netgroups</span><span class="p">[</span><span class="n">nset</span><span class="p">],</span> <span class="n">settype</span><span class="p">,</span>
-                                                              <span class="n">port</span><span class="p">,</span> <span class="n">setname</span><span class="p">[</span><span class="n">nset</span><span class="p">],</span> <span class="n">generate_file</span><span class="p">,</span> <span class="n">file_override</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
+                                <span class="nb">print</span> <span class="s2">&quot;Set name longer thatn 31 chars please specify a shorter custom name using --setname&quot;</span>
+                                <span class="k">return</span> <span class="mi">1</span>
+                        <span class="k">elif</span> <span class="n">setname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="c1"># output = handle_netgroups_set(simul, action, iptype, netgroup_networks[nset], settype, port,</span>
+                                <span class="c1">#                          setname[nset], generate_file, file_override)</span>
+                                <span class="n">output</span> <span class="o">=</span> <span class="n">handle_netgroups_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">netgroup_networks</span><span class="p">[</span><span class="n">nset</span><span class="p">],</span> <span class="n">settype</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span>
+                                                              <span class="n">setname</span><span class="p">[</span><span class="n">nset</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">generate_file</span><span class="p">,</span> <span class="n">file_override</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
                                 <span class="k">if</span> <span class="n">output</span> <span class="o">==</span> <span class="s1">&#39;SETNOTFOUND&#39;</span><span class="p">:</span>
                                     <span class="k">return</span> <span class="n">output</span>
                                 <span class="k">return</span> <span class="mi">0</span>
-                        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-                            <span class="nb">print</span> <span class="s2">&quot;Setname longer than 31 chars please specify a shorter custom one using --setname&quot;</span>
-                            <span class="k">return</span> <span class="mi">1</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="nb">print</span> <span class="s2">&quot;Set name longer thatn 31 chars please specify a shorter custom name using --setname&quot;</span>
-                        <span class="k">return</span> <span class="mi">1</span>
-                <span class="k">elif</span> <span class="n">setname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="c1"># output = handle_netgroups_set(simul, action, iptype, netgroups[nset], settype, port,</span>
-                        <span class="c1">#                          setname[nset], generate_file, file_override)</span>
-                        <span class="n">output</span> <span class="o">=</span> <span class="n">handle_netgroups_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">netgroups</span><span class="p">[</span><span class="n">nset</span><span class="p">],</span> <span class="n">settype</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span>
-                                                      <span class="n">setname</span><span class="p">[</span><span class="n">nset</span><span class="p">],</span> <span class="n">generate_file</span><span class="p">,</span> <span class="n">file_override</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">output</span> <span class="o">==</span> <span class="s1">&#39;SETNOTFOUND&#39;</span><span class="p">:</span>
-                            <span class="k">return</span> <span class="n">output</span>
-                        <span class="k">return</span> <span class="mi">0</span>
-                    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-                        <span class="c1"># output = handle_netgroups_set(simul, action, iptype, netgroups[nset], settype, port,</span>
-                        <span class="c1"># generate_file, file_override)</span>
-                        <span class="n">output</span> <span class="o">=</span> <span class="n">handle_netgroups_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">netgroups</span><span class="p">[</span><span class="n">nset</span><span class="p">],</span> <span class="n">settype</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
-                                                      <span class="n">generate_file</span><span class="p">,</span> <span class="n">file_override</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">output</span> <span class="o">==</span> <span class="s1">&#39;SETNOTFOUND&#39;</span><span class="p">:</span>
-                            <span class="k">return</span> <span class="n">output</span>
-                        <span class="k">return</span> <span class="mi">1</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># output = handle_netgroups_set(simul, action, iptype, netgroups[nset], settype, port, None,</span>
-                    <span class="c1"># None, generate_file, file_override)</span>
-                    <span class="n">output</span> <span class="o">=</span> <span class="n">handle_netgroups_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">netgroups</span><span class="p">[</span><span class="n">nset</span><span class="p">],</span> <span class="n">settype</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
-                                                  <span class="n">generate_file</span><span class="p">,</span> <span class="n">file_override</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">output</span> <span class="o">==</span> <span class="s1">&#39;SETNOTFOUND&#39;</span><span class="p">:</span>
-                        <span class="k">return</span> <span class="n">output</span>
-                    <span class="k">return</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">1</span>
-    <span class="k">elif</span> <span class="n">setname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">setname</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;Please choose smaller name &lt; 31 chars for &quot;</span><span class="p">,</span> <span class="n">setname</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">return</span> <span class="mi">1</span>
-        <span class="c1"># if (ips is None and hostnames is None) and action != &#39;destroy&#39;:</span>
-        <span class="c1">#     return 1</span>
-        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;destroy&#39;</span><span class="p">:</span>
-            <span class="n">handle_custom_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">setname</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">settype</span><span class="p">,</span> <span class="n">ips</span><span class="p">,</span> <span class="n">hostnames</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">netgroups_list</span><span class="p">,</span>
-                              <span class="n">generate_file</span><span class="p">,</span> <span class="n">file_override</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
-            <span class="k">return</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;Set type is: &quot;</span><span class="p">,</span> <span class="n">settype</span>
-            <span class="c1"># print &quot;Hostnames: &quot;, hostnames</span>
-            <span class="c1"># if port[0] != &#39;direct&#39; and (len(port) &gt; 1) and (len(port) &lt; len(ips) + len(hostnames)):</span>
-            <span class="k">if</span> <span class="s1">&#39;port&#39;</span> <span class="ow">in</span> <span class="n">settype</span><span class="p">:</span>
-                <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;direct&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">port</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">ips</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">hostnames</span><span class="p">)):</span>
-                    <span class="nb">print</span> <span class="s2">&quot;Ports provided are not as many as the ips + hostnames&quot;</span>
-                    <span class="k">return</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="n">ips</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># print &quot;IPS is not None&quot;</span>
-                <span class="n">valid</span> <span class="o">=</span> <span class="n">ip_validation_check</span><span class="p">(</span><span class="n">ips</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">settype</span><span class="p">)</span>
+                            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                                <span class="n">output</span> <span class="o">=</span> <span class="n">handle_netgroups_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">netgroup_networks</span><span class="p">[</span><span class="n">nset</span><span class="p">],</span> <span class="n">settype</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
+                                                              <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">generate_file</span><span class="p">,</span> <span class="n">file_override</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">output</span> <span class="o">==</span> <span class="s1">&#39;SETNOTFOUND&#39;</span><span class="p">:</span>
+                                    <span class="k">return</span> <span class="n">output</span>
+                                <span class="k">return</span> <span class="mi">1</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">output</span> <span class="o">=</span> <span class="n">handle_netgroups_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">netgroup_networks</span><span class="p">[</span><span class="n">nset</span><span class="p">],</span> <span class="n">settype</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
+                                                          <span class="n">generate_file</span><span class="p">,</span> <span class="n">file_override</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">output</span> <span class="o">==</span> <span class="s1">&#39;SETNOTFOUND&#39;</span><span class="p">:</span>
+                                <span class="k">return</span> <span class="n">output</span>
+                            <span class="k">return</span> <span class="mi">0</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">valid</span> <span class="o">=</span> <span class="kc">True</span>
-
-            <span class="k">if</span> <span class="n">valid</span><span class="p">:</span>
-                <span class="n">handle_custom_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">setname</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">settype</span><span class="p">,</span> <span class="n">ips</span><span class="p">,</span> <span class="n">hostnames</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">netgroups_list</span><span class="p">,</span>
+                <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">setname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">setname</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Please choose smaller name &lt; 31 chars for &quot;</span><span class="p">,</span> <span class="n">setname</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">return</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;destroy&#39;</span><span class="p">:</span>
+                <span class="n">handle_custom_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">setname</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">settype</span><span class="p">,</span> <span class="n">ips</span><span class="p">,</span> <span class="n">hostnames</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">netgroup_set_list</span><span class="p">,</span>
                                   <span class="n">generate_file</span><span class="p">,</span> <span class="n">file_override</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
-                <span class="c1"># print &quot;Valid: &quot;, valid</span>
                 <span class="k">return</span> <span class="mi">0</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="s2">&quot;IP Validation unsuccessful: &quot;</span><span class="p">,</span> <span class="n">valid</span>
-                <span class="k">return</span> <span class="mi">1</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span> <span class="s2">&quot;LAST ELSE !!!!!!!&quot;</span>
-        <span class="k">return</span> <span class="mi">1</span></div>
+                <span class="nb">print</span> <span class="s2">&quot;Set type is: &quot;</span><span class="p">,</span> <span class="n">settype</span>
+                <span class="k">if</span> <span class="s1">&#39;port&#39;</span> <span class="ow">in</span> <span class="n">settype</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;direct&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">port</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">ips</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">hostnames</span><span class="p">)):</span>
+                        <span class="nb">print</span> <span class="s2">&quot;Ports provided are not as many as the ips + hostnames&quot;</span>
+                        <span class="k">return</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">ips</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># print &quot;IPS is not None&quot;</span>
+                    <span class="n">valid</span> <span class="o">=</span> <span class="n">ip_validation_check</span><span class="p">(</span><span class="n">ips</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">settype</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">valid</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">if</span> <span class="n">valid</span><span class="p">:</span>
+                    <span class="n">handle_custom_set</span><span class="p">(</span><span class="n">simul</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">setname</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">settype</span><span class="p">,</span> <span class="n">ips</span><span class="p">,</span> <span class="n">hostnames</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">netgroup_set_list</span><span class="p">,</span>
+                                      <span class="n">generate_file</span><span class="p">,</span> <span class="n">file_override</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
+                    <span class="c1"># print &quot;Valid: &quot;, valid</span>
+                    <span class="k">return</span> <span class="mi">0</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s2">&quot;IP Validation unsuccessful: &quot;</span><span class="p">,</span> <span class="n">valid</span>
+                    <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;LAST ELSE !!!!!!!&quot;</span>
+            <span class="k">return</span> <span class="mi">1</span></div>
 
 
 <span class="c1">######################################################################################</span>
@@ -1075,7 +1204,8 @@
 <span class="sd">    :return: Does not return anything</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">ipset_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;hash:net,port&#39;</span><span class="p">,</span> <span class="s1">&#39;hash:ip,port&#39;</span><span class="p">,</span> <span class="s1">&#39;hash:net&#39;</span><span class="p">,</span> <span class="s1">&#39;hash:ip&#39;</span><span class="p">,</span> <span class="s1">&#39;hash:ip,port,net&#39;</span><span class="p">,</span> <span class="s1">&#39;hash:ip,port,ip&#39;</span><span class="p">]</span>
+    <span class="n">ipset_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;hash:net,port&#39;</span><span class="p">,</span> <span class="s1">&#39;hash:ip,port&#39;</span><span class="p">,</span> <span class="s1">&#39;hash:net&#39;</span><span class="p">,</span> <span class="s1">&#39;hash:ip&#39;</span><span class="p">,</span> <span class="s1">&#39;hash:ip,port,net&#39;</span><span class="p">,</span> <span class="s1">&#39;hash:ip,port,ip&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;list:set&#39;</span><span class="p">]</span>
 
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
 
@@ -1091,15 +1221,16 @@
                                                      <span class="s1">&#39;or custom ip sets. Regarding network sets, every argument &#39;</span>
                                                      <span class="s1">&#39;after setname is corresponding to each networkset. &#39;</span>
                                                      <span class="s1">&#39;If you want to omit names use </span><span class="se">\&#39;\&#39;</span><span class="s1"> &#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--netgroups&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Define network sets like &quot;IT SECURITY FIREWALL ALIENDB&quot; use&#39;</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--netgroup_networks&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Define network sets like &quot;IT SECURITY FIREWALL ALIENDB&quot; use&#39;</span>
                                                            <span class="s1">&#39;&quot; &quot; or &#39;&#39; use the escape char \ if spaces or special &#39;</span>
                                                            <span class="s1">&#39;characters included&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--netgroups_list&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Define network sets like &quot;IT SECURITY FIREWALL ALIENDB&quot; in &#39;</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--netgroup_set_list&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Define network sets like &quot;IT SECURITY FIREWALL ALIENDB&quot; in &#39;</span>
                                                            <span class="s1">&#39;a list to add them in one set use &quot; &quot; or &#39;&#39; use the escape &#39;</span>
                                                            <span class="s1">&#39;char \ if spaces or special characters included&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--hostnames&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Define machines hostnames like &quot;agkara-train&quot; or &#39;</span>
                                                        <span class="s1">&#39;&quot;agkara-train.cern.ch&quot;&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--ips&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Define machines IPs IPv4 or IPv6&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--set_names&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Define the names of the other sets to add to the list:set&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--simulate&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--generate_file&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Tell the script to create the ipset restore file&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--file_override&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Flag whether to override the file or not&#39;</span><span class="p">)</span>

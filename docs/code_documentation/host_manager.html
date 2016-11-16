@@ -27,7 +27,7 @@
     <link rel="search" title="Search" href="../search.html" />
     <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../index.html" />
     <link rel="up" title="Code" href="../code.html" />
-    <link rel="next" title="netset_extraction" href="netset_extraction.html" />
+    <link rel="next" title="cern_netset_extraction" href="cern_netset_extraction.html" />
     <link rel="prev" title="iptables_manager" href="iptables_manager.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -47,7 +47,7 @@
   <div class="section" id="module-bin.host_manager">
 <span id="host-manager"></span><h1>host_manager<a class="headerlink" href="#module-bin.host_manager" title="Permalink to this headline">¶</a></h1>
 <p>Author: Athanasios Gkaraliakos
-email: <a class="reference external" href="mailto:a&#46;gkaraliakos&#37;&#52;&#48;gmail&#46;com">a<span>&#46;</span>gkaraliakos<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+email: <a class="reference external" href="mailto:athanasios&#46;gkaraliakos&#37;&#52;&#48;cern&#46;ch">athanasios<span>&#46;</span>gkaraliakos<span>&#64;</span>cern<span>&#46;</span>ch</a></p>
 <p>The script is written on python &gt;=2.6</p>
 <dl class="class">
 <dt id="bin.host_manager.ManageHosts">
@@ -71,7 +71,7 @@ check the &#8216;integrity&#8217; of the config files in terms of specifying the
 
 <dl class="method">
 <dt id="bin.host_manager.ManageHosts.parse_config_file">
-<code class="descname">parse_config_file</code><span class="sig-paren">(</span><em>deploy=False</em>, <em>no_default_config=False</em>, <em>update_sets=False</em>, <em>allow=False</em>, <em>drop_all=False</em>, <em>generate_files=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/host_manager.html#ManageHosts.parse_config_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.host_manager.ManageHosts.parse_config_file" title="Permalink to this definition">¶</a></dt>
+<code class="descname">parse_config_file</code><span class="sig-paren">(</span><em>deploy=False</em>, <em>no_default_config=False</em>, <em>update_sets=False</em>, <em>allow=False</em>, <em>drop_all=False</em>, <em>generate_files=False</em>, <em>check_matches=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/host_manager.html#ManageHosts.parse_config_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.host_manager.ManageHosts.parse_config_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is used to parse  the config files. It checks if the hostname of the machine is defined in the list
 of hostnames that this configuration will be applied. Then it calls the &#8216;iptables_manager&#8217; function from the
 iptables_manager script instructing which config files to load and provides all the other arguments.</p>
@@ -134,6 +134,20 @@ class</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="bin.host_manager.check_machines_functions">
+<code class="descclassname">bin.host_manager.</code><code class="descname">check_machines_functions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/host_manager.html#check_machines_functions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.host_manager.check_machines_functions" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to perform health checks before the tool starts</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="bin.host_manager.main">
 <code class="descclassname">bin.host_manager.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/host_manager.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.host_manager.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main function use to expose all the parameters to the command line and call parse_config_file function.</p>
@@ -160,7 +174,7 @@ class</p>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../code.html">Code</a><ul>
       <li>Previous: <a href="iptables_manager.html" title="previous chapter">iptables_manager</a></li>
-      <li>Next: <a href="netset_extraction.html" title="next chapter">netset_extraction</a></li>
+      <li>Next: <a href="cern_netset_extraction.html" title="next chapter">cern_netset_extraction</a></li>
   </ul></li>
   </ul></li>
 </ul>

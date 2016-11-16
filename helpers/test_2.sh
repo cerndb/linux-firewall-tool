@@ -1,0 +1,7 @@
+#!/bin/bash
+echo WEBRLB01
+echo WEBRLB02
+echo WEBRLB03
+echo WEBRLB04
+echo WEBRLB05
+echo WEBSVC02

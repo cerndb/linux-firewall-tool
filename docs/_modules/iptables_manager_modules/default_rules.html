@@ -53,11 +53,11 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Author: Athanasios Gkaraliakos</span>
-<span class="sd">email: a.gkaraliakos@gmail.com</span>
+<span class="sd">email: athanasios.gkaraliakos@cern.ch</span>
 
 <span class="sd">The script is written on python &gt;=2.6</span>
-<span class="sd">&quot;&quot;&quot;</span>
 
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
@@ -65,6 +65,7 @@
 
 <span class="c1"># import from outer folder</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))))</span>
+<span class="kn">from</span> <span class="nn">bin.ipset_manager</span> <span class="k">import</span> <span class="n">ipset_manager</span>
 <span class="kn">from</span> <span class="nn">bin.main_nic_extractor</span> <span class="k">import</span> <span class="n">main_nic_extractor</span>
 
 

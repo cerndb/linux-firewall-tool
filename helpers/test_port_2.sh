@@ -1,9 +1,8 @@
 #!/bin/bash
-echo itrac5164,9079
-echo itrac5123,1023
-echo itrac5165,5547
-echo itrac5124,6987
-echo itrac5166,6123
-echo itrac5125,787
-echo itrac5167,443
-echo itrac5126,80
+echo ALIENDB1,9079
+echo ALIENDB2,1023
+echo ALIENDB3,5547
+echo ALIENDB4,6987
+echo ALIENDB5,6123
+echo ALIENDB7,787
+echo ALIENDB8,443

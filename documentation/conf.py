@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# cerndb-infra-firewall-tool documentation build configuration file, created by
+# linux-firewall-tool documentation build configuration file, created by
 # sphinx-quickstart on Tue Sep 13 16:11:30 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -139,7 +139,7 @@ html_theme = 'alabaster'
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
 #
-# html_title = u'cerndb-infra-firewall-tool v1.0'
+# html_title = u'linux-firewall-tool v1.0'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #

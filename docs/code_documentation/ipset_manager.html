@@ -47,9 +47,9 @@
   <div class="section" id="module-bin.ipset_manager">
 <span id="ipset-manager"></span><h1>ipset_manager<a class="headerlink" href="#module-bin.ipset_manager" title="Permalink to this headline">¶</a></h1>
 <p>Author: Athanasios Gkaraliakos
-email: <a class="reference external" href="mailto:a&#46;gkaraliakos&#37;&#52;&#48;gmail&#46;com">a<span>&#46;</span>gkaraliakos<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+email: <a class="reference external" href="mailto:athanasios&#46;gkaraliakos&#37;&#52;&#48;cern&#46;ch">athanasios<span>&#46;</span>gkaraliakos<span>&#64;</span>cern<span>&#46;</span>ch</a></p>
 <p>The script is written on python &gt;=2.6</p>
-<p>Script to create/modify/delete ipsets on CentOS6.x and older of IPv4 and/or IPv6 (if exists)</p>
+<p>Script to create/modify/delete ipsets on CentOS6.x and older of IPv4 and/or IPv6 (if exists) from CERN&#8217;s network sets.</p>
 <dl class="function">
 <dt id="bin.ipset_manager.create_ip_set">
 <code class="descclassname">bin.ipset_manager.</code><code class="descname">create_ip_set</code><span class="sig-paren">(</span><em>simulate</em>, <em>ips</em>, <em>setname</em>, <em>iptype</em>, <em>settype</em>, <em>port</em>, <em>generate_file</em>, <em>file_override</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#create_ip_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.create_ip_set" title="Permalink to this definition">¶</a></dt>
@@ -153,7 +153,7 @@ ip addresses and creates a list of those ip address ( along with the ports if th
 
 <dl class="function">
 <dt id="bin.ipset_manager.get_network_sets">
-<code class="descclassname">bin.ipset_manager.</code><code class="descname">get_network_sets</code><span class="sig-paren">(</span><em>set_names</em>, <em>iptype</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#get_network_sets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.get_network_sets" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">get_network_sets</code><span class="sig-paren">(</span><em>set_names</em>, <em>iptype</em>, <em>username=None</em>, <em>password=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#get_network_sets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.get_network_sets" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function uses the ip_extraction.py python script to query LanDB service based on a network set name and extract
 all the ip addresses of each machine inside this network set.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -177,7 +177,7 @@ all the ip addresses of each machine inside this network set.</p>
 
 <dl class="function">
 <dt id="bin.ipset_manager.handle_custom_set">
-<code class="descclassname">bin.ipset_manager.</code><code class="descname">handle_custom_set</code><span class="sig-paren">(</span><em>simulate</em>, <em>action</em>, <em>setname</em>, <em>iptype</em>, <em>settype</em>, <em>ips=None</em>, <em>hostnames=None</em>, <em>port=None</em>, <em>netgroups_list=None</em>, <em>generate_file=False</em>, <em>file_override=False</em>, <em>cmd=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#handle_custom_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.handle_custom_set" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">handle_custom_set</code><span class="sig-paren">(</span><em>simulate</em>, <em>action</em>, <em>setname</em>, <em>iptype</em>, <em>settype</em>, <em>ips=None</em>, <em>hostnames=None</em>, <em>port=None</em>, <em>netgroup_net_list=None</em>, <em>generate_file=False</em>, <em>file_override=False</em>, <em>cmd=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#handle_custom_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.handle_custom_set" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function handles the action to be performed based on the provided input action of the user. The main role of
 this function is to call the appropriate end function that performs the task.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -194,7 +194,7 @@ this function is to call the appropriate end function that performs the task.</p
 <li><strong>hostnames</strong> &#8211; The hostnames of either single boxes or aliases ( to resolved via dns ) that will be added in
 the ipset</li>
 <li><strong>port</strong> &#8211; Port number if the set type contains port</li>
-<li><strong>netgroups_list</strong> &#8211; A list of network groups names to be added into the set.</li>
+<li><strong>netgroup_net_list</strong> &#8211; A list of cern network set names to be added into the set.</li>
 <li><strong>generate_file</strong> &#8211; Flag whether or not to generate ipset file</li>
 <li><strong>file_override</strong> &#8211; Flag whether or not to override ipset file</li>
 <li><strong>cmd</strong> &#8211; Flag to save current ipset state if script was called vim the command line</li>
@@ -209,8 +209,32 @@ the ipset</li>
 </dd></dl>
 
 <dl class="function">
+<dt id="bin.ipset_manager.handle_list_set">
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">handle_list_set</code><span class="sig-paren">(</span><em>simul</em>, <em>action</em>, <em>set_name</em>, <em>set_names_list</em>, <em>generate_file=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#handle_list_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.handle_list_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to handle the operation on list:set type of ipset.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>simul</strong> &#8211; Flag to print or not</li>
+<li><strong>action</strong> &#8211; the action to perform</li>
+<li><strong>set_name</strong> &#8211; name of the set</li>
+<li><strong>set_names_list</strong> &#8211; list of names of other existing ipsets to add</li>
+<li><strong>generate_file</strong> &#8211; Flag to write to the ipset generated file or not</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">0 if ok or 1 if not ok</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="bin.ipset_manager.handle_netgroups_set">
-<code class="descclassname">bin.ipset_manager.</code><code class="descname">handle_netgroups_set</code><span class="sig-paren">(</span><em>simulate</em>, <em>action</em>, <em>iptype</em>, <em>set_names</em>, <em>settype</em>, <em>port</em>, <em>custom_name=None</em>, <em>generate_file=False</em>, <em>file_override=False</em>, <em>cmd=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#handle_netgroups_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.handle_netgroups_set" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">handle_netgroups_set</code><span class="sig-paren">(</span><em>simulate</em>, <em>action</em>, <em>iptype</em>, <em>set_names</em>, <em>settype</em>, <em>port</em>, <em>custom_name=None</em>, <em>username=None</em>, <em>password=None</em>, <em>generate_file=False</em>, <em>file_override=False</em>, <em>cmd=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#handle_netgroups_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.handle_netgroups_set" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function handles the action to be performed based on the provided input action of the user. The main role of
 this function is to call the appropriate end function that performs the task.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -225,6 +249,8 @@ this function is to call the appropriate end function that performs the task.</p
 <li><strong>settype</strong> &#8211; IPset type. Only the allowed sets</li>
 <li><strong>port</strong> &#8211; Port number if the set type contains port</li>
 <li><strong>custom_name</strong> &#8211; Custom ipset name if the regular name is to large of if the user wants a shorter one</li>
+<li><strong>username</strong> &#8211; optional username for the LanDB service authentication</li>
+<li><strong>password</strong> &#8211; mandatory if you specify username for the LanDB service authentication</li>
 <li><strong>generate_file</strong> &#8211; Flag whether or not to generate ipset file</li>
 <li><strong>file_override</strong> &#8211; Flag whether or not to override ipset file</li>
 <li><strong>cmd</strong> &#8211; Flag to save current ipset state if script was called vim the command line</li>
@@ -262,7 +288,7 @@ this function is to call the appropriate end function that performs the task.</p
 
 <dl class="function">
 <dt id="bin.ipset_manager.ipset_manager">
-<code class="descclassname">bin.ipset_manager.</code><code class="descname">ipset_manager</code><span class="sig-paren">(</span><em>args=None</em>, <em>action=None</em>, <em>iptype=None</em>, <em>settype=None</em>, <em>port=None</em>, <em>setname=None</em>, <em>netgroups=None</em>, <em>netgroups_list=None</em>, <em>hostnames=None</em>, <em>ips=None</em>, <em>simul=False</em>, <em>generate_file=False</em>, <em>file_override=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#ipset_manager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.ipset_manager" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bin.ipset_manager.</code><code class="descname">ipset_manager</code><span class="sig-paren">(</span><em>args=None</em>, <em>action=None</em>, <em>iptype=None</em>, <em>settype=None</em>, <em>port=None</em>, <em>setname=None</em>, <em>netgroup_networks=None</em>, <em>netgroup_set_list=None</em>, <em>hostnames=None</em>, <em>ips=None</em>, <em>simul=False</em>, <em>generate_file=False</em>, <em>file_override=False</em>, <em>set_names=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/ipset_manager.html#ipset_manager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.ipset_manager.ipset_manager" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function handles all the logic of running the script, both from terminal and as a module</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -275,13 +301,14 @@ this function is to call the appropriate end function that performs the task.</p
 <li><strong>settype</strong> &#8211; type of ipset</li>
 <li><strong>port</strong> &#8211; port number (optional protocol) udp:53</li>
 <li><strong>setname</strong> &#8211; custom name for the ipset</li>
-<li><strong>netgroups</strong> &#8211; name of the cern networkset</li>
-<li><strong>netgroups_list</strong> &#8211; list of network groups to be added</li>
+<li><strong>netgroup_networks</strong> &#8211; name of the netgroups networkset</li>
+<li><strong>netgroup_set_list</strong> &#8211; list of netgroups network sets to be added</li>
 <li><strong>hostnames</strong> &#8211; hostnames to resolve ips from</li>
 <li><strong>ips</strong> &#8211; ips to add</li>
 <li><strong>simul</strong> &#8211; simulate mode</li>
 <li><strong>generate_file</strong> &#8211; generate ipset file for use with ipset-restore</li>
 <li><strong>file_override</strong> &#8211; tell the script whether to override the ipset file</li>
+<li><strong>set_names</strong> &#8211; Names of existing sets to be added inside a list:set ipset</li>
 </ul>
 </td>
 </tr>

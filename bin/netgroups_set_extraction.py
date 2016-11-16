@@ -27,15 +27,12 @@ This script was querying the CERNs network service to obtain the hostnames of ma
 
 """
 import argparse
-import logging
-import os
-import subprocess
 import sys
 
 from ip_dns_resolve import ip_dns_resolver
 
 
-def netset_extractor(iptype, networksets, cmdcall=False):
+def netgroup_set_extractor(iptype, networksets, cmdcall=False, only_hostnames=False):
     # pylint: disable=C0301
     """
     This function is proxy between main and the rest of the script so it can be run both as script and as a module
@@ -55,6 +52,7 @@ def netset_extractor(iptype, networksets, cmdcall=False):
                               "On each list you specify first the IPv4 addresses and then the IPv6")
 
 
+
 def main():
     # pylint: disable=C0301
     """
@@ -72,6 +70,8 @@ def main():
     parser.add_argument('--networksets', nargs='+', help='Define network sets like "IT SECURITY FIREWALL ALIENDB" use '
                                                          '" " or the escape char \ if spaces or special characters '
                                                          'included')
+    parser.add_argument('--only_hostnames', action='store_true', help='Return only hostnames without resolving them to '
+                                                                      'ips')
 
     args = parser.parse_args()
 
@@ -79,6 +79,11 @@ def main():
         iptype = args.iptype[0]
     else:
         iptype = 'ip'
+
+    if args.only_hostnames:
+        only_hostnames = True
+    else:
+        only_hostnames = False
 
     cmdcall = True
 
@@ -88,14 +93,14 @@ def main():
             user = args.username[0]
             if args.password:
                 password = args.password[0]
-                netset_extractor(iptype, args.networksets, user, password, cmdcall)
+                netgroup_set_extractor(iptype, args.networksets, user, password, cmdcall, only_hostnames)
             else:
                 print parser.usage()
                 sys.exit(1)
         else:
             user = args.username
         # Create the soap client instance
-            netset_extractor(iptype, args.networksets, user, None, cmdcall)
+            netgroup_set_extractor(iptype, args.networksets, user, None, cmdcall, only_hostnames)
     else:
         print parser.print_usage()
         sys.exit(1)

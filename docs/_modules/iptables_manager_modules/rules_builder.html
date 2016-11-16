@@ -53,11 +53,12 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Author: Athanasios Gkaraliakos</span>
-<span class="sd">email: a.gkaraliakos@gmail.com</span>
+<span class="sd">email: athanasios.gkaraliakos@cern.ch</span>
 
 <span class="sd">The script is written on python &gt;=2.6</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -222,7 +223,8 @@
 <span class="c1">######################################################################################################</span>
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="FirewallRuleBuilder.manage_ipset"><a class="viewcode-back" href="../../code_documentation/iptables_manager_modules_documentation/rules_builder.html#iptables_manager_modules.rules_builder.FirewallRuleBuilder.manage_ipset">[docs]</a>    <span class="k">def</span> <span class="nf">manage_ipset</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iptype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">settype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">setname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cern_networks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                     <span class="n">hostnames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ips</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cern_set_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">simul</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">generate_files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">file_override</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                     <span class="n">hostnames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ips</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cern_set_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">simul</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">generate_files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">file_override</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">set_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method calls the scripts that manages all the operations regarding ipsets and pass all the arguments to</span>
 <span class="sd">        other script in order to create/update/destroy an ipset.</span>
@@ -240,12 +242,13 @@
 <span class="sd">        :param simul: flag whether to print or apply the actions</span>
 <span class="sd">        :param generate_files: flag to generate the ipset.gen file to be user by the restore command</span>
 <span class="sd">        :param file_override: flag used to tell the script to override the generated file or not</span>
+<span class="sd">        :param set_names: list of names to be added inside a list:set ipset</span>
 <span class="sd">        :return: the response of the ipset_a</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># print action, iptype, settype, port, setname, cern_networks, hostnames, ips</span>
         <span class="c1"># print &quot;Hostnames: &quot;, hostnames</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">ipset_manager</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">iptype</span><span class="p">,</span> <span class="n">settype</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">setname</span><span class="p">,</span> <span class="n">cern_networks</span><span class="p">,</span> <span class="n">cern_set_list</span><span class="p">,</span> <span class="n">hostnames</span><span class="p">,</span> <span class="n">ips</span><span class="p">,</span>
-                             <span class="n">simul</span><span class="p">,</span> <span class="n">generate_files</span><span class="p">,</span> <span class="n">file_override</span><span class="p">)</span>
+                             <span class="n">simul</span><span class="p">,</span> <span class="n">generate_files</span><span class="p">,</span> <span class="n">file_override</span><span class="p">,</span> <span class="n">set_names</span><span class="p">)</span>
         <span class="c1"># print &quot;MANAGE IPSet resp: &quot;, resp</span>
         <span class="k">return</span> <span class="n">resp</span></div>
 

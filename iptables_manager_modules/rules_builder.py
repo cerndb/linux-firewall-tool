@@ -8,11 +8,12 @@
 
 """
 Author: Athanasios Gkaraliakos
-email: a.gkaraliakos@gmail.com
+email: athanasios.gkaraliakos@cern.ch
 
 The script is written on python >=2.6
 
 """
+
 import os
 import subprocess
 import sys
@@ -177,7 +178,8 @@ class FirewallRuleBuilder(object):
 ######################################################################################################
     @staticmethod
     def manage_ipset(action=None, iptype=None, settype=None, port=None, setname=None, cern_networks=None,
-                     hostnames=None, ips=None, cern_set_list=None, simul=False, generate_files=False, file_override=False):
+                     hostnames=None, ips=None, cern_set_list=None, simul=False, generate_files=False,
+                     file_override=False, set_names=None):
         """
         This method calls the scripts that manages all the operations regarding ipsets and pass all the arguments to
         other script in order to create/update/destroy an ipset.
@@ -195,12 +197,13 @@ class FirewallRuleBuilder(object):
         :param simul: flag whether to print or apply the actions
         :param generate_files: flag to generate the ipset.gen file to be user by the restore command
         :param file_override: flag used to tell the script to override the generated file or not
+        :param set_names: list of names to be added inside a list:set ipset
         :return: the response of the ipset_a
         """
         # print action, iptype, settype, port, setname, cern_networks, hostnames, ips
         # print "Hostnames: ", hostnames
         resp = ipset_manager(None, action, iptype, settype, port, setname, cern_networks, cern_set_list, hostnames, ips,
-                             simul, generate_files, file_override)
+                             simul, generate_files, file_override, set_names)
         # print "MANAGE IPSet resp: ", resp
         return resp
 

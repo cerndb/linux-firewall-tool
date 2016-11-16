@@ -47,7 +47,7 @@
   <div class="section" id="module-iptables_manager_modules.rules_builder">
 <span id="rules-builder"></span><h1>rules_builder<a class="headerlink" href="#module-iptables_manager_modules.rules_builder" title="Permalink to this headline">¶</a></h1>
 <p>Author: Athanasios Gkaraliakos
-email: <a class="reference external" href="mailto:a&#46;gkaraliakos&#37;&#52;&#48;gmail&#46;com">a<span>&#46;</span>gkaraliakos<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+email: <a class="reference external" href="mailto:athanasios&#46;gkaraliakos&#37;&#52;&#48;cern&#46;ch">athanasios<span>&#46;</span>gkaraliakos<span>&#64;</span>cern<span>&#46;</span>ch</a></p>
 <p>The script is written on python &gt;=2.6</p>
 <dl class="class">
 <dt id="iptables_manager_modules.rules_builder.FirewallRuleBuilder">
@@ -122,7 +122,7 @@ the LOG chain</p>
 
 <dl class="staticmethod">
 <dt id="iptables_manager_modules.rules_builder.FirewallRuleBuilder.manage_ipset">
-<em class="property">static </em><code class="descname">manage_ipset</code><span class="sig-paren">(</span><em>action=None</em>, <em>iptype=None</em>, <em>settype=None</em>, <em>port=None</em>, <em>setname=None</em>, <em>cern_networks=None</em>, <em>hostnames=None</em>, <em>ips=None</em>, <em>cern_set_list=None</em>, <em>simul=False</em>, <em>generate_files=False</em>, <em>file_override=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iptables_manager_modules/rules_builder.html#FirewallRuleBuilder.manage_ipset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.rules_builder.FirewallRuleBuilder.manage_ipset" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">manage_ipset</code><span class="sig-paren">(</span><em>action=None</em>, <em>iptype=None</em>, <em>settype=None</em>, <em>port=None</em>, <em>setname=None</em>, <em>cern_networks=None</em>, <em>hostnames=None</em>, <em>ips=None</em>, <em>cern_set_list=None</em>, <em>simul=False</em>, <em>generate_files=False</em>, <em>file_override=False</em>, <em>set_names=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iptables_manager_modules/rules_builder.html#FirewallRuleBuilder.manage_ipset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iptables_manager_modules.rules_builder.FirewallRuleBuilder.manage_ipset" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method calls the scripts that manages all the operations regarding ipsets and pass all the arguments to
 other script in order to create/update/destroy an ipset.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -143,6 +143,7 @@ other script in order to create/update/destroy an ipset.</p>
 <li><strong>simul</strong> &#8211; flag whether to print or apply the actions</li>
 <li><strong>generate_files</strong> &#8211; flag to generate the ipset.gen file to be user by the restore command</li>
 <li><strong>file_override</strong> &#8211; flag used to tell the script to override the generated file or not</li>
+<li><strong>set_names</strong> &#8211; list of names to be added inside a list:set ipset</li>
 </ul>
 </td>
 </tr>

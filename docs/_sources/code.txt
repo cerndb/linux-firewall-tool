@@ -7,7 +7,7 @@ Code
     code_documentation/ipset_manager
     code_documentation/iptables_manager
     code_documentation/host_manager
-    code_documentation/netset_extraction
+    code_documentation/cern_netset_extraction
     code_documentation/ip_dns_resolve
     code_documentation/main_nic_extractor
     code_documentation/other_nic_extractor

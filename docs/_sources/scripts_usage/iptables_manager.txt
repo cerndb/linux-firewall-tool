@@ -63,7 +63,7 @@ Check what we will apply.
         /usr/sbin/ipset add admin_workstations_x_v4 128.142.153.55
         admin_workstations_x_v4
         Script  ['test_nets_v4.sh']  not in system path
-        Trying herlpers: /root/cerndb-infra-firewall/helpers/test_nets_v4.sh
+        Trying herlpers: /root/linux-firewall/helpers/test_nets_v4.sh
         ['100.64.0.0/10', '192.91.242.0/24', '188.184.0.0/15']
         Set type is:  hash:net
         /usr/sbin/ipset create static_dns_servers4_v4 hash:net family inet hashsize 1024 maxelem 65536
@@ -73,7 +73,7 @@ Check what we will apply.
         /usr/sbin/ipset add static_dns_servers4_v4 192.91.242.0/24
         static_dns_servers4_v4
         Script  ['test_nets_v6.sh']  not in system path
-        Trying herlpers: /root/cerndb-infra-firewall/helpers/test_nets_v6.sh
+        Trying herlpers: /root/linux-firewall/helpers/test_nets_v6.sh
         ['2001:1458::/32', 'FD01:1459::/32']
         Set type is:  hash:net
         /usr/sbin/ipset create static_dns_servers4_v6 hash:net family inet6 hashsize 1024 maxelem 65536
@@ -130,7 +130,7 @@ argument.
 
         0 ['admin_workstations_x']
         Script  ['test_nets_v4.sh']  not in system path
-        Trying herlpers: /root/cerndb-infra-firewall/helpers/test_nets_v4.sh
+        Trying herlpers: /root/linux-firewall/helpers/test_nets_v4.sh
         ['100.64.0.0/10', '192.91.242.0/24', '188.184.0.0/15']
         Set type is:  hash:net
         static_dns_servers4_v4
@@ -144,7 +144,7 @@ argument.
 
         0 ['static_dns_servers4']
         Script  ['test_nets_v6.sh']  not in system path
-        Trying herlpers: /root/cerndb-infra-firewall/helpers/test_nets_v6.sh
+        Trying herlpers: /root/linux-firewall/helpers/test_nets_v6.sh
         ['2001:1458::/32', 'FD01:1459::/32']
         Set type is:  hash:net
         static_dns_servers4_v6

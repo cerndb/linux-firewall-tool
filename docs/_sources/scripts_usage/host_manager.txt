@@ -9,7 +9,7 @@ We use the argument **--no_default_config** so we can see only what we generated
 Check what we will apply.
     ..  code-block:: bash
 
-        bin/host_manager.py --no_default_config --config /root/cerndb-infra-firewall-tool/custom_conf_files/test_hosts.cfg
+        bin/host_manager.py --no_default_config --config /root/linux-firewall-tool/custom_conf_files/test_hosts.cfg
 
     ..  code-block:: bash
 
@@ -56,14 +56,14 @@ Like this we deploy the configuration
 
     ..  code-block:: bash
 
-        bin/host_manager.py --config /root/cerndb-infra-firewall-tool/custom_conf_files/test_hosts.cfg --deploy
+        bin/host_manager.py --config /root/linux-firewall-tool/custom_conf_files/test_hosts.cfg --deploy
 
 If you have a running firewall and just want to update ipsets that are in use you have to use the **--update_sets**
 argument.
 
     .. code-block:: bash
 
-        bin/host_manager.py --config /root/cerndb-infra-firewall-tool/custom_conf_files/test_hosts.cfg --update_sets
+        bin/host_manager.py --config /root/linux-firewall-tool/custom_conf_files/test_hosts.cfg --update_sets
 
     .. code-block:: bash
 
@@ -98,4 +98,4 @@ Like this we deploy the update of the ipsets
 
     ..  code-block:: bash
 
-        bin/host_manager.py --config /root/cerndb-infra-firewall-tool/custom_conf_files/test_hosts.cfg --update_sets --deploy
+        bin/host_manager.py --config /root/linux-firewall-tool/custom_conf_files/test_hosts.cfg --update_sets --deploy

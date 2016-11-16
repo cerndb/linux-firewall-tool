@@ -1,5 +1,10 @@
-Linux Firewall Tool
-===================
+.. linux-firewall-tool documentation master file, created by
+   sphinx-quickstart on Tue Sep 13 16:11:30 2016.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+linux-firewall-tool
+==========================
 
 Summary
 =======
@@ -19,7 +24,6 @@ Contents
     code
     config
     scripts
-
 
 
 

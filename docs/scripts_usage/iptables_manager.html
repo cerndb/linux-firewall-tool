@@ -102,7 +102,7 @@ Set  admin_workstations_x_v4  created
 /usr/sbin/ipset add admin_workstations_x_v4 128.142.153.55
 admin_workstations_x_v4
 Script  <span class="o">[</span><span class="s1">&#39;test_nets_v4.sh&#39;</span><span class="o">]</span>  not in system path
-Trying herlpers: /root/cerndb-infra-firewall/helpers/test_nets_v4.sh
+Trying herlpers: /root/linux-firewall/helpers/test_nets_v4.sh
 <span class="o">[</span><span class="s1">&#39;100.64.0.0/10&#39;</span>, <span class="s1">&#39;192.91.242.0/24&#39;</span>, <span class="s1">&#39;188.184.0.0/15&#39;</span><span class="o">]</span>
 Set <span class="nb">type</span> is:  hash:net
 /usr/sbin/ipset create static_dns_servers4_v4 hash:net family inet hashsize <span class="m">1024</span> maxelem 65536
@@ -112,7 +112,7 @@ Set  static_dns_servers4_v4  created
 /usr/sbin/ipset add static_dns_servers4_v4 192.91.242.0/24
 static_dns_servers4_v4
 Script  <span class="o">[</span><span class="s1">&#39;test_nets_v6.sh&#39;</span><span class="o">]</span>  not in system path
-Trying herlpers: /root/cerndb-infra-firewall/helpers/test_nets_v6.sh
+Trying herlpers: /root/linux-firewall/helpers/test_nets_v6.sh
 <span class="o">[</span><span class="s1">&#39;2001:1458::/32&#39;</span>, <span class="s1">&#39;FD01:1459::/32&#39;</span><span class="o">]</span>
 Set <span class="nb">type</span> is:  hash:net
 /usr/sbin/ipset create static_dns_servers4_v6 hash:net family inet6 hashsize <span class="m">1024</span> maxelem 65536
@@ -166,7 +166,7 @@ To be removed:  <span class="o">[]</span>
 
 <span class="m">0</span> <span class="o">[</span><span class="s1">&#39;admin_workstations_x&#39;</span><span class="o">]</span>
 Script  <span class="o">[</span><span class="s1">&#39;test_nets_v4.sh&#39;</span><span class="o">]</span>  not in system path
-Trying herlpers: /root/cerndb-infra-firewall/helpers/test_nets_v4.sh
+Trying herlpers: /root/linux-firewall/helpers/test_nets_v4.sh
 <span class="o">[</span><span class="s1">&#39;100.64.0.0/10&#39;</span>, <span class="s1">&#39;192.91.242.0/24&#39;</span>, <span class="s1">&#39;188.184.0.0/15&#39;</span><span class="o">]</span>
 Set <span class="nb">type</span> is:  hash:net
 static_dns_servers4_v4
@@ -180,7 +180,7 @@ To be removed:  <span class="o">[]</span>
 
 <span class="m">0</span> <span class="o">[</span><span class="s1">&#39;static_dns_servers4&#39;</span><span class="o">]</span>
 Script  <span class="o">[</span><span class="s1">&#39;test_nets_v6.sh&#39;</span><span class="o">]</span>  not in system path
-Trying herlpers: /root/cerndb-infra-firewall/helpers/test_nets_v6.sh
+Trying herlpers: /root/linux-firewall/helpers/test_nets_v6.sh
 <span class="o">[</span><span class="s1">&#39;2001:1458::/32&#39;</span>, <span class="s1">&#39;FD01:1459::/32&#39;</span><span class="o">]</span>
 Set <span class="nb">type</span> is:  hash:net
 static_dns_servers4_v6

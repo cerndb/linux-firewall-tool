@@ -51,7 +51,7 @@
 <strong>&#8211;deploy</strong> argument. If you start the firewall for the first time is better to also apply the default config also.</p>
 <dl class="docutils">
 <dt>Check what we will apply.</dt>
-<dd><div class="first highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --no_default_config --config /root/cerndb-infra-firewall-tool/custom_conf_files/test_hosts.cfg
+<dd><div class="first highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --no_default_config --config /root/linux-firewall-tool/custom_conf_files/test_hosts.cfg
 </pre></div>
 </div>
 <div class="last highlight-bash"><div class="highlight"><pre><span></span><span class="c1">####### SECTION matched: &#39;itdb_test_2&#39; ################</span>
@@ -95,14 +95,14 @@ rules apply. It cleans also everything and the ipsets so you have a clean deploy
 <p>If you are absolutely certain that you applied the default before and just want what you defined then use the argument</p>
 <p>Like this we deploy the configuration</p>
 <blockquote>
-<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --config /root/cerndb-infra-firewall-tool/custom_conf_files/test_hosts.cfg --deploy
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --config /root/linux-firewall-tool/custom_conf_files/test_hosts.cfg --deploy
 </pre></div>
 </div>
 </div></blockquote>
 <p>If you have a running firewall and just want to update ipsets that are in use you have to use the <strong>&#8211;update_sets</strong>
 argument.</p>
 <blockquote>
-<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --config /root/cerndb-infra-firewall-tool/custom_conf_files/test_hosts.cfg --update_sets
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --config /root/linux-firewall-tool/custom_conf_files/test_hosts.cfg --update_sets
 </pre></div>
 </div>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1">####### SECTION matched: &#39;itdb_test_2&#39; ################</span>
@@ -136,7 +136,7 @@ To be removed:  <span class="o">[]</span>
 </div></blockquote>
 <p>Like this we deploy the update of the ipsets</p>
 <blockquote>
-<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --config /root/cerndb-infra-firewall-tool/custom_conf_files/test_hosts.cfg --update_sets --deploy
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --config /root/linux-firewall-tool/custom_conf_files/test_hosts.cfg --update_sets --deploy
 </pre></div>
 </div>
 </div></blockquote>

@@ -9,13 +9,15 @@
 
 """
 Author: Athanasios Gkaraliakos
-email: a.gkaraliakos@gmail.com
+email: athanasios.gkaraliakos@cern.ch
 
 The script is written on python >=2.6
 
 Script to get IPv4 and/or IPv6 (if exists) for every machine in the given set
 
 Depends on python-dns " yum install python-dns "
+
+Script uses as default username the --> dbsystem
 
 """
 import sys
@@ -45,7 +47,6 @@ def ip_dns_resolver(hostname, iptype, silent=False):
     iplist = []
 
     hostname = hostname.upper()
-
     if not silent:
         iplist.append(str(hostname))
 

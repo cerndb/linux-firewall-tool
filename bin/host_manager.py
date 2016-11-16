@@ -9,7 +9,7 @@
 
 """
 Author: Athanasios Gkaraliakos
-email: a.gkaraliakos@gmail.com
+email: athanasios.gkaraliakos@cern.ch
 
 The script is written on python >=2.6
 """
@@ -17,10 +17,12 @@ The script is written on python >=2.6
 import os
 import sys
 import argparse
-import configparser
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import configparser
 from iptables_manager import iptables_manager
 from iptables_manager_modules.rules_builder import FirewallRuleBuilder
+from ip_dns_resolve import ip_dns_resolver
+from netgroups_set_extraction import netgroup_set_extractor
 
 
 class ReadWriteConfigFiles(object):
@@ -29,6 +31,7 @@ class ReadWriteConfigFiles(object):
     and adds all the sections of the file as key and its options as value
     """
 
+    # parser = configparser.RawConfigParser()
     parser = configparser.ConfigParser()
 
     def read_config_file(self, filepath):
@@ -112,8 +115,13 @@ class ManageHosts(object):
                     print "Specify 'config_folder' option for section '" + i.encode("utf-8") + "'"
                     sys.exit(1)
 
+            # if not (self.parser.has_option(i.encode('utf-8'), "config_folder_files") or
+            #             (self.parser.has_option(i.encode('utf-8'), "config_files"))):
+            #     print "Specify 'config_folder_files' or 'config_files' option for section '" + i.encode("utf-8") + "'"
+            #     sys.exit(1)
+
     def parse_config_file(self, deploy=False, no_default_config=False, update_sets=False, allow=False, drop_all=False,
-                          generate_files=False):
+                          generate_files=False, check_matches=False):
         """
         This method is used to parse  the config files. It checks if the hostname of the machine is defined in the list
         of hostnames that this configuration will be applied. Then it calls the 'iptables_manager' function from the
@@ -139,11 +147,14 @@ class ManageHosts(object):
                 print "'machines' option for section '" + sect + "' must be a list or a sciprt to run"
                 sys.exit(1)
 
+            # if update_sets and not no_default_config:
+            #     print "Cannot apply default config and update sets!!!!!!"
+            #     sys.exit(1)
             if update_sets:
                 no_default_config = True
 
             if hostname in machines:
-                print "####### SECTION matched: '" + sect + "' ################"
+                print "\n####### SECTION matched: '" + sect + "' ################"
 
                 try:
                     default_interface = self.parser.get(sect.encode('utf-8'), "default_interface").encode('utf-8')
@@ -176,8 +187,8 @@ class ManageHosts(object):
                         if config_folder[-1] != '/':
                             config_folder += '/'
                         for cfile in config_folder_files:
-                            if os.path.exists(config_folder+cfile):
-                                config_files_list.append(config_folder+cfile)
+                            if os.path.exists(config_folder + cfile):
+                                config_files_list.append(config_folder + cfile)
                             else:
                                 print "File: '" + cfile + "' under folder '" + config_folder + "' of section '" + sect \
                                       + "' does not exits"
@@ -194,16 +205,111 @@ class ManageHosts(object):
                             print "File: '" + config_files + "' under folder '" + config_folder + "' of section " + sect \
                                   + " does not exits"
 
+                # print "Config file list: ", config_files_list
                 if config_files_list is []:
                     config_files_list = None
-
-                print "Deploy is:", deploy
-                iptables_manager(None, config_files_list, default_interface, no_default_config, allow, drop_all,
-                                 update_sets, deploy, generate_files)
-                sys.exit(0)
+                if check_matches:
+                    print "Config folder: ", config_folder
+                    print "Config files: ", config_folder_files
+                    print "Config individual files: ", config_files, "\n"
+                else:
+                    print "Deploy is:", deploy
+                    iptables_manager(None, config_files_list, default_interface, no_default_config, allow, drop_all,
+                                     update_sets, deploy, generate_files)
+                    sys.exit(0)
             else:
                 print "Machine list: ", machines
                 print "Machine " + hostname + " not in this sections machine list. \nNothing to do.."
+
+        print "\nNo matching sections"
+        sys.exit(1)
+
+
+###########################################################################################################
+
+def check_machines_functions():
+    """
+    This function is used to perform health checks before the tool starts
+
+    :return: Boolean
+    """
+
+    valid_dns = False
+    valid_landb = False
+    project_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    dns_ipv4 = {'ip-dns-1': '137.138.16.5',
+                'ip-dns-2': '137.138.17.5',
+                'ip-dns-3': '172.18.16.5',
+                'ip-dns-4': '172.18.17.5'}
+
+    dns_ipv6 = {'ip-dns-1.ipv6': '2001:1458:201:1000::5',
+                'ip-dns-2.ipv6': '2001:1458:201:1100::5'}
+
+    for key in dns_ipv4:
+        value = ip_dns_resolver(key, 'ipv4')
+        if value[1] == dns_ipv4[key]:
+            valid_dns = True
+            break
+
+    if not valid_dns:
+        for key in dns_ipv6:
+            value = ip_dns_resolver(key, 'ipv6')
+            if value[1] == dns_ipv4[key]:
+                valid_dns = True
+                break
+
+    try:
+        for line in open(project_folder + '/default_conf_files' + '/configuration_info.cfg', 'r').readlines():
+            if 'landb_set_check' in line:
+                check_landb_set = line.partition('"')[-1].rpartition('"')[0]
+                # print check_landb_set
+                break
+
+        for line in open(project_folder + '/default_conf_files' + '/configuration_info.cfg', 'r').readlines():
+            if 'landb_set_values' in line:
+                check_landb_value = line.partition('"')[-1].rpartition('"')[0]
+                # print check_landb_value
+                break
+    except:
+        print "Cannot read config file!!! Cannot read config file!!! \nPath: " + project_folder + \
+              '/default_conf_files' + '/configuration_info.cfg'
+        sys.exit(1)
+
+    check_value = netgroup_set_extractor('ip', check_landb_set, None, None, False, False)
+
+    if check_value[0][0] == check_landb_value:
+        valid_landb = True
+
+    project_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    command = None
+
+    try:
+        for line in open(project_folder + '/default_conf_files' + '/configuration_info.cfg', 'r').readlines():
+            if "custom_check" in line:
+                command = line.partition('"')[-1].rpartition('"')[0]
+                break
+    except:
+        print "Cannot read config file!!! Cannot read config file!!! \nPath: " + project_folder + \
+              '/default_conf_files' + '/configuration_info.cfg' + " \n"
+
+    print "Command:", command
+
+    if (command is not None) and command != "":
+        command = command.split()
+        output, err, exit_code = FirewallRuleBuilder.sys_process_executor(command)
+        print "\n############## Check script output ###############################\n"
+        print output
+        if exit_code == 0:
+            script_valid = True
+        else:
+            print "Error:", err
+            script_valid = False
+    else:
+        script_valid = True
+
+    return valid_dns and valid_landb and script_valid
 
 
 ###########################################################################################################
@@ -224,28 +330,38 @@ def main():
     parser.add_argument('--generate_files', action='store_true', help='Generate iptables and ipset configuration files')
     parser.add_argument('--allow', action='store_true', help='Set policy to ACCEPT')
     parser.add_argument('--drop_all', action='store_true', help='Set policy to DENY')
+    parser.add_argument('--ignore_check', action='store_true', help='Ignore needed network components check')
+    parser.add_argument('--check_matches', action='store_true', help='Check all section of the file and print at which '
+                                                                     'sections is this machine matching')
 
     args = parser.parse_args()
 
-    if args.config:
-        try:
-            file_reader = ReadWriteConfigFiles()
-            file_parser = file_reader.read_config_file(args.config)
-        except RuntimeError:
-            sys.stderr.write("Error reading the files")
-            print "Please check the files are under the provided path/s"
-            sys.exit(1)
-
-        host_manager = ManageHosts(file_parser)
-
-        host_manager.config_integrity_check()
-
-        host_manager.parse_config_file(deploy=args.deploy, no_default_config=args.no_default_config,
-                                       update_sets=args.update_sets, allow=args.allow, drop_all=args.drop_all,
-                                       generate_files=args.generate_files)
+    if args.ignore_check or args.check_matches:
+        valid = True
+        print "\nIgnoring DNS and LanDB check result.\n"
     else:
-        print "Please specify config file/s"
-        sys.exit(1)
+        valid = check_machines_functions()
+
+    if valid:
+        if args.config:
+            try:
+                file_reader = ReadWriteConfigFiles()
+                file_parser = file_reader.read_config_file(args.config)
+                # print file_parser.sections()
+            except RuntimeError:
+                sys.stderr.write("Error reading the files")
+                print "Please check the files are under the provided path/s"
+                sys.exit(1)
+
+            host_manager = ManageHosts(file_parser)
+
+            host_manager.config_integrity_check()
+
+            host_manager.parse_config_file(deploy=args.deploy, no_default_config=args.no_default_config,
+                                           update_sets=args.update_sets, allow=args.allow, drop_all=args.drop_all,
+                                           generate_files=args.generate_files, check_matches=args.check_matches)
+    else:
+        print "Network components check failed. Cannot operate"
 
 if __name__ == '__main__':
     main()

@@ -9,3 +9,4 @@ Examples
     examples/log_rule
     examples/policy
     examples/host_config
+    examples/Using_the_list_set

@@ -9,7 +9,7 @@
 
 """
 Author: Athanasios Gkaraliakos
-email: a.gkaraliakos@gmail.com
+email: athanasios.gkaraliakos@cern.ch
 
 The script is written on python >=2.6
 
@@ -21,6 +21,7 @@ import argparse
 import configparser
 from main_nic_extractor import main_nic_extractor
 from other_nic_extractor import other_nic_extractor
+from netgroups_set_extraction import netgroup_set_extractor
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from iptables_manager_modules.default_rules import DefaultConfiguration
 from iptables_manager_modules.rules_builder import FirewallRuleBuilder
@@ -78,17 +79,17 @@ class ManageRules(object):
     """
     All the allowed option of a section that defines iptables rules.
     """
-    sect_general_options_list = ['description', 'section_type', 'action', 'default_chain', 'md5', 'ip_version',
+    sect_general_options_list = ['description', 'section_type', 'action', 'default_chain', 'ip_version',
                                  'interface', 'protocol', 'ports', 'custom_chain', 'limit', 'log-level',
                                  'log-prefix', 'set', 'set_directions', 'log-specific-options']
 
     """
     All the allowed option of a section that defines ipsets.
     """
-    sect_set_option_list = ['description', 'section_type', 'ipset_type', 'set_name', 'netgroup_name',
+    sect_set_option_list = ['description', 'section_type', 'ipset_type', 'set_name', 'netgroup_set_name',
                             'set_hostnames', 'set_ips_v4', 'set_ips_v6', 'set_net_ranges_v4',
-                            'set_net_ranges_v6', 'netgroups_list', 'set_ip_port_ip_v4', 'set_ip_port_ip_v6',
-                            'set_ip_port_net_v4', 'set_ip_port_net_v6']
+                            'set_net_ranges_v6', 'netgroup_set_list', 'set_ip_port_ip_v4', 'set_ip_port_ip_v6',
+                            'set_ip_port_net_v4', 'set_ip_port_net_v6', 'list_set_sections']
 
     """
     All the allowed option of a section that defines Policy.
@@ -137,6 +138,29 @@ class ManageRules(object):
                         if type(eval(self.parser.get(i.encode('utf-8'), "action"))) is not list:
                             print "Specify 'action' option for section '" + i.encode("utf-8") + "'"
                             sys.exit(1)
+                    # Check for script and replace the name with the one returned from the script
+                    if self.parser.has_option(i.encode('utf-8'), "set"):
+                        script_command = self.parser.get(i.encode('utf-8'), "set").encode('utf-8')
+                        if '"' in script_command:
+                            script_command = script_command.replace('"', '')
+                            script_command = script_command.split(" ")
+                            replace_set, err, exit_code = self.rule_builder.sys_process_executor(script_command)
+                            if err or (exit_code != 0):
+                                print "Error with script defining set name on section: ", i.encode("utf-8")
+                            elif replace_set != "":
+                                replace_set = replace_set.replace("\n", "")
+                                if self.parser.has_section(replace_set.encode("utf-8")):
+                                    self.parser.set(i.encode('utf-8'), "set", replace_set)
+                                else:
+                                    print "Error on section: '" + i.encode('utf-8') + "' set section '" + \
+                                      replace_set + "' does exist in the current loaded sections. Please create " \
+                                                    "that section inside the config files"
+                                    sys.exit(1)
+                            else:
+                                print "Error on section: '" + i.encode('utf-8') + "' set section '" + \
+                                      replace_set + "' does exist in the current loaded sections. Please create " \
+                                                    "that section inside the config files"
+                                sys.exit(1)
 
                     if self.parser.has_option(i.encode('utf-8'), "default_chain"):
                         df_chain = self.parser.get(i.encode('utf-8'), "default_chain").encode('utf-8')
@@ -161,7 +185,7 @@ class ManageRules(object):
                         protocol = protocol.split(',')
                         for pl in protocol:
                             if pl not in ['tcp', 'udp']:
-                                print "Protocol value '" + pl + "' for section '" + i.encode("utf-8") + "' not supported"
+                                print "Protocol value '" + pl + "'for section'" + i.encode("utf-8") + "' not supported"
                                 sys.exit(1)
                     else:
                         if self.parser.has_option(i.encode('utf-8'), "ports"):
@@ -172,7 +196,6 @@ class ManageRules(object):
                             tmp_set = self.parser.get(i.encode('utf-8'), "set").encode('utf-8')
                             try:
                                 tmp_ipset_type = self.parser.get(tmp_set.encode('utf-8'), "ipset_type").encode('utf-8')
-                                # if tmp_ipset_type == 'custom_port':\
                                 if 'port' in tmp_ipset_type:
                                     print "Cannot have ports declared on the rule if you use a hash:ip,port or '" + \
                                           i.encode("utf-8") + "' and section '" + tmp_set + "'"
@@ -181,11 +204,6 @@ class ManageRules(object):
                                 pass
 
                         ports = self.parser.get(i.encode('utf-8'), "ports").encode('utf-8')
-                        # if (',' not in ports) and (':' not in ports):
-                        #     print "Port values for section '" + i.encode("utf-8") + "' not valid"
-                        #     print "Specify ports using ',' or ':' for range or script to obtain the ports"
-                        #     sys.exit(1)
-                        # else:
                         if ',' in ports:
                             ports = ports.split(',')
                             for pr in ports:
@@ -247,7 +265,7 @@ class ManageRules(object):
                     else:
                         set_type = self.parser.get(i.encode("utf-8"), 'ipset_type').encode("utf-8")
                         if set_type not in ['hash:net,port', 'hash:ip,port', 'hash:net', 'hash:ip', 'hash:ip,port,net',
-                                            'hash:ip,port,ip']:
+                                            'hash:ip,port,ip', 'list:set']:
                             print "Specify 'ipset_type' 'hash:net,port', 'hash:ip,port', 'hash:net', 'hash:ip', " \
                                   "'hash:ip,port,net', 'hash:ip,port,ip' option for section '" + i.encode("utf-8") + "'"
                             sys.exit(1)
@@ -263,8 +281,8 @@ class ManageRules(object):
                                 if not ((self.parser.has_option(i.encode('utf-8'), "set_ips_v4")) or
                                         (self.parser.has_option(i.encode('utf-8'), "set_ips_v6")) or
                                         (self.parser.has_option(i.encode('utf-8'), "set_hostnames")) or
-                                        (self.parser.has_option(i.encode('utf-8'), "netgroups_list")) or
-                                        (self.parser.has_option(i.encode('utf-8'), "netgroup_name"))):
+                                        (self.parser.has_option(i.encode('utf-8'), "netgroup_set_list")) or
+                                        (self.parser.has_option(i.encode('utf-8'), "netgroup_set_name"))):
                                     print "Specify 'set_ips_v4' ,'set_ips_v6', 'set_hostnames' option for section '" \
                                           + i.encode("utf-8") + "'"
                                     sys.exit(1)
@@ -273,7 +291,7 @@ class ManageRules(object):
                                 if not ((self.parser.has_option(i.encode('utf-8'), "set_ip_port_ip_v4")) or
                                         (self.parser.has_option(i.encode('utf-8'), "set_ip_port_ip_v6")) or
                                         (self.parser.has_option(i.encode('utf-8'), "set_hostnames")) or
-                                        (self.parser.has_option(i.encode('utf-8'), "netgroups_list"))):
+                                        (self.parser.has_option(i.encode('utf-8'), "netgroup_set_list"))):
                                     print "Specify 'set_ip_port_ip_v4' ,'set_ip_port_ip_v6', 'set_hostnames' option " \
                                           "for section '" + i.encode("utf-8") + "'"
                                     sys.exit(1)
@@ -285,6 +303,30 @@ class ManageRules(object):
                                     print "Specify 'set_ip_port_net_v4' ,'set_ip_port_net_v6', 'set_hostnames' option " \
                                           "for section '" + i.encode("utf-8") + "'"
                                     sys.exit(1)
+
+                            elif set_type in ['list:set']:
+                                if not self.parser.has_option(i.encode('utf-8'), "set_name"):
+                                    print "Specify 'set_name' option for section '" + i.encode("utf-8") + "'"
+                                    sys.exit(1)
+                                if not self.parser.has_option(i.encode('utf-8'), "list_set_sections"):
+                                    print "Specify 'list_set_sections' option for section '" + i.encode("utf-8") + "'"
+                                    sys.exit(1)
+                                else:
+                                    try:
+                                        list_sections = eval(self.parser.get(i.encode('utf-8'), 'list_set_sections')
+                                                                 .encode('utf-8'))
+                                        if type(list_sections) is list:
+                                            for _sect_ in list_sections:
+                                                if not self.parser.has_section(_sect_):
+                                                    print "Section '" + _sect_ + "' is not present. Please define " \
+                                                                                 "this section inside one of your " \
+                                                                                 "config files"
+                                                    sys.exit(1)
+                                        else:
+                                            print "You have tou provide a list for 'list_set_sections' option for " \
+                                                  "section '" + i.encode("utf-8") + "'"
+                                    except configparser.NoOptionError:
+                                        pass
 
                         for opt in self.parser.options(i.encode("utf-8")):
                             if opt.encode("utf-8") not in self.sect_set_option_list:
@@ -365,13 +407,153 @@ class ManageRules(object):
         return nic
 
 ###########################################################################################################
-    def handle_ipsets(self, ipset_setction, ip_version, update_only=False):
+    def handle_script_runs(self, ipset_section, hostname, ipset_type, ip_version):
+
+        """
+        This method is used to handle set triplets to be used in ipsets.
+
+        :param ipset_section:
+        :param hostname:
+        :param ipset_type:
+        :param ip_version:
+        :return:
+        """
+        return_list = []
+        return_list_1 = None
+        return_list_2 = None
+        part_1 = None
+        part_2 = None
+        part_3 = None
+
+        if ipset_type == 'hash:ip,port,net' or ipset_type == 'hash:ip,port,ip':
+
+            if "script_double:" in hostname:
+                part_1, part_2 = hostname.split(',')
+
+                if "script_double:" in part_2:
+                    print "\nSection '" + ipset_section + " cannot use a 'script_double' on last element of the triplet"
+                    sys.exit(1)
+
+            elif ("script:" in hostname) or ("netgroup:" in hostname):
+                part_1, part_2, part_3 = hostname.split(',')
+
+        elif ipset_type == 'hash:ip,port':
+            if ("script:" in hostname) or ("netgroup:" in hostname):
+                part_1, part_2 = hostname.split(',')
+
+                if "script_double:" in part_2:
+                    print "\nSection '" + ipset_section + " cannot use a 'script_double' on last element of the triplet"
+                    sys.exit(1)
+
+            elif "script_double:" in hostname:
+                part_1 = hostname
+
+        elif ipset_type == 'hash:net,port':
+            print "\nSection '" + ipset_section + " cannot use a 'script' for set type hash:net,port"
+            sys.exit(1)
+        else:
+            part_1 = hostname
+
+        if 'script:' in part_1:
+            command_1 = part_1[7:].split()
+            return_list_1, err, exit_code = self.rule_builder.sys_process_executor(command_1)
+
+
+        elif 'script_double:' in part_1:
+            command_1 = part_1[14:].split()
+            return_list_1, err, exit_code = self.rule_builder.sys_process_executor(command_1)
+
+        elif 'netgroup:' in part_1:
+            netgroup = part_1[9:]
+            return_list_1 = netgroup_set_extractor(ip_version, netgroup, None, None, False, True)
+            exit_code = 0
+            # print "NetGroup_1:", return_list_1
+
+        if (part_2 is not None) and (part_3 is None):
+            if 'script:' in part_2:
+                command_2 = part_2[7:].split()
+                return_list_2, err, exit_code = self.rule_builder.sys_process_executor(command_2)
+            elif 'netgroup:' in part_2:
+                netgroup = part_2[9:]
+                return_list_2 = netgroup_set_extractor(ip_version, netgroup, None, None, False, True)
+                exit_code = 0
+                # print "NetGroup_2:", return_list_2
+
+        if part_3 is not None:
+            if 'script:' in part_3:
+                command_3 = part_3[7:].split()
+                return_list_2, err, exit_code = self.rule_builder.sys_process_executor(command_3)
+            elif 'netgroup:' in part_3:
+                netgroup = part_3[9:]
+                return_list_2 = netgroup_set_extractor(ip_version, netgroup, None, None, False, True)
+                exit_code = 0
+                # print "NetGroup_3:", return_list_2
+
+        if exit_code == 0:
+
+            if return_list_1 is not None:
+                if type(return_list_1) is not list:
+                    return_list_1 = return_list_1.splitlines()
+                    return_list_1 = [x for x in return_list_1 if x != '-']
+                # print "Result list 1:", return_list_1
+
+            if return_list_2 is not None:
+                if type(return_list_2) is not list:
+                    return_list_2 = return_list_2.splitlines()
+                if ipset_type != 'hash:ip,port,net':
+                    return_list_2 = [x for x in return_list_2 if x != '-']
+                else:
+                    if ip_version == 'ipv4':
+                        return_list_2 = [x for x in return_list_2 if (x != '-') and (':' not in x)]
+                    elif ip_version == 'ipv6':
+                        return_list_2 = [x for x in return_list_2 if (x != '-') and ('.' not in x)]
+            else:
+                if ipset_type == 'hash:ip,port,net':
+                    if ip_version == 'ipv4':
+                        if ':' in part_2:
+                            return []
+                    elif ip_version == 'ipv6':
+                        if '.' in part_2:
+                            return []
+
+            if (return_list_1 is not None) and (return_list_2 is not None):
+                if part_3 is not None:
+                    for i in xrange(len(return_list_1)):
+                        for j in xrange(len(return_list_2)):
+                            return_list.append(return_list_1[i] + ',' + part_2 + ',' + return_list_2[j])
+                else:
+                    for i in xrange(len(return_list_1)):
+                        for j in xrange(len(return_list_2)):
+                            return_list.append(return_list_1[i] + ',' + return_list_2[j])
+
+            elif return_list_1 is not None:
+                if 'script_double:' in part_1:
+                    if ipset_type != 'hash:ip,port':
+                        for i in xrange(len(return_list_1)):
+                            return_list.append(return_list_1[i] + ',' + part_2)
+                    else:
+                        for i in xrange(len(return_list_1)):
+                            return_list.append(return_list_1[i])
+                else:
+                    for i in xrange(len(return_list_1)):
+                        return_list.append(return_list_1[i] + ',' + part_2 + ',' + part_3)
+            else:
+                pass
+        else:
+            print "\nSection '" + ipset_section + " script run error"
+            sys.exit(1)
+
+        # print "Return list:", return_list
+        return return_list
+
+###########################################################################################################
+    def handle_ipsets(self, ipset_section, ip_version, update_only=False):
         """
         This method is used to handle the ipsets. It parses ipset sections by extracting the values from the options
         provided in the files. It is used to create or update(if set exists) an ipset so to be later used by the
         iptable rules.
 
-        :param ipset_setction:Name of the ipset section to be parsed
+        :param ipset_section:Name of the ipset section to be parsed
         :param ip_version: IPv4/IPv6
         :param update_only: Bool variable to tell the method to do an update of the existing set.
         :return: It returns two values. 1. The exit code of the other script that handles ipsets 2. The actual name of the created ipset to be used by the rule/s
@@ -381,50 +563,61 @@ class ManageRules(object):
         settype = None
         port = None
         set_name = None
-        netgroup = None
+        netgroup_networks = None
         ips = None
         ips = None
         hostnames = None
         ips = None
-        netgroups_list = None
+        netgroup_set_list = None
 
-        # set_ipver = self.parser.get(ipset_setction, 'ip_version').encode('utf-8')
+        # set_ipver = self.parser.get(ipset_section, 'ip_version').encode('utf-8')
         set_ipver = ip_version
-        ipset_type = self.parser.get(ipset_setction, 'ipset_type').encode('utf-8')
+        ipset_type = self.parser.get(ipset_section, 'ipset_type').encode('utf-8')
 
         try:
-            set_name = eval(self.parser.get(ipset_setction, 'set_name').encode('utf-8'))
+            set_name = eval(self.parser.get(ipset_section, 'set_name').encode('utf-8'))
             set_name[0] = set_name[0].replace(' ', '_')
         except configparser.NoOptionError:
             set_name = None
 
         try:
-            hostnames = eval(self.parser.get(ipset_setction, 'set_hostnames').encode('utf-8'))
+            hostnames = eval(self.parser.get(ipset_section, 'set_hostnames').encode('utf-8'))
         except configparser.NoOptionError:
             hostnames = None
         if type(hostnames) is list:
             _hostnames_ = []
             for hst in xrange(len(hostnames)):
                 # This part is executed when in the hostnames list we provided also scripts(commands) to be ran
-                if "script:" in hostnames[hst]:
-                    command = hostnames[hst][7:].split()
-                    command, err, exit_code = self.rule_builder.sys_process_executor(command)
-                    if exit_code == 0:
-                        command = command.splitlines()
-                        command = [x for x in command if x != '-']
-                        for addr in command:
-                            if (',' in addr) and (ipset_type in ['hash:ip', 'hash:net']):
-                                print "\nSection '" + ipset_setction + "' type is '" + \
-                                      ipset_type + "' but you provided extra elements. Change ipset_type option"
-                                sys.exit(1)
-                        _hostnames_.extend(command)
+                if ("script:" in hostnames[hst]) or ("script_double:" in hostnames[hst]) or ("netgroup:" in hostnames[hst]):
+                    # if ipset_type == 'hash:ip,port,net':
+                    #     command, _net_range_ = hostnames[hst].split(',')
+                    #     command = command[7:].split()
+                    # else:
+                    #     command = hostnames[hst][7:].split()
+                    # command, err, exit_code = self.rule_builder.sys_process_executor(command)
+                    # if exit_code == 0:
+                    #     command = command.splitlines()
+                    #     command = [x for x in command if x != '-']
+                    #     for addr in xrange(len(command)):
+                    #         if (',' in command[addr]) and (ipset_type in ['hash:ip', 'hash:net']):
+                    #             print "\nSection '" + ipset_section + "' type is '" + \
+                    #                   ipset_type + "' but you provided extra elements. Change ipset_type option"
+                    #             sys.exit(1)
+                    #         elif (',' in command[addr]) and (ipset_type == 'hash:ip,port,net'):
+                    #             command[addr] += ',' + _net_range_
+                    #             command[addr] = command[addr].lower()
+                    #     _hostnames_.extend(command)
+                    _hostnames_.extend(self.handle_script_runs(ipset_section, hostnames[hst], ipset_type, ip_version))
                 elif (',' in hostnames[hst]) and (ipset_type in ['hash:ip', 'hash:net']):
-                    print "\nSection " + ipset_setction + " type is '" + \
-                                      ipset_type + "' but you provided extra elements. Change ipset_type option"
+                    print "\nSection " + ipset_section + " type is '" + \
+                          ipset_type + "' but you provided extra elements. Change ipset_type option"
                     sys.exit(1)
             for hst in xrange(len(hostnames)):
-                if "script:" not in hostnames[hst]:
+                if ("script:" not in hostnames[hst]) and ("script_double:" not in hostnames[hst]) \
+                        and ("netgroup:" not in hostnames[hst]):
                     _hostnames_.append(hostnames[hst])
+
+            del hostnames[:]
             hostnames = _hostnames_
             # print "Hostnames: ", hostnames
 
@@ -438,8 +631,8 @@ class ManageRules(object):
                 print hostnames
                 for hst in hostnames:
                     if (',' in hst) and (ipset_type == "custom"):
-                        print "\nSection '" + ipset_setction + "' type is 'custom' but you provided ports also. " \
-                                                                 " type should including port"
+                        print "\nSection '" + ipset_section + "' type is 'custom' but you provided ports also. " \
+                                                                 " type should include port "
                         sys.exit(1)
             else:
                 print err
@@ -447,16 +640,16 @@ class ManageRules(object):
 
         if ipset_type in ['hash:ip', 'hash:ip,port']:
             try:
-                netgroup = eval(self.parser.get(ipset_setction, 'netgroup_name').encode('utf-8'))
+                netgroup_networks = eval(self.parser.get(ipset_section, 'netgroup_set_name').encode('utf-8'))
             except configparser.NoOptionError:
-                netgroup = None
+                netgroup_networks = None
 
-            if netgroup is None:
+            if netgroup_networks is None:
                 try:
                     if ip_version == 'ipv4':
-                        ips = eval(self.parser.get(ipset_setction, 'set_ips_v4').encode('utf-8'))
+                        ips = eval(self.parser.get(ipset_section, 'set_ips_v4').encode('utf-8'))
                     elif ip_version == 'ipv6':
-                        ips = eval(self.parser.get(ipset_setction, 'set_ips_v6').encode('utf-8'))
+                        ips = eval(self.parser.get(ipset_section, 'set_ips_v6').encode('utf-8'))
                 except configparser.NoOptionError:
                     ips = None
                 # if type(ips) is list:
@@ -473,21 +666,21 @@ class ManageRules(object):
                         sys.exit(1)
                 if ipset_type == 'hash:ip':
                     try:
-                        netgroups_list = eval(self.parser.get(ipset_setction, 'netgroups_list').encode('utf-8'))
+                        netgroup_set_list = eval(self.parser.get(ipset_section, 'netgroup_set_list').encode('utf-8'))
                     except configparser.NoOptionError:
-                        netgroups_list = None
-                    if netgroups_list is not None:
-                        if type(netgroups_list) is not list:
-                            print "\nOption netgroups_list for '" + ipset_setction + "' section should be a list. " \
+                        netgroup_set_list = None
+                    if netgroup_set_list is not None:
+                        if type(netgroup_set_list) is not list:
+                            print "\nOption netgroup_set_list for '" + ipset_section + "' section should be a list. " \
                                                                                     "Set it correctly"
                             sys.exit(1)
 
         elif ipset_type in ['hash:net', 'hash:net,port']:
             try:
                 if ip_version == 'ipv4':
-                    ips = eval(self.parser.get(ipset_setction, 'set_net_ranges_v4').encode('utf-8'))
+                    ips = eval(self.parser.get(ipset_section, 'set_net_ranges_v4').encode('utf-8'))
                 elif ip_version == 'ipv6':
-                    ips = eval(self.parser.get(ipset_setction, 'set_net_ranges_v6').encode('utf-8'))
+                    ips = eval(self.parser.get(ipset_section, 'set_net_ranges_v6').encode('utf-8'))
                     if type(ips) is list:
                         for nr in xrange(len(ips)):
                             ips[nr] = ips[nr].lower()
@@ -508,19 +701,19 @@ class ManageRules(object):
 
         elif ipset_type in ['hash:ip,port,ip']:
             try:
-                netgroups_list = eval(self.parser.get(ipset_setction, 'netgroups_list').encode('utf-8'))
+                netgroup_set_list = eval(self.parser.get(ipset_section, 'netgroup_set_list').encode('utf-8'))
             except configparser.NoOptionError:
-                netgroups_list = None
-            if netgroups_list is not None:
-                if type(netgroups_list) is not list:
-                    print "\nOption netgroups_list for '" + ipset_setction + "' section should be a list. " \
+                netgroup_set_list = None
+            if netgroup_set_list is not None:
+                if type(netgroup_set_list) is not list:
+                    print "\nOption netgroup_set_list for '" + ipset_section + "' section should be a list. " \
                                                                             "Set it correctly"
                     sys.exit(1)
             try:
                 if ip_version == 'ipv4':
-                    ips = eval(self.parser.get(ipset_setction, 'set_ip_port_ip_v4').encode('utf-8'))
+                    ips = eval(self.parser.get(ipset_section, 'set_ip_port_ip_v4').encode('utf-8'))
                 elif ip_version == 'ipv6':
-                    ips = eval(self.parser.get(ipset_setction, 'set_ip_port_ip_v6').encode('utf-8'))
+                    ips = eval(self.parser.get(ipset_section, 'set_ip_port_ip_v6').encode('utf-8'))
                     if type(ips) is list:
                         for nr in xrange(len(ips)):
                             ips[nr] = ips[nr].lower()
@@ -532,9 +725,9 @@ class ManageRules(object):
         elif ipset_type in ['hash:ip,port,net']:
             try:
                 if ip_version == 'ipv4':
-                    ips = eval(self.parser.get(ipset_setction, 'set_ip_port_net_v4').encode('utf-8'))
+                    ips = eval(self.parser.get(ipset_section, 'set_ip_port_net_v4').encode('utf-8'))
                 elif ip_version == 'ipv6':
-                    ips = eval(self.parser.get(ipset_setction, 'set_ip_port_net_v6').encode('utf-8'))
+                    ips = eval(self.parser.get(ipset_section, 'set_ip_port_net_v6').encode('utf-8'))
                     if type(ips) is list:
                         for nr in xrange(len(ips)):
                             ips[nr] = ips[nr].lower()
@@ -543,37 +736,105 @@ class ManageRules(object):
                 ips = None
 
         if set_name is not None:
-            responce = self.rule_builder.check_ipset(set_ipver, set_name[0])
+            response = self.rule_builder.check_ipset(set_ipver, set_name[0])
         else:
-            responce = self.rule_builder.check_ipset(set_ipver, netgroup[0])
+            response = self.rule_builder.check_ipset(set_ipver, netgroup_networks[0])
 
         if 'port' in ipset_type:
             port = ['direct']
 
-        if responce == 'SetDoNotExist':
+        if response == 'SetDoNotExist':
 
             if not update_only:
                 ipset_action = 'create'
-                responce = self.rule_builder.manage_ipset(ipset_action, set_ipver, ipset_type, port, set_name,
-                                                          netgroup, hostnames, ips, netgroups_list, self.deploy,
+                response = self.rule_builder.manage_ipset(ipset_action, set_ipver, ipset_type, port, set_name,
+                                                          netgroup_networks, hostnames, ips, netgroup_set_list, self.deploy,
                                                           self.generate_files, self.file_override)
                 self.file_override = False
             else:
-                # print "Create RESP: ", responce
-                return responce, set_name
+                # print "Create RESP: ", response
+                return response, set_name
 
-        elif responce == 'SetExists':
+        elif response == 'SetExists':
             ipset_action = 'update'
-            responce = self.rule_builder.manage_ipset(ipset_action, set_ipver, ipset_type, port, set_name,
-                                                      netgroup, hostnames, ips, netgroups_list, self.deploy)
-        elif responce == 'IpsetCheckERROR':
-            print responce
+            response = self.rule_builder.manage_ipset(ipset_action, set_ipver, ipset_type, port, set_name,
+                                                      netgroup_networks, hostnames, ips, netgroup_set_list, self.deploy)
+        elif response == 'IpsetCheckERROR':
+            print response
             sys.exit(1)
         if set_name is None:
-            return responce, netgroup
+            return response, netgroup_networks
 
         else:
-            return responce, set_name
+            return response, set_name
+
+###########################################################################################################
+    def handle_list_set(self, ipset_setction, ip_version, update_only=False):
+        """
+        This method is used to create a list:set type of ipset. This includes other already in memory sets.
+        Works by reading the sections that define the other sets, builds them first and then adds them to it.
+
+        :param ipset_setction: Section of the list set
+        :param ip_version: ip version to build on IPv4 or IPv6
+        :param update_only: flag to update sets only to be passed to handle ipsets method
+        :return: the response and the name of the set
+        """
+
+        actual_set_names = []
+
+        try:
+            set_name = eval(self.parser.get(ipset_setction, 'set_name').encode('utf-8'))
+            set_name[0] = set_name[0].replace(' ', '_')
+        except configparser.NoOptionError:
+            set_name = None
+
+        try:
+            list_set_sections = eval(self.parser.get(ipset_setction, 'list_set_sections').encode('utf-8'))
+        except configparser.NoOptionError:
+            list_set_sections = None
+
+        set_name[0] = set_name[0].replace(' ', '_')
+        if ip_version == 'ipv4':
+            if '_v4' not in set_name[0]:
+                set_name[0] += '_v4'
+        elif ip_version == 'ipv6':
+            if '_v6' not in set_name[0]:
+                set_name[0] += '_v6'
+
+        if not self.generate_files:
+            response_exist = self.rule_builder.check_ipset("", set_name[0])
+        else:
+            response_exist = "SetDoNotExist"
+
+        if list_set_sections is not None:
+            if type(list_set_sections) is list:
+                for sect in list_set_sections:
+                    response, name = self.handle_ipsets(sect, ip_version, update_only)
+                    name[0] = name[0].replace(' ', '_')
+                    if ip_version == 'ipv4':
+                        name[0] += '_v4'
+                    elif ip_version == 'ipv6':
+                        name[0] += '_v6'
+                    actual_set_names.append(name[0])
+                if response_exist == "SetDoNotExist":
+                    self.rule_builder.manage_ipset("create", None, "list:set", None, set_name, None, None, None, None,
+                                                   self.deploy, self.generate_files, False, actual_set_names)
+                elif response_exist == "SetExists":
+                    self.rule_builder.manage_ipset("update", None, "list:set", None, set_name, None, None, None, None,
+                                                   self.deploy, self.generate_files, self.file_override,
+                                                   actual_set_names)
+            else:
+                pass
+        else:
+            if response_exist == "SetDoNotExist":
+                response = self.rule_builder.manage_ipset("create", None, "list:set", None, set_name, None, None, None,
+                                                          None, self.deploy, self.generate_files, False, [])
+            elif response_exist == "SetExists":
+                response = self.rule_builder.manage_ipset("update", None, "list:set", None, set_name, None, None, None,
+                                                          None, self.deploy, self.generate_files, self.file_override, [])
+
+        return response, set_name
+
 
 ###########################################################################################################
     def handle_bidirectional_rules(self, general_section, ip_version):
@@ -640,7 +901,10 @@ class ManageRules(object):
         if self.parser.has_option(general_section, 'set'):
             set_section = self.parser.get(general_section, 'set').encode('utf-8')
             if self.parser.has_section(set_section):
-                response_set, set_name = self.handle_ipsets(set_section, ip_version)
+                if self.parser.get(set_section, "ipset_type") != "list:set":
+                    response_set, set_name = self.handle_ipsets(set_section, ip_version)
+                else:
+                    response_set, set_name = self.handle_list_set(set_section, ip_version)
                 if response_set == 'SETNOTFOUND':
                     print 'SETNOTFOUND'
                     print 'Section: ', general_section
@@ -878,7 +1142,10 @@ class ManageRules(object):
         if self.parser.has_option(general_section, 'set'):
             set_section = self.parser.get(general_section, 'set').encode('utf-8')
             if self.parser.has_section(set_section):
-                response_set, set_name = self.handle_ipsets(set_section, ip_version)
+                if self.parser.get(set_section, "ipset_type") != "list:set":
+                    response_set, set_name = self.handle_ipsets(set_section, ip_version)
+                else:
+                    response_set, set_name = self.handle_list_set(set_section, ip_version)
                 if response_set == 'SETNOTFOUND':
                     print 'SETNOTFOUND'
                     print 'Section: ', general_section
@@ -905,6 +1172,7 @@ class ManageRules(object):
             if self.parser.has_option(general_section, 'set'):
                 if response_set == 0:
                     set_name[0] = set_name[0].replace(' ', '_')
+                    # if self.parser.get(set_section, 'ipset_type').encode('utf-8') != "list:set":
                     if ip_version == 'ipv4':
                         if '_v4' not in set_name[0]:
                             set_name[0] += '_v4'
@@ -1232,14 +1500,21 @@ class ManageRules(object):
         if len(general_sections) > 0:
             for sect in general_sections:
                 if self.parser.has_option(sect, "set"):
+                    set_sect = self.parser.get(sect, "set")
                     if self.parser.get(sect, 'ip_version') in ['ipv4', 'both']:
                         ip_version = 'ipv4'
-                        responce, set_name = self.handle_ipsets(self.parser.get(sect, "set"), ip_version, True)
+                        if self.parser.get(set_sect, "ipset_type") != "list:set":
+                            responce, set_name = self.handle_ipsets(set_sect, ip_version, True)
+                        else:
+                            responce, set_name = self.handle_list_set(set_sect, ip_version, True)
                         print responce, set_name
 
                     if self.parser.get(sect, 'ip_version') in ['ipv6', 'both']:
                         ip_version = 'ipv6'
-                        responce, set_name = self.handle_ipsets(self.parser.get(sect, "set"), ip_version, True)
+                        if self.parser.get(set_sect, "ipset_type") != "list:set":
+                            responce, set_name = self.handle_ipsets(set_sect, ip_version, True)
+                        else:
+                            responce, set_name = self.handle_list_set(set_sect, ip_version, True)
                         print responce, set_name
 
             self.rule_builder.save_ipset(self.deploy)

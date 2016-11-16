@@ -59,7 +59,7 @@
 <tr class="field-odd field"><th class="field-name">description:</th><td class="field-body"><p class="first"><em>Free text to add description to each ipset</em></p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">ipset_type:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">hash:net,port</span></code> or <code class="docutils literal"><span class="pre">hash:ip,port</span></code> or <code class="docutils literal"><span class="pre">hash:net</span></code> or <code class="docutils literal"><span class="pre">hash:ip</span></code> or <code class="docutils literal"><span class="pre">hash:ip,port,net</span></code> or <code class="docutils literal"><span class="pre">hash:ip,port,ip</span></code></p>
+<tr class="field-even field"><th class="field-name">ipset_type:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">hash:net,port</span></code> or <code class="docutils literal"><span class="pre">hash:ip,port</span></code> or <code class="docutils literal"><span class="pre">hash:net</span></code> or <code class="docutils literal"><span class="pre">hash:ip</span></code> or <code class="docutils literal"><span class="pre">hash:ip,port,net</span></code> or <code class="docutils literal"><span class="pre">hash:ip,port,ip</span></code> or <code class="docutils literal"><span class="pre">list:set</span></code></p>
 <p>The above types are allowed to be defined when describing an ipset.</p>
 </td>
 </tr>
@@ -68,15 +68,18 @@
 actually created on the kernel side.</p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">netgroup_name:</th><td class="field-body"><p class="first">Here we define the name of a netgroup from which host we will create the ipset</p>
+<tr class="field-even field"><th class="field-name" colspan="2">netgroup_set_name:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">Here we define the name of a LanDB set from which host we will create the ipset</p>
 <p>Note that if we don&#8217;t specify a name the set will take the LanDB name if its smaller than 29 chars</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">netgroups_list:</th><td class="field-body"><p class="first">Here we define a list of netgroups so we can create ipsets based on many LanDB sets</p>
+<tr class="field-odd field"><th class="field-name" colspan="2">netgroup_set_list:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">Here we define a list of LandDB sets so we can create ipsets based on many LanDB sets</p>
 <p>Note that depending on the ipset type each element of the list should in the appropriate format</p>
 <ul class="simple">
-<li>e.g. <code class="docutils literal"><span class="pre">[&quot;script:test_port.sh&quot;,&quot;script:test_port_2.sh&quot;,&quot;agkara-train,6178&quot;]</span></code></li>
+<li>e.g. <code class="docutils literal"><span class="pre">[&quot;script_double:test_port.sh&quot;,&quot;script_double:test_port_2.sh&quot;,&quot;agkara-train,6178&quot;]</span></code></li>
 <li>e.g. <code class="docutils literal"><span class="pre">['CERNVM-CLUSTER-ESX,tcp:5530,CDS</span> <span class="pre">LB','DRUPAL,tcp:6677,FRONTIER-MONITORING']</span></code></li>
+<li>e.g. <code class="docutils literal"><span class="pre">[&quot;script:test.sh,80&quot;,&quot;script:test_2.sh,443&quot;,&quot;agkara-train,6178&quot;]</span></code></li>
 </ul>
 </td>
 </tr>
@@ -118,8 +121,16 @@ actually created on the kernel side.</p>
 </table>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">script:</th><td class="field-body"><p class="first last">When you want to use a script inside the ipset for either <strong>hostnames</strong> or <strong>cern_set_list</strong> you have to define
+<tr class="field-odd field"><th class="field-name">script:</th><td class="field-body"><p class="first">When you want to use a script inside the ipset for either <strong>hostnames</strong> or <strong>netgroup_set_list</strong> you have to define
 the <strong>script:</strong> &#8220;<em>keyword</em>&#8221; and then the script as you would normally type in the command line.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">script_double:</th><td class="field-body"><p class="first">When you want to use a script to return pairs of <strong>hostname,port</strong> inside the ipset for <strong>hostnames</strong> you have to define
+the <strong>script_double:</strong> &#8220;<em>keyword</em>&#8221; and then the script as you would normally type in the command line.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">netgroup:</th><td class="field-body"><p class="first last">When you want to use a netgroup to return hostnames inside the ipset for <strong>hostnames</strong> option you have to define
+the <strong>netgroup:</strong> &#8220;<em>keyword</em>&#8221; and then the name for of the netgroup.</p>
 </td>
 </tr>
 </tbody>

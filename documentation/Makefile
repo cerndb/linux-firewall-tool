@@ -91,9 +91,9 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/cerndb-infra-firewall-tool.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/linux-firewall-tool.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/cerndb-infra-firewall-tool.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/linux-firewall-tool.qhc"
 
 .PHONY: applehelp
 applehelp:
@@ -110,8 +110,8 @@ devhelp:
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/cerndb-infra-firewall-tool"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/cerndb-infra-firewall-tool"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/linux-firewall-tool"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/linux-firewall-tool"
 	@echo "# devhelp"
 
 .PHONY: epub

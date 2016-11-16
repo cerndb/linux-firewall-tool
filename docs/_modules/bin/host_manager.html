@@ -54,7 +54,7 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Author: Athanasios Gkaraliakos</span>
-<span class="sd">email: a.gkaraliakos@gmail.com</span>
+<span class="sd">email: athanasios.gkaraliakos@cern.ch</span>
 
 <span class="sd">The script is written on python &gt;=2.6</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -62,10 +62,12 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
-<span class="kn">import</span> <span class="nn">configparser</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))))</span>
+<span class="kn">import</span> <span class="nn">configparser</span>
 <span class="kn">from</span> <span class="nn">iptables_manager</span> <span class="k">import</span> <span class="n">iptables_manager</span>
 <span class="kn">from</span> <span class="nn">iptables_manager_modules.rules_builder</span> <span class="k">import</span> <span class="n">FirewallRuleBuilder</span>
+<span class="kn">from</span> <span class="nn">ip_dns_resolve</span> <span class="k">import</span> <span class="n">ip_dns_resolver</span>
+<span class="kn">from</span> <span class="nn">netgroups_set_extraction</span> <span class="k">import</span> <span class="n">netgroup_set_extractor</span>
 
 
 <div class="viewcode-block" id="ReadWriteConfigFiles"><a class="viewcode-back" href="../../code_documentation/host_manager.html#bin.host_manager.ReadWriteConfigFiles">[docs]</a><span class="k">class</span> <span class="nc">ReadWriteConfigFiles</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -74,6 +76,7 @@
 <span class="sd">    and adds all the sections of the file as key and its options as value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1"># parser = configparser.RawConfigParser()</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ReadWriteConfigFiles.read_config_file"><a class="viewcode-back" href="../../code_documentation/host_manager.html#bin.host_manager.ReadWriteConfigFiles.read_config_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
@@ -157,8 +160,13 @@
                     <span class="nb">print</span> <span class="s2">&quot;Specify &#39;config_folder&#39; option for section &#39;&quot;</span> <span class="o">+</span> <span class="n">i</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span>
                     <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
 
+            <span class="c1"># if not (self.parser.has_option(i.encode(&#39;utf-8&#39;), &quot;config_folder_files&quot;) or</span>
+            <span class="c1">#             (self.parser.has_option(i.encode(&#39;utf-8&#39;), &quot;config_files&quot;))):</span>
+            <span class="c1">#     print &quot;Specify &#39;config_folder_files&#39; or &#39;config_files&#39; option for section &#39;&quot; + i.encode(&quot;utf-8&quot;) + &quot;&#39;&quot;</span>
+            <span class="c1">#     sys.exit(1)</span>
+
 <div class="viewcode-block" id="ManageHosts.parse_config_file"><a class="viewcode-back" href="../../code_documentation/host_manager.html#bin.host_manager.ManageHosts.parse_config_file">[docs]</a>    <span class="k">def</span> <span class="nf">parse_config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deploy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">no_default_config</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">update_sets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop_all</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                          <span class="n">generate_files</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                          <span class="n">generate_files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">check_matches</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method is used to parse  the config files. It checks if the hostname of the machine is defined in the list</span>
 <span class="sd">        of hostnames that this configuration will be applied. Then it calls the &#39;iptables_manager&#39; function from the</span>
@@ -184,11 +192,14 @@
                 <span class="nb">print</span> <span class="s2">&quot;&#39;machines&#39; option for section &#39;&quot;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s2">&quot;&#39; must be a list or a sciprt to run&quot;</span>
                 <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
+            <span class="c1"># if update_sets and not no_default_config:</span>
+            <span class="c1">#     print &quot;Cannot apply default config and update sets!!!!!!&quot;</span>
+            <span class="c1">#     sys.exit(1)</span>
             <span class="k">if</span> <span class="n">update_sets</span><span class="p">:</span>
                 <span class="n">no_default_config</span> <span class="o">=</span> <span class="kc">True</span>
 
             <span class="k">if</span> <span class="n">hostname</span> <span class="ow">in</span> <span class="n">machines</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="s2">&quot;####### SECTION matched: &#39;&quot;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s2">&quot;&#39; ################&quot;</span>
+                <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">####### SECTION matched: &#39;&quot;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s2">&quot;&#39; ################&quot;</span>
 
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">default_interface</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span> <span class="s2">&quot;default_interface&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
@@ -221,8 +232,8 @@
                         <span class="k">if</span> <span class="n">config_folder</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;/&#39;</span><span class="p">:</span>
                             <span class="n">config_folder</span> <span class="o">+=</span> <span class="s1">&#39;/&#39;</span>
                         <span class="k">for</span> <span class="n">cfile</span> <span class="ow">in</span> <span class="n">config_folder_files</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">config_folder</span><span class="o">+</span><span class="n">cfile</span><span class="p">):</span>
-                                <span class="n">config_files_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config_folder</span><span class="o">+</span><span class="n">cfile</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">config_folder</span> <span class="o">+</span> <span class="n">cfile</span><span class="p">):</span>
+                                <span class="n">config_files_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config_folder</span> <span class="o">+</span> <span class="n">cfile</span><span class="p">)</span>
                             <span class="k">else</span><span class="p">:</span>
                                 <span class="nb">print</span> <span class="s2">&quot;File: &#39;&quot;</span> <span class="o">+</span> <span class="n">cfile</span> <span class="o">+</span> <span class="s2">&quot;&#39; under folder &#39;&quot;</span> <span class="o">+</span> <span class="n">config_folder</span> <span class="o">+</span> <span class="s2">&quot;&#39; of section &#39;&quot;</span> <span class="o">+</span> <span class="n">sect</span> \
                                       <span class="o">+</span> <span class="s2">&quot;&#39; does not exits&quot;</span>
@@ -239,16 +250,111 @@
                             <span class="nb">print</span> <span class="s2">&quot;File: &#39;&quot;</span> <span class="o">+</span> <span class="n">config_files</span> <span class="o">+</span> <span class="s2">&quot;&#39; under folder &#39;&quot;</span> <span class="o">+</span> <span class="n">config_folder</span> <span class="o">+</span> <span class="s2">&quot;&#39; of section &quot;</span> <span class="o">+</span> <span class="n">sect</span> \
                                   <span class="o">+</span> <span class="s2">&quot; does not exits&quot;</span>
 
+                <span class="c1"># print &quot;Config file list: &quot;, config_files_list</span>
                 <span class="k">if</span> <span class="n">config_files_list</span> <span class="ow">is</span> <span class="p">[]:</span>
                     <span class="n">config_files_list</span> <span class="o">=</span> <span class="kc">None</span>
-
-                <span class="nb">print</span> <span class="s2">&quot;Deploy is:&quot;</span><span class="p">,</span> <span class="n">deploy</span>
-                <span class="n">iptables_manager</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">config_files_list</span><span class="p">,</span> <span class="n">default_interface</span><span class="p">,</span> <span class="n">no_default_config</span><span class="p">,</span> <span class="n">allow</span><span class="p">,</span> <span class="n">drop_all</span><span class="p">,</span>
-                                 <span class="n">update_sets</span><span class="p">,</span> <span class="n">deploy</span><span class="p">,</span> <span class="n">generate_files</span><span class="p">)</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">check_matches</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s2">&quot;Config folder: &quot;</span><span class="p">,</span> <span class="n">config_folder</span>
+                    <span class="nb">print</span> <span class="s2">&quot;Config files: &quot;</span><span class="p">,</span> <span class="n">config_folder_files</span>
+                    <span class="nb">print</span> <span class="s2">&quot;Config individual files: &quot;</span><span class="p">,</span> <span class="n">config_files</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s2">&quot;Deploy is:&quot;</span><span class="p">,</span> <span class="n">deploy</span>
+                    <span class="n">iptables_manager</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">config_files_list</span><span class="p">,</span> <span class="n">default_interface</span><span class="p">,</span> <span class="n">no_default_config</span><span class="p">,</span> <span class="n">allow</span><span class="p">,</span> <span class="n">drop_all</span><span class="p">,</span>
+                                     <span class="n">update_sets</span><span class="p">,</span> <span class="n">deploy</span><span class="p">,</span> <span class="n">generate_files</span><span class="p">)</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span> <span class="s2">&quot;Machine list: &quot;</span><span class="p">,</span> <span class="n">machines</span>
-                <span class="nb">print</span> <span class="s2">&quot;Machine &quot;</span> <span class="o">+</span> <span class="n">hostname</span> <span class="o">+</span> <span class="s2">&quot; not in this sections machine list. </span><span class="se">\n</span><span class="s2">Nothing to do..&quot;</span></div></div>
+                <span class="nb">print</span> <span class="s2">&quot;Machine &quot;</span> <span class="o">+</span> <span class="n">hostname</span> <span class="o">+</span> <span class="s2">&quot; not in this sections machine list. </span><span class="se">\n</span><span class="s2">Nothing to do..&quot;</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No matching sections&quot;</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div></div>
+
+
+<span class="c1">###########################################################################################################</span>
+
+<div class="viewcode-block" id="check_machines_functions"><a class="viewcode-back" href="../../code_documentation/host_manager.html#bin.host_manager.check_machines_functions">[docs]</a><span class="k">def</span> <span class="nf">check_machines_functions</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is used to perform health checks before the tool starts</span>
+
+<span class="sd">    :return: Boolean</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">valid_dns</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">valid_landb</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">project_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)))</span>
+
+    <span class="n">dns_ipv4</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ip-dns-1&#39;</span><span class="p">:</span> <span class="s1">&#39;137.138.16.5&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;ip-dns-2&#39;</span><span class="p">:</span> <span class="s1">&#39;137.138.17.5&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;ip-dns-3&#39;</span><span class="p">:</span> <span class="s1">&#39;172.18.16.5&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;ip-dns-4&#39;</span><span class="p">:</span> <span class="s1">&#39;172.18.17.5&#39;</span><span class="p">}</span>
+
+    <span class="n">dns_ipv6</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ip-dns-1.ipv6&#39;</span><span class="p">:</span> <span class="s1">&#39;2001:1458:201:1000::5&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;ip-dns-2.ipv6&#39;</span><span class="p">:</span> <span class="s1">&#39;2001:1458:201:1100::5&#39;</span><span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dns_ipv4</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">ip_dns_resolver</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;ipv4&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">dns_ipv4</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+            <span class="n">valid_dns</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_dns</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dns_ipv6</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">ip_dns_resolver</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;ipv6&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">dns_ipv4</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                <span class="n">valid_dns</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">project_folder</span> <span class="o">+</span> <span class="s1">&#39;/default_conf_files&#39;</span> <span class="o">+</span> <span class="s1">&#39;/configuration_info.cfg&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s1">&#39;landb_set_check&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">check_landb_set</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1"># print check_landb_set</span>
+                <span class="k">break</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">project_folder</span> <span class="o">+</span> <span class="s1">&#39;/default_conf_files&#39;</span> <span class="o">+</span> <span class="s1">&#39;/configuration_info.cfg&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s1">&#39;landb_set_values&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">check_landb_value</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1"># print check_landb_value</span>
+                <span class="k">break</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Cannot read config file!!! Cannot read config file!!! </span><span class="se">\n</span><span class="s2">Path: &quot;</span> <span class="o">+</span> <span class="n">project_folder</span> <span class="o">+</span> \
+              <span class="s1">&#39;/default_conf_files&#39;</span> <span class="o">+</span> <span class="s1">&#39;/configuration_info.cfg&#39;</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">check_value</span> <span class="o">=</span> <span class="n">netgroup_set_extractor</span><span class="p">(</span><span class="s1">&#39;ip&#39;</span><span class="p">,</span> <span class="n">check_landb_set</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">check_value</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">check_landb_value</span><span class="p">:</span>
+        <span class="n">valid_landb</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">project_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)))</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">project_folder</span> <span class="o">+</span> <span class="s1">&#39;/default_conf_files&#39;</span> <span class="o">+</span> <span class="s1">&#39;/configuration_info.cfg&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s2">&quot;custom_check&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">break</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Cannot read config file!!! Cannot read config file!!! </span><span class="se">\n</span><span class="s2">Path: &quot;</span> <span class="o">+</span> <span class="n">project_folder</span> <span class="o">+</span> \
+              <span class="s1">&#39;/default_conf_files&#39;</span> <span class="o">+</span> <span class="s1">&#39;/configuration_info.cfg&#39;</span> <span class="o">+</span> <span class="s2">&quot; </span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;Command:&quot;</span><span class="p">,</span> <span class="n">command</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">command</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="n">command</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="n">command</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">output</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">exit_code</span> <span class="o">=</span> <span class="n">FirewallRuleBuilder</span><span class="o">.</span><span class="n">sys_process_executor</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">############## Check script output ###############################</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="nb">print</span> <span class="n">output</span>
+        <span class="k">if</span> <span class="n">exit_code</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">script_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Error:&quot;</span><span class="p">,</span> <span class="n">err</span>
+            <span class="n">script_valid</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">script_valid</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="n">valid_dns</span> <span class="ow">and</span> <span class="n">valid_landb</span> <span class="ow">and</span> <span class="n">script_valid</span></div>
 
 
 <span class="c1">###########################################################################################################</span>
@@ -269,28 +375,38 @@
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--generate_files&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Generate iptables and ipset configuration files&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--allow&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Set policy to ACCEPT&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--drop_all&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Set policy to DENY&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--ignore_check&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Ignore needed network components check&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--check_matches&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Check all section of the file and print at which &#39;</span>
+                                                                     <span class="s1">&#39;sections is this machine matching&#39;</span><span class="p">)</span>
 
     <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">file_reader</span> <span class="o">=</span> <span class="n">ReadWriteConfigFiles</span><span class="p">()</span>
-            <span class="n">file_parser</span> <span class="o">=</span> <span class="n">file_reader</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Error reading the files&quot;</span><span class="p">)</span>
-            <span class="nb">print</span> <span class="s2">&quot;Please check the files are under the provided path/s&quot;</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-
-        <span class="n">host_manager</span> <span class="o">=</span> <span class="n">ManageHosts</span><span class="p">(</span><span class="n">file_parser</span><span class="p">)</span>
-
-        <span class="n">host_manager</span><span class="o">.</span><span class="n">config_integrity_check</span><span class="p">()</span>
-
-        <span class="n">host_manager</span><span class="o">.</span><span class="n">parse_config_file</span><span class="p">(</span><span class="n">deploy</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">deploy</span><span class="p">,</span> <span class="n">no_default_config</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">no_default_config</span><span class="p">,</span>
-                                       <span class="n">update_sets</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">update_sets</span><span class="p">,</span> <span class="n">allow</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">allow</span><span class="p">,</span> <span class="n">drop_all</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">drop_all</span><span class="p">,</span>
-                                       <span class="n">generate_files</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">generate_files</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">ignore_check</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">check_matches</span><span class="p">:</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Ignoring DNS and LanDB check result.</span><span class="se">\n</span><span class="s2">&quot;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span> <span class="s2">&quot;Please specify config file/s&quot;</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+        <span class="n">valid</span> <span class="o">=</span> <span class="n">check_machines_functions</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">valid</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">file_reader</span> <span class="o">=</span> <span class="n">ReadWriteConfigFiles</span><span class="p">()</span>
+                <span class="n">file_parser</span> <span class="o">=</span> <span class="n">file_reader</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+                <span class="c1"># print file_parser.sections()</span>
+            <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Error reading the files&quot;</span><span class="p">)</span>
+                <span class="nb">print</span> <span class="s2">&quot;Please check the files are under the provided path/s&quot;</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">host_manager</span> <span class="o">=</span> <span class="n">ManageHosts</span><span class="p">(</span><span class="n">file_parser</span><span class="p">)</span>
+
+            <span class="n">host_manager</span><span class="o">.</span><span class="n">config_integrity_check</span><span class="p">()</span>
+
+            <span class="n">host_manager</span><span class="o">.</span><span class="n">parse_config_file</span><span class="p">(</span><span class="n">deploy</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">deploy</span><span class="p">,</span> <span class="n">no_default_config</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">no_default_config</span><span class="p">,</span>
+                                           <span class="n">update_sets</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">update_sets</span><span class="p">,</span> <span class="n">allow</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">allow</span><span class="p">,</span> <span class="n">drop_all</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">drop_all</span><span class="p">,</span>
+                                           <span class="n">generate_files</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">generate_files</span><span class="p">,</span> <span class="n">check_matches</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">check_matches</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Network components check failed. Cannot operate&quot;</span></div>
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>

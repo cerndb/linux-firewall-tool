@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# pylint: disable=C0301
 
 # Copyright (C) 2016, CERN
 # This software is distributed under the terms of the GNU General Public
@@ -8,13 +7,14 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+# pylint: disable=C0301
 """
 Author: Athanasios Gkaraliakos
-email: a.gkaraliakos@gmail.com
+email: athanasios.gkaraliakos@cern.ch
 
 The script is written on python >=2.6
 
-Script to create/modify/delete ipsets on CentOS6.x and older of IPv4 and/or IPv6 (if exists)
+Script to create/modify/delete ipsets on CentOS6.x and older of IPv4 and/or IPv6 (if exists) from CERN's network sets.
 
 """
 
@@ -22,14 +22,10 @@ import sys
 import argparse
 import subprocess
 import os
-import ipaddress
 from ip_dns_resolve import ip_dns_resolver
-from netset_extraction import netset_extractor
-
-# path, fl = os.path.split(os.path.realpath(__file__+'..'))
-# del fl
-# sys.path.append(path + '../')
-# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from netgroups_set_extraction import netgroup_set_extractor
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import ipaddress
 
 
 ######################################################################################
@@ -86,7 +82,7 @@ def read_config_file(parameter):
 ######################################################################################
 # Extract Network sets using set name from the CERN network service
 # Call the python script that handles the soap parsing and set extraction from the network service
-def get_network_sets(set_names, iptype):
+def get_network_sets(set_names, iptype, username=None, password=None):
     # pylint: disable=C0301
     """
     The function uses the ip_extraction.py python script to query LanDB service based on a network set name and extract
@@ -98,9 +94,15 @@ def get_network_sets(set_names, iptype):
     :param password: mandatory if you specify username for the LanDB service authentication
     :return: String output containing all the ip address if they are successfully resolved
     """
-    cern_net_set = netset_extractor(iptype, set_names)
-    # print "Temp: ", temp
-    return cern_net_set
+
+    if (username is not None) and (password is not None):
+        netgroup_set = netgroup_set_extractor(iptype, set_names, username, password)
+        # print "Temp cred: ", temp
+        return netgroup_set
+    else:
+        netgroup_set = netgroup_set_extractor(iptype, set_names)
+        # print "Temp: ", temp
+        return netgroup_set
 
 
 ######################################################################################
@@ -183,7 +185,6 @@ def create_ip_set(simulate, ips, setname, iptype, settype, port, generate_file, 
     if iptype == "ipv4":
         setname += "_v4"
         if simulate:
-            # print ipset_command, ' create ', setname, ' ', settype, ' family ', 'inet'
             if generate_file:
                 file_lines.append(['create', setname, settype, 'family', 'inet', 'hashsize', '1024', 'maxelem', '65536'])
             else:
@@ -194,7 +195,6 @@ def create_ip_set(simulate, ips, setname, iptype, settype, port, generate_file, 
     elif iptype == "ipv6":
         setname += "_v6"
         if simulate:
-            # print ipset_command, ' create ', setname, ' ', settype, ' family ', 'inet6'
             if generate_file:
                 file_lines.append(['create', setname, settype, 'family', 'inet6', 'hashsize', '1024', 'maxelem', '65536'])
             else:
@@ -263,18 +263,14 @@ def destroy_ip_set(simulate, setname, iptype):
 
     if iptype == "ipv4":
         setname += "_v4"
-        if simulate:
-            print ipset_command, ' destroy ', setname
-        else:
-            call = subprocess.Popen([ipset_command, 'destroy', setname],
-                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     elif iptype == "ipv6":
         setname += "_v6"
-        if simulate:
-             print ipset_command, ' destroy ', setname
-        else:
-            call = subprocess.Popen([ipset_command, 'destroy', setname],
-                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    if simulate:
+        print ipset_command, ' destroy ', setname
+    else:
+        call = subprocess.Popen([ipset_command, 'destroy', setname],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     if not simulate:
         response, err = call.communicate()
@@ -372,9 +368,9 @@ def update_ip_set(simulate, ips, set_name, ip_type, settype, port):
         in_set_not_in_network = lr_diff(ips_of_set, ips)
 
         if len(in_network_not_in_set) >= 1:
-            print "in_network_not_in_set: ", in_network_not_in_set
+            print "To be added: ", in_network_not_in_set
         if len(in_set_not_in_network) >= 1:
-            print "in_set_not_in_network: ", in_set_not_in_network
+            print "To be removed: ", in_set_not_in_network
 
 
 ######################################################################################
@@ -387,8 +383,6 @@ def save_current_ipset(simulate):
     :return: void
     """
     ipset_script = read_config_file('ipset_script')
-    # ipset_command = read_config_file('ipset_command')
-    # ipset_file = read_config_file('ipset_file')
 
     if simulate:
         print ipset_script + " save"
@@ -408,9 +402,102 @@ def save_current_ipset(simulate):
 
 
 ######################################################################################
-# create/modify/delete ip sets based on network groups of either IPv4 or IPv6
-def handle_netgroups_set(simulate, action, iptype, set_names, settype, port, custom_name=None, generate_file=False,
-                         file_override=False, cmd=False):
+
+def handle_list_set(simul, action, set_name, set_names_list, generate_file=False):
+    """
+    This function is used to handle the operation on list:set type of ipset.
+
+    :param simul: Flag to print or not
+    :param action: the action to perform
+    :param set_name: name of the set
+    :param set_names_list: list of names of other existing ipsets to add
+    :param generate_file: Flag to write to the ipset generated file or not
+    :return: 0 if ok or 1 if not ok
+    """
+
+    ipset_command = read_config_file('ipset_command')
+
+    file_lines = []
+
+    if action == 'create':
+        call = subprocess.Popen([ipset_command, 'list', set_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        response, err = call.communicate()
+        exit_code = call.wait()
+        if exit_code != 0:
+            if not simul:
+                call = subprocess.Popen([ipset_command, 'create', set_name, 'list:set'], stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
+                response, err = call.communicate()
+                exit_code = call.wait()
+            else:
+                if generate_file:
+                    file_lines.append(['create', set_name, 'list:set'])
+                else:
+                    print ipset_command, ' create ', set_name, ' list:set'
+                exit_code = 0
+            if exit_code != 0:
+                print "Error creating the specified set, exit code: ", exit_code
+                print err
+            else:
+                print "Set '" + set_name + "' created"
+                if set_names_list is not None:
+                    if not simul:
+                        call = subprocess.Popen([ipset_command, 'list', '-n'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        response, err = call.communicate()
+                        exit_code = call.wait()
+                    else:
+                        exit_code = 0
+                    if exit_code != 0:
+                        print "Error listing ipsets, exit code: ", exit_code
+                        print err
+                    else:
+                        if not simul:
+                            current_sets = response.split('\n')
+                            for _set_ in set_names_list:
+                                if _set_ in current_sets:
+                                        call = subprocess.Popen([ipset_command, 'add', set_name, _set_],
+                                                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                        response, err = call.communicate()
+                                        exit_code = call.wait()
+                                        if exit_code != 0:
+                                            print "Error adding the specified set to the list set, exit code: ", exit_code
+                                            print err
+                                else:
+                                    print "Set name: '" + str(_set_) + "' does not exist. Omitting"
+                        else:
+                            for _set_ in set_names_list:
+                                if not generate_file:
+                                    print ipset_command + ' add ' + set_name + ' ' + _set_
+                                else:
+                                    file_lines.append(['add', set_name, _set_])
+                            if generate_file:
+                                write_config_file(set_name, file_lines, False)
+        else:
+            print "Set '" + set_name + "' already exists. Cannot create"
+            return 1
+    elif action == 'update':
+        call = subprocess.Popen([ipset_command, 'list', set_name, '-n'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        exit_code = call.wait()
+        if exit_code == 0:
+            update_ip_set(simul, set_names_list, set_name, "", "list:set", None)
+        else:
+            print "Set '" + set_name + "' does not exist. Cannot update"
+            return 1
+    elif action == 'destroy':
+        call = subprocess.Popen([ipset_command, 'list', set_name, '-n'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        exit_code = call.wait()
+        if exit_code == 0:
+            destroy_ip_set(simul, set_name, "")
+        else:
+            print "Set '" + set_name + "' does not exist. Cannot delete"
+            return 0
+
+
+######################################################################################
+
+# create/modify/delete ip sets based on cern network service of either IPv4 or IPv6
+def handle_netgroups_set(simulate, action, iptype, set_names, settype, port, custom_name=None, username=None, password=None,
+                         generate_file=False, file_override=False, cmd=False):
     # pylint: disable=C0301
     """
     This function handles the action to be performed based on the provided input action of the user. The main role of
@@ -423,6 +510,8 @@ def handle_netgroups_set(simulate, action, iptype, set_names, settype, port, cus
     :param settype: IPset type. Only the allowed sets
     :param port: Port number if the set type contains port
     :param custom_name: Custom ipset name if the regular name is to large of if the user wants a shorter one
+    :param username: optional username for the LanDB service authentication
+    :param password: mandatory if you specify username for the LanDB service authentication
     :param generate_file: Flag whether or not to generate ipset file
     :param file_override: Flag whether or not to override ipset file
     :param cmd: Flag to save current ipset state if script was called vim the command line
@@ -430,8 +519,10 @@ def handle_netgroups_set(simulate, action, iptype, set_names, settype, port, cus
     """
 
     if action == 'create':
-
-        output = get_network_sets(set_names, iptype)
+        if (username is not None) and (password is not None):
+            output = get_network_sets(set_names, iptype, username, password)
+        else:
+            output = get_network_sets(set_names, iptype)
 
         if "SETNOTFOUND" in output:
             # print output
@@ -464,7 +555,10 @@ def handle_netgroups_set(simulate, action, iptype, set_names, settype, port, cus
 
     elif action == 'update':
 
-        output = get_network_sets(set_names, iptype)
+        if (username is not None) and (password is not None):
+            output = get_network_sets(set_names, iptype, username, password)
+        else:
+            output = get_network_sets(set_names, iptype)
 
         if "SETNOTFOUND" in output:
             # print output
@@ -484,7 +578,7 @@ def handle_netgroups_set(simulate, action, iptype, set_names, settype, port, cus
 ######################################################################################
 # create/modify/delete custom ip sets of either IPv4 or IPv6
 def handle_custom_set(simulate, action, setname, iptype, settype, ips=None, hostnames=None, port=None,
-                      netgroups_list=None, generate_file=False, file_override=False, cmd=False):
+                      netgroup_net_list=None, generate_file=False, file_override=False, cmd=False):
     # pylint: disable=C0301
     """
     This function handles the action to be performed based on the provided input action of the user. The main role of
@@ -499,7 +593,7 @@ def handle_custom_set(simulate, action, setname, iptype, settype, ips=None, host
     :param hostnames: The hostnames of either single boxes or aliases ( to resolved via dns ) that will be added in
                       the ipset
     :param port: Port number if the set type contains port
-    :param netgroups_list: A list of network groups names to be added into the set.
+    :param netgroup_net_list: A list of cern network set names to be added into the set.
     :param generate_file: Flag whether or not to generate ipset file
     :param file_override: Flag whether or not to override ipset file
     :param cmd: Flag to save current ipset state if script was called vim the command line
@@ -507,7 +601,6 @@ def handle_custom_set(simulate, action, setname, iptype, settype, ips=None, host
     """
 
     if action in ['create', 'update']:
-        # hostset = ''
         hostsetfinal = []
 
         if settype in ['hash:ip,port,net', 'hash:ip,port,ip']:
@@ -515,19 +608,20 @@ def handle_custom_set(simulate, action, setname, iptype, settype, ips=None, host
             triplet_port = []
             triplet_ip2 = []
 
-            if netgroups_list is not None:
-                for cern_nets in xrange(len(netgroups_list)):
-                    name1, prt, name2 = netgroups_list[cern_nets].split(',')
-                    triplet_ip1.append(netset_extractor(iptype, name1))
+            if netgroup_net_list is not None:
+                for netgroups in xrange(len(netgroup_net_list)):
+                    name1, prt, name2 = netgroup_net_list[netgroups].split(',')
+                    triplet_ip1.append(netgroup_set_extractor(iptype, name1))
                     if ':' not in prt:
                         prt = 'tcp:' + prt
                     triplet_port.append(prt)
                     if settype == 'hash:ip,port,ip':
-                        triplet_ip2.append(netset_extractor(iptype, name2))
+                        triplet_ip2.append(netgroup_set_extractor(iptype, name2))
                     elif settype == 'hash:ip,port,net':
                         triplet_ip2.append(name2)
             if hostnames is not None:
                 for _host_ in xrange(len(hostnames)):
+                    # print "::::::::::::::::", hostnames[_host_]
                     ip1, prt, ip2 = hostnames[_host_].split(',')
                     triplet_ip1.append([ip_dns_resolver(ip1, iptype)])
                     if ':' not in prt:
@@ -585,19 +679,19 @@ def handle_custom_set(simulate, action, setname, iptype, settype, ips=None, host
                                 tmp_addr[t_addr] += ',' + port[hst]
                             hostsetfinal.append(tmp_addr)
                 setname = setname.replace(' ', '_')
-                # hostset = format_network_set(hostset)
+
                 hostsetfinal = extract_ips_from_network_set(hostsetfinal, iptype)
 
-            if netgroups_list is not None:
+            if netgroup_net_list is not None:
                 if 'port' not in settype:
-                    cern_net_ips = []
-                    for _set_ in netgroups_list:
+                    netgroup_net_ips = []
+                    for _set_ in netgroup_net_list:
                         ips_tmp = get_network_sets(_set_, iptype)
-                        cern_net_ips.extend(extract_ips_from_network_set(ips_tmp, iptype))
+                        netgroup_net_ips.extend(extract_ips_from_network_set(ips_tmp, iptype))
 
-                    hostsetfinal.extend(cern_net_ips)
-                    del cern_net_ips[:]
-                    del cern_net_ips
+                    hostsetfinal.extend(netgroup_net_ips)
+                    del netgroup_net_ips[:]
+                    del netgroup_net_ips
 
             if ips is not None:
                 for ip in ips:
@@ -784,6 +878,8 @@ def write_config_file(set_name, lines, override):
             print "Cannot create file path!!"
             sys.exit(1)
         else:
+            if not os.path.isfile(file_path+"/ipset.gen"):
+                override = True
             print response
 
     if override:
@@ -803,13 +899,23 @@ def write_config_file(set_name, lines, override):
     else:
         print "Do not override ipset file"
         set_exits = False
-        try:
-            if set_name in open(file_path + '/ipset.gen').read():
-                set_exits = True
-        except:
-            print "Cannot read generated ipset configuration file!!!!!"
-            sys.exit(1)
-
+        if lines[0][2] != "list:set":
+            try:
+                file_contents = open(file_path + '/ipset.gen').read()
+                if set_name in file_contents:
+                    set_exits = True
+                del file_contents
+            except:
+                print "Cannot read generated ipset configuration file!!!!!"
+                sys.exit(1)
+        else:
+            file_contents = open(file_path + '/ipset.gen').read()
+            if not set_exits:
+                print "Lines:", lines
+                for _set_ in lines[1:]:
+                    if _set_[2] not in file_contents:
+                        print "Set: " + _set_ + " has not been created. Exiting..."
+                        sys.exit(1)
         try:
             if not set_exits:
                 with open(file_path + '/ipset.gen', 'a') as file_handler:
@@ -826,8 +932,11 @@ def write_config_file(set_name, lines, override):
 
 
 ######################################################################################
-def ipset_manager(args=None, action=None, iptype=None, settype=None, port=None, setname=None, netgroups=None,
-                  netgroups_list=None, hostnames=None, ips=None, simul=False, generate_file=False, file_override=False):
+
+
+def ipset_manager(args=None, action=None, iptype=None, settype=None, port=None, setname=None, netgroup_networks=None,
+                  netgroup_set_list=None, hostnames=None, ips=None, simul=False, generate_file=False, file_override=False,
+                  set_names=None):
     # type: (object, object, object, object, object, object, object, object, object) -> object
 
     """
@@ -839,13 +948,14 @@ def ipset_manager(args=None, action=None, iptype=None, settype=None, port=None, 
     :param settype: type of ipset
     :param port: port number (optional protocol) udp:53
     :param setname: custom name for the ipset
-    :param netgroups: name of the cern networkset
-    :param netgroups_list: list of network groups to be added
+    :param netgroup_networks: name of the netgroups networkset
+    :param netgroup_set_list: list of netgroups network sets to be added
     :param hostnames: hostnames to resolve ips from
     :param ips: ips to add
     :param simul: simulate mode
     :param generate_file: generate ipset file for use with ipset-restore
     :param file_override: tell the script whether to override the ipset file
+    :param set_names: Names of existing sets to be added inside a list:set ipset
     :return: 0 if ok 1 if error
     """
 
@@ -863,47 +973,52 @@ def ipset_manager(args=None, action=None, iptype=None, settype=None, port=None, 
         else:
             return 1
 
-        # Catch ip type IPv4 or IPv6
-        if args.iptype:
-            iptype = args.iptype[0]
-        else:
-            return 1
+        if args.setname:
+            setname = args.setname
 
         # Catch ipset type
         if args.settype:
             settype = args.settype[0]
+
+            if settype != "list:set":
+                # Catch ip type IPv4 or IPv6
+                if args.iptype:
+                    iptype = args.iptype[0]
+                else:
+                    return 1
+
+                if args.port:
+                    # port = args.port[0]
+                    port = args.port
+
+                if args.netgroups_networks:
+                    netgroup_networks = args.netgroups_networks
+
+                if args.hostnames:
+                    hostnames = args.hostnames
+
+                if args.ips:
+                    ips = args.ips
+
+                if args.netgroups_set_list:
+                    netgroup_set_list = args.netgroups_set_list
+
+                if args.generate_file:
+                    generate_file = True
+                else:
+                    generate_file = False
+
+                if args.file_override:
+                    file_override = True
+                else:
+                    file_override = False
+            else:
+                if args.set_names:
+                    set_names = args.set_names
+                else:
+                    set_names = None
         else:
             return 1
-
-        if args.port:
-            # port = args.port[0]
-            port = args.port
-
-        if args.netgroups:
-            netgroups = args.netgroups
-
-        if args.setname:
-            setname = args.setname
-
-        if args.hostnames:
-            hostnames = args.hostnames
-
-        if args.ips:
-            ips = args.ips
-
-        if args.netgroups_list:
-            netgroups_list = args.netgroups_list
-
-        if args.generate_file:
-            generate_file = True
-        else:
-            generate_file = False
-
-        if args.file_override:
-            file_override = True
-        else:
-            file_override = False
-
     else:
         cmd = False
 
@@ -911,112 +1026,126 @@ def ipset_manager(args=None, action=None, iptype=None, settype=None, port=None, 
         action = 'create'
         simul = True
 
-    # Check for port argument if the given ipset type uses a port number
-    if (action != 'destroy') and ('port' in settype):
-        if port is not None:
-            if 'direct' not in port:
-                for prt in port:
-                    if ':' in prt:
-                        prot, port_num = prt.split(':')
-                        if (prot not in ['tcp', 'udp']) or (not 1 <= int(port_num) <= 65536):
-                            print "IPset port number " + prot + ":" + port_num + " not valid"
-                            return 1
-                    elif not 1 <= int(prt) <= 65536:
-                        print "IPset port number " + port + " not valid"
-                        return 1
-        else:
-            print "Ports not set!!!!"
-            return 1
+    if settype == 'list:set':
+        handle_list_set(simul, action, setname[0], set_names, generate_file)
+        return 0
     else:
-        # port = ''
-        port = []
-
-    if netgroups is not None:
-        if (setname is not None) and (len(setname) != len(netgroups)):
-            print "Custom setnames if specified should be as many as the netgroups"
-            return 1
-        if (settype is not None) and (settype[0] not in ['hash:net', 'hash:net,port']):
-            for nset in xrange(len(netgroups)):
-                if (len(netgroups[nset]) + 3) > 31:
-                    if type(setname) is list:
-                        try:
-                            if (len(setname[nset]) + 3) > 31:
-                                print "Please choose smaller name < 31 chars for ", netgroups[nset]
+        # Check for port argument if the given ipset type uses a port number
+        if (action != 'destroy') and ('port' in settype):
+            if port is not None:
+                if 'direct' not in port:
+                    for prt in port:
+                        if ':' in prt:
+                            prot, port_num = prt.split(':')
+                            if (prot not in ['tcp', 'udp']) or (not 1 <= int(port_num) <= 65536):
+                                print "IPset port number " + prot + ":" + port_num + " not valid"
                                 return 1
+                        elif not 1 <= int(prt) <= 65536:
+                            print "IPset port number " + port + " not valid"
+                            return 1
+            else:
+                print "Ports not set!!!!"
+                return 1
+        else:
+            # port = ''
+            port = []
+
+        if netgroup_networks is not None:
+            if (setname is not None) and (len(setname) != len(netgroup_networks)):
+                print "Custom setnames if specified should be as many as the networksets"
+                return 1
+            if (settype is not None) and (settype[0] not in ['hash:net', 'hash:net,port']):
+                # Authentication information
+                if (args is not None) and (type(args.username) is list):
+                    username = args.username[0]
+                    if args.password:
+                        password = args.password[0]
+                        for nset in xrange(len(netgroup_networks)):
+                            if (len(netgroup_networks[nset]) + 3) > 31:
+                                if args.setname[nset] != '':
+                                    handle_netgroups_set(simul, action, iptype, netgroup_networks[nset], settype, port,
+                                                         setname[nset], username, password, generate_file, file_override, cmd)
+                                    return 0
+                                else:
+                                    print "Name for network set " + netgroup_networks[nset] + " does not exist"
+                                    return 1
+                    else:
+                        print "Password is missing to access the network service"
+                        return 1
+                else:
+                    for nset in xrange(len(netgroup_networks)):
+                        if (len(netgroup_networks[nset]) + 3) > 31:
+                            if type(setname) is list:
+                                try:
+                                    if (len(setname[nset]) + 3) > 31:
+                                        print "Please choose smaller name < 31 chars for ", netgroup_networks[nset]
+                                        return 1
+                                    else:
+                                        output = handle_netgroups_set(simul, action, iptype, netgroup_networks[nset], settype,
+                                                                      port, setname[nset], generate_file, file_override, cmd)
+                                        if output == 'SETNOTFOUND':
+                                            return output
+                                        return 0
+                                except IndexError:
+                                    print "Setname longer than 31 chars please specify a shorter custom one using --setname"
+                                    return 1
                             else:
-                                output = handle_netgroups_set(simul, action, iptype, netgroups[nset], settype,
-                                                              port, setname[nset], generate_file, file_override, cmd)
+                                print "Set name longer thatn 31 chars please specify a shorter custom name using --setname"
+                                return 1
+                        elif setname is not None:
+                            try:
+                                # output = handle_netgroups_set(simul, action, iptype, netgroup_networks[nset], settype, port,
+                                #                          setname[nset], generate_file, file_override)
+                                output = handle_netgroups_set(simul, action, iptype, netgroup_networks[nset], settype, port,
+                                                              setname[nset], None, None, generate_file, file_override, cmd)
                                 if output == 'SETNOTFOUND':
                                     return output
                                 return 0
-                        except IndexError:
-                            print "Setname longer than 31 chars please specify a shorter custom one using --setname"
-                            return 1
-                    else:
-                        print "Set name longer thatn 31 chars please specify a shorter custom name using --setname"
-                        return 1
-                elif setname is not None:
-                    try:
-                        # output = handle_netgroups_set(simul, action, iptype, netgroups[nset], settype, port,
-                        #                          setname[nset], generate_file, file_override)
-                        output = handle_netgroups_set(simul, action, iptype, netgroups[nset], settype, port,
-                                                      setname[nset], generate_file, file_override, cmd)
-                        if output == 'SETNOTFOUND':
-                            return output
-                        return 0
-                    except IndexError:
-                        # output = handle_netgroups_set(simul, action, iptype, netgroups[nset], settype, port,
-                        # generate_file, file_override)
-                        output = handle_netgroups_set(simul, action, iptype, netgroups[nset], settype, port, None,
-                                                      generate_file, file_override, cmd)
-                        if output == 'SETNOTFOUND':
-                            return output
-                        return 1
-                else:
-                    # output = handle_netgroups_set(simul, action, iptype, netgroups[nset], settype, port, None,
-                    # None, generate_file, file_override)
-                    output = handle_netgroups_set(simul, action, iptype, netgroups[nset], settype, port, None,
-                                                  generate_file, file_override, cmd)
-                    if output == 'SETNOTFOUND':
-                        return output
-                    return 0
-        else:
-            return 1
-    elif setname is not None:
-        if (len(setname[0]) + 3) > 31:
-            print "Please choose smaller name < 31 chars for ", setname[0]
-            return 1
-        # if (ips is None and hostnames is None) and action != 'destroy':
-        #     return 1
-        elif action == 'destroy':
-            handle_custom_set(simul, action, setname[0], iptype, settype, ips, hostnames, port, netgroups_list,
-                              generate_file, file_override, cmd)
-            return 0
-        else:
-            print "Set type is: ", settype
-            # print "Hostnames: ", hostnames
-            # if port[0] != 'direct' and (len(port) > 1) and (len(port) < len(ips) + len(hostnames)):
-            if 'port' in settype:
-                if ('direct' not in port) and (len(port) > 1) and (len(port) < len(ips) + len(hostnames)):
-                    print "Ports provided are not as many as the ips + hostnames"
-                    return 1
-            if ips is not None:
-                # print "IPS is not None"
-                valid = ip_validation_check(ips, iptype, settype)
+                            except IndexError:
+                                output = handle_netgroups_set(simul, action, iptype, netgroup_networks[nset], settype, port, None,
+                                                              None, None, generate_file, file_override, cmd)
+                                if output == 'SETNOTFOUND':
+                                    return output
+                                return 1
+                        else:
+                            output = handle_netgroups_set(simul, action, iptype, netgroup_networks[nset], settype, port, None, None,
+                                                          generate_file, file_override, cmd)
+                            if output == 'SETNOTFOUND':
+                                return output
+                            return 0
             else:
-                valid = True
-
-            if valid:
-                handle_custom_set(simul, action, setname[0], iptype, settype, ips, hostnames, port, netgroups_list,
+                return 1
+        elif setname is not None:
+            if (len(setname[0]) + 3) > 31:
+                print "Please choose smaller name < 31 chars for ", setname[0]
+                return 1
+            elif action == 'destroy':
+                handle_custom_set(simul, action, setname[0], iptype, settype, ips, hostnames, port, netgroup_set_list,
                                   generate_file, file_override, cmd)
-                # print "Valid: ", valid
                 return 0
             else:
-                print "IP Validation unsuccessful: ", valid
-                return 1
-    else:
-        print "LAST ELSE !!!!!!!"
-        return 1
+                print "Set type is: ", settype
+                if 'port' in settype:
+                    if ('direct' not in port) and (len(port) > 1) and (len(port) < len(ips) + len(hostnames)):
+                        print "Ports provided are not as many as the ips + hostnames"
+                        return 1
+                if ips is not None:
+                    # print "IPS is not None"
+                    valid = ip_validation_check(ips, iptype, settype)
+                else:
+                    valid = True
+
+                if valid:
+                    handle_custom_set(simul, action, setname[0], iptype, settype, ips, hostnames, port, netgroup_set_list,
+                                      generate_file, file_override, cmd)
+                    # print "Valid: ", valid
+                    return 0
+                else:
+                    print "IP Validation unsuccessful: ", valid
+                    return 1
+        else:
+            print "LAST ELSE !!!!!!!"
+            return 1
 
 
 ######################################################################################
@@ -1030,7 +1159,8 @@ def main():
     :return: Does not return anything
     """
 
-    ipset_types = ['hash:net,port', 'hash:ip,port', 'hash:net', 'hash:ip', 'hash:ip,port,net', 'hash:ip,port,ip']
+    ipset_types = ['hash:net,port', 'hash:ip,port', 'hash:net', 'hash:ip', 'hash:ip,port,net', 'hash:ip,port,ip',
+                   'list:set']
 
     parser = argparse.ArgumentParser()
 
@@ -1046,15 +1176,16 @@ def main():
                                                      'or custom ip sets. Regarding network sets, every argument '
                                                      'after setname is corresponding to each networkset. '
                                                      'If you want to omit names use \'\' ')
-    parser.add_argument('--netgroups', nargs='+', help='Define network sets like "IT SECURITY FIREWALL ALIENDB" use'
+    parser.add_argument('--netgroup_networks', nargs='+', help='Define network sets like "IT SECURITY FIREWALL ALIENDB" use'
                                                            '" " or '' use the escape char \ if spaces or special '
                                                            'characters included')
-    parser.add_argument('--netgroups_list', nargs='+', help='Define network sets like "IT SECURITY FIREWALL ALIENDB" in '
+    parser.add_argument('--netgroup_set_list', nargs='+', help='Define network sets like "IT SECURITY FIREWALL ALIENDB" in '
                                                            'a list to add them in one set use " " or '' use the escape '
                                                            'char \ if spaces or special characters included')
     parser.add_argument('--hostnames', nargs='+', help='Define machines hostnames like "agkara-train" or '
                                                        '"agkara-train.cern.ch"')
     parser.add_argument('--ips', nargs='+', help='Define machines IPs IPv4 or IPv6')
+    parser.add_argument('--set_names', nargs='+', help='Define the names of the other sets to add to the list:set')
     parser.add_argument('--simulate', action='store_true')
     parser.add_argument('--generate_file', action='store_true', help='Tell the script to create the ipset restore file')
     parser.add_argument('--file_override', action='store_true', help='Flag whether to override the file or not')

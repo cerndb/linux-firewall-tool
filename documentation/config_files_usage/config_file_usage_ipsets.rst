@@ -8,7 +8,7 @@ Explanation of the config files for creating ipsets
 
     :description: *Free text to add description to each ipset*
 
-    :ipset_type: ``hash:net,port`` or ``hash:ip,port`` or ``hash:net`` or ``hash:ip`` or ``hash:ip,port,net`` or ``hash:ip,port,ip``
+    :ipset_type: ``hash:net,port`` or ``hash:ip,port`` or ``hash:net`` or ``hash:ip`` or ``hash:ip,port,net`` or ``hash:ip,port,ip`` or ``list:set``
 
         The above types are allowed to be defined when describing an ipset.
 
@@ -17,16 +17,17 @@ Explanation of the config files for creating ipsets
         Please note that depending for each IP protocol version ``_v4`` or ``_v6`` will be appended when the set is
         actually created on the kernel side.
 
-    :netgroup_name: Here we define the name of a netgroup from which host we will create the ipset
+    :netgroup_set_name: Here we define the name of a LanDB set from which host we will create the ipset
 
         Note that if we don't specify a name the set will take the LanDB name if its smaller than 29 chars
 
-    :netgroups_list: Here we define a list of netgroups so we can create ipsets based on many LanDB sets
+    :netgroup_set_list: Here we define a list of LandDB sets so we can create ipsets based on many LanDB sets
 
         Note that depending on the ipset type each element of the list should in the appropriate format
 
-        * e.g. ``["script:test_port.sh","script:test_port_2.sh","agkara-train,6178"]``
+        * e.g. ``["script_double:test_port.sh","script_double:test_port_2.sh","agkara-train,6178"]``
         * e.g. ``['CERNVM-CLUSTER-ESX,tcp:5530,CDS LB','DRUPAL,tcp:6677,FRONTIER-MONITORING']``
+        * e.g. ``["script:test.sh,80","script:test_2.sh,443","agkara-train,6178"]``
 
     :set_hostnames: Here we define the hostname or list of hostnames or script that returns list of hostnames
 
@@ -50,5 +51,11 @@ Explanation of the config files for creating ipsets
 
 
 
-:script: When you want to use a script inside the ipset for either **hostnames** or **cern_set_list** you have to define
+:script: When you want to use a script inside the ipset for either **hostnames** or **netgroup_set_list** you have to define
          the **script:** "*keyword*" and then the script as you would normally type in the command line.
+
+:script_double: When you want to use a script to return pairs of **hostname,port** inside the ipset for **hostnames** you have to define
+         the **script_double:** "*keyword*" and then the script as you would normally type in the command line.
+
+:netgroup: When you want to use a netgroup to return hostnames inside the ipset for **hostnames** option you have to define
+         the **netgroup:** "*keyword*" and then the name for of the netgroup.
