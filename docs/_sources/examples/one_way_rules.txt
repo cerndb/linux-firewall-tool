@@ -184,7 +184,7 @@ The output of the above section is the following:
         [triplet_set]
         section_type = ipset
         ipset_type = hash:ip,port,ip
-        cern_set_list = ['CERNVM-CLUSTER-ESX,tcp:5530,CDS LB','DRUPAL,tcp:6677,FRONTIER-MONITORING']
+        netgroup_set_list = ['CERNVM-CLUSTER-ESX,tcp:5530,CDS LB','DRUPAL,tcp:6677,FRONTIER-MONITORING']
         set_name = ['CERN_TEST_SET_LIST']
 
 

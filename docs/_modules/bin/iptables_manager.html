@@ -503,7 +503,6 @@
             <span class="n">command_1</span> <span class="o">=</span> <span class="n">part_1</span><span class="p">[</span><span class="mi">7</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
             <span class="n">return_list_1</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">exit_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule_builder</span><span class="o">.</span><span class="n">sys_process_executor</span><span class="p">(</span><span class="n">command_1</span><span class="p">)</span>
 
-
         <span class="k">elif</span> <span class="s1">&#39;script_double:&#39;</span> <span class="ow">in</span> <span class="n">part_1</span><span class="p">:</span>
             <span class="n">command_1</span> <span class="o">=</span> <span class="n">part_1</span><span class="p">[</span><span class="mi">14</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
             <span class="n">return_list_1</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">exit_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule_builder</span><span class="o">.</span><span class="n">sys_process_executor</span><span class="p">(</span><span class="n">command_1</span><span class="p">)</span>
@@ -579,9 +578,13 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">return_list_1</span><span class="p">)):</span>
                             <span class="n">return_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">return_list_1</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">return_list_1</span><span class="p">)):</span>
-                        <span class="n">return_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">return_list_1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="n">part_2</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="n">part_3</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="s1">&#39;script:&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s1">&#39;port&#39;</span> <span class="ow">in</span> <span class="n">ipset_type</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">return_list_1</span><span class="p">)):</span>
+                            <span class="n">return_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">return_list_1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="n">part_2</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="n">part_3</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">return_list_1</span><span class="p">)):</span>
+                            <span class="n">return_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">return_list_1</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>

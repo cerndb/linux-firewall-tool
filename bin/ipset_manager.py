@@ -1000,8 +1000,8 @@ def ipset_manager(args=None, action=None, iptype=None, settype=None, port=None, 
                 if args.ips:
                     ips = args.ips
 
-                if args.netgroups_set_list:
-                    netgroup_set_list = args.netgroups_set_list
+                if args.netgroup_set_list:
+                    netgroup_set_list = args.netgroup_set_list
 
                 if args.generate_file:
                     generate_file = True

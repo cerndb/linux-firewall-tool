@@ -458,7 +458,6 @@ class ManageRules(object):
             command_1 = part_1[7:].split()
             return_list_1, err, exit_code = self.rule_builder.sys_process_executor(command_1)
 
-
         elif 'script_double:' in part_1:
             command_1 = part_1[14:].split()
             return_list_1, err, exit_code = self.rule_builder.sys_process_executor(command_1)
@@ -534,9 +533,13 @@ class ManageRules(object):
                     else:
                         for i in xrange(len(return_list_1)):
                             return_list.append(return_list_1[i])
-                else:
-                    for i in xrange(len(return_list_1)):
-                        return_list.append(return_list_1[i] + ',' + part_2 + ',' + part_3)
+                elif 'script:':
+                    if 'port' in ipset_type:
+                        for i in xrange(len(return_list_1)):
+                            return_list.append(return_list_1[i] + ',' + part_2 + ',' + part_3)
+                    else:
+                        for i in xrange(len(return_list_1)):
+                            return_list.append(return_list_1[i])
             else:
                 pass
         else:
