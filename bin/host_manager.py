@@ -16,8 +16,8 @@ The script is written on python >=2.6
 import os
 import sys
 import argparse
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import configparser
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from iptables_manager import iptables_manager
 from iptables_manager_modules.rules_builder import FirewallRuleBuilder
 from ip_dns_resolve import ip_dns_resolver

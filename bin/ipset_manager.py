@@ -22,10 +22,10 @@ import sys
 import argparse
 import subprocess
 import os
+import ipaddress
 from ip_dns_resolve import ip_dns_resolver
 from netgroups_set_extraction import netgroup_set_extractor
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import ipaddress
 
 
 ######################################################################################
