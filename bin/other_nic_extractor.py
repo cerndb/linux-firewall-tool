@@ -9,6 +9,7 @@
 
 """
 Author: Athanasios Gkaraliakos
+email: a.gkaraliakos@gmail.com
 email: athanasios.gkaraliakos@cern.ch
 
 The script is written on python >=2.6
@@ -18,25 +19,46 @@ Script to identify all network interfaces expect main used by the current box.
 """
 import argparse
 import subprocess
+import os.path
+import sys
 from main_nic_extractor import main_nic_extractor
 
 
-def other_nic_extractor(all=False):
+def other_nic_extractor(all_nics=False):
     """
     This function returns a list with all network interfaces or all except the main ( the one that listens to the outside)
 
-    :param all: This flag tell the script whether to return all interface except main or everything
+    :param all_nics: This flag tell the script whether to return all interface except main or everything
     :return: List of network interface names
     """
-    interfaces_call = subprocess.Popen(['/bin/ls', '-1', '/sys/class/net'], stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE)
+    interfaces_call = subprocess.Popen(['/bin/ls', '-1', '/sys/class/net'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     interfaces, err = interfaces_call.communicate()
-    interfaces = interfaces.split('\n')
-    del interfaces[-1]
+    if not err:
+        interfaces = interfaces.split('\n')
+        del interfaces[-1]
+    else:
+        print err
+        print "Cannot extract bonded interfaces"
+        sys.exit(1)
+
+    # Strip out none interface files (not symlink files)
+    interfaces = [nic for nic in interfaces if os.path.islink('/sys/class/net/' + nic)]
+
+    # Strip out bonded interfaces
+    bonded_interfaces_call = subprocess.Popen('/bin/cat /sys/class/net/*/bonding/slaves', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    bonded_interfaces, err = bonded_interfaces_call.communicate()
+    if not err:
+        bonded_interfaces = bonded_interfaces[:-1]
+        bonded_interfaces = bonded_interfaces.split(' ')
+
+        interfaces = [nic for nic in interfaces if nic not in bonded_interfaces]
+    else:
+        print err
+        print "Cannot extract bonded interfaces"
 
     main_nic = main_nic_extractor()
 
-    if not all:
+    if not all_nics:
         index = interfaces.index(main_nic)
         del interfaces[index]
 

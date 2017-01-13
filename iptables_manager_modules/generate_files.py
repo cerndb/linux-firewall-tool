@@ -8,6 +8,7 @@
 
 """
 Author: Athanasios Gkaraliakos
+email: a.gkaraliakos@gmail.com
 email: athanasios.gkaraliakos@cern.ch
 
 The script is written on python >=2.6
