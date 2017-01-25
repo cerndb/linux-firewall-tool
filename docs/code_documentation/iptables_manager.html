@@ -47,6 +47,7 @@
   <div class="section" id="module-bin.iptables_manager">
 <span id="iptables-manager"></span><h1>iptables_manager<a class="headerlink" href="#module-bin.iptables_manager" title="Permalink to this headline">¶</a></h1>
 <p>Author: Athanasios Gkaraliakos
+email: <a class="reference external" href="mailto:a&#46;gkaraliakos&#37;&#52;&#48;gmail&#46;com">a<span>&#46;</span>gkaraliakos<span>&#64;</span>gmail<span>&#46;</span>com</a>
 email: <a class="reference external" href="mailto:athanasios&#46;gkaraliakos&#37;&#52;&#48;cern&#46;ch">athanasios<span>&#46;</span>gkaraliakos<span>&#64;</span>cern<span>&#46;</span>ch</a></p>
 <p>The script is written on python &gt;=2.6</p>
 <dl class="class">
@@ -188,7 +189,7 @@ firewall rules on.</p>
 
 <dl class="method">
 <dt id="bin.iptables_manager.ManageRules.ipsets_update">
-<code class="descname">ipsets_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.ipsets_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.ipsets_update" title="Permalink to this definition">¶</a></dt>
+<code class="descname">ipsets_update</code><span class="sig-paren">(</span><em>update_list</em>, <em>exclude_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#ManageRules.ipsets_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.ManageRules.ipsets_update" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is used to update existing kernel ipsets. It checks for rules that sections and on those that have an ipset
 defined calls the &#8211;&gt; handle_ipsets() method to update the sets.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -355,7 +356,7 @@ class</p>
 
 <dl class="function">
 <dt id="bin.iptables_manager.iptables_manager">
-<code class="descclassname">bin.iptables_manager.</code><code class="descname">iptables_manager</code><span class="sig-paren">(</span><em>args=None</em>, <em>config=None</em>, <em>interface='main'</em>, <em>no_default_config=False</em>, <em>allow=False</em>, <em>drop_all=False</em>, <em>update_sets=False</em>, <em>deploy=False</em>, <em>generate_files=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#iptables_manager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.iptables_manager" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bin.iptables_manager.</code><code class="descname">iptables_manager</code><span class="sig-paren">(</span><em>args=None</em>, <em>config=None</em>, <em>interface='main'</em>, <em>no_default_config=False</em>, <em>allow=False</em>, <em>drop_all=False</em>, <em>update_sets=False</em>, <em>deploy=False</em>, <em>generate_files=False</em>, <em>update_list=None</em>, <em>exclude_list=None</em>, <em>map_config_files=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bin/iptables_manager.html#iptables_manager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bin.iptables_manager.iptables_manager" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function is the actual main function. It is used as &#8216;proxy&#8217; method so you can either use this script from a
 another python script or directly from command line. This method is being called with either the &#8216;args&#8217; param or the
 all others depending if its being called from the main function or from another python script.</p>
@@ -371,8 +372,11 @@ all others depending if its being called from the main function or from another 
 <li><strong>allow</strong> &#8211; If set it sets the policy of all the default chains to ACCEPT.</li>
 <li><strong>drop_all</strong> &#8211; If set it sets the policy of all the default chains to DROP.</li>
 <li><strong>update_sets</strong> &#8211; If set it reads the config and updates all the existing kernel ipsets</li>
+<li><strong>update_list</strong> &#8211; Explicitly indicates which ipsets will be updated.</li>
+<li><strong>exclude_list</strong> &#8211; Explicitly indicates which ipsets will not be updated.</li>
 <li><strong>deploy</strong> &#8211; If set it applies the configuration. If not all the rules are being displayed instead of run.</li>
 <li><strong>generate_files</strong> &#8211; It create the actual rule files for iptables and ip6tables to be used with the restore option</li>
+<li><strong>map_config_files</strong> &#8211; It creates a dot language code that visually maps the rules</li>
 </ul>
 </td>
 </tr>

@@ -232,9 +232,11 @@ The output of the above sections is the following:
 
 
 **Example of hash:ip,port,ip using mix of script and network set**
-In case your script can provide the combo of hostname,port you have to use the tag **script_double**. If you want to return only a list of hostnames
-then you have to provide the port for each list element and use the **script:** or **netgroup:** tags. Please note that last part of each element in the list can only
-use the **script:** or **netgroup:**(which extracts hostnames from LanDB) tags and has to return as output a list with single elements
+
+In case your script can provide the combo of hostname,port you have to use the tag **script_double**
+If you want to return only a list of hostnames then you have to provide the port for each list element and use the **script:** or **netgroup:** tags.
+Please note that last part of each element in the list can only use the **script:** or **netgroup:**(which extracts hostnames from LanDB) tags and has
+to return as output a list with single elements
 
     .. code-block:: ini
 

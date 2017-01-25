@@ -1,0 +1,438 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iptables_manager_modules.rule_map &#8212; linux-firewall-tool 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="top" title="linux-firewall-tool 1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for iptables_manager_modules.rule_map</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2016, CERN</span>
+<span class="c1"># This software is distributed under the terms of the GNU General Public</span>
+<span class="c1"># Licence version 3 (GPL Version 3), copied verbatim in the file &quot;LICENSE&quot;.</span>
+<span class="c1"># In applying this license, CERN does not waive the privileges and immunities</span>
+<span class="c1"># granted to it by virtue of its status as Intergovernmental Organization</span>
+<span class="c1"># or submit itself to any jurisdiction.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Author: Athanasios Gkaraliakos</span>
+<span class="sd">email: a.gkaraliakos@gmail.com</span>
+<span class="sd">email: athanasios.gkaraliakos@cern.ch</span>
+
+<span class="sd">The script is written on python &gt;=2.6</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">configparser</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))))</span>
+
+
+<div class="viewcode-block" id="RuleVisualMapBuilder"><a class="viewcode-back" href="../../code_documentation/iptables_manager_modules_documentation/rule_map.html#iptables_manager_modules.rule_map.RuleVisualMapBuilder">[docs]</a><span class="k">class</span> <span class="nc">RuleVisualMapBuilder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class creates  .dot files with which you can see all the section-rules of a specific file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># self.parser = configparser.ConfigParser()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connections</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">no_edge_connections</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">no_edge_connections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;{ edge[style=invis]&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">rule_map_builder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">sections</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;digraph G {&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;node [shape=record, style=filled];&#39;</span><span class="p">)</span>
+
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">last_section_element</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">current_section_element</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">custom_chain</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">sect</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s1">&#39;section_type&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;general&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;[fillcolor=&quot;green&quot;, fontcolor=&quot;yellow&quot;,label=&quot;&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;&quot;]&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;subgraph cluster_&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;{&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;ranksep=&quot;1.0&quot;&#39;</span><span class="p">)</span>
+
+                <span class="n">action</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s1">&#39;action&#39;</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">action</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">default_chain</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s2">&quot;default_chain&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+                    <span class="n">jump_chain</span> <span class="o">=</span> <span class="n">action</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">action</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">custom_chain</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s1">&#39;custom_chain&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                        <span class="n">custom_chain</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+                    <span class="n">default_chain</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s2">&quot;default_chain&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">custom_chain</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                        <span class="n">jump_chain</span> <span class="o">=</span> <span class="n">custom_chain</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">jump_chain</span> <span class="o">=</span> <span class="n">action</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; , &quot;</span> <span class="o">+</span> <span class="n">action</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">action</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">default_chain</span> <span class="o">=</span> <span class="s2">&quot;INPUT,OUTPUT&quot;</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">desc</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                    <span class="n">desc</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">if</span> <span class="n">desc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;_cluster_desc[fillcolor=&quot;darkslategray&quot;, fontcolor=&quot;yellow&quot;, label=&quot;{Description |&#39;</span> <span class="o">+</span> <span class="n">desc</span> <span class="o">+</span> <span class="s1">&#39;}&quot;];&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;_cluster_desc[fillcolor=&quot;darkslategray&quot;, fontcolor=&quot;yellow&quot;, label=&quot;{Description | -}&quot;];&#39;</span><span class="p">)</span>
+
+                <span class="n">str_no_edge_connection</span> <span class="o">=</span> <span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;_cluster_desc}&#39;</span>
+                <span class="n">current_section_element</span> <span class="o">=</span> <span class="s1">&#39;desc&#39;</span>
+
+                <span class="n">ip_version</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s1">&#39;ip_version&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ip_version</span> <span class="o">==</span> <span class="s1">&#39;both&#39;</span><span class="p">:</span>
+                    <span class="n">ip_version</span> <span class="o">=</span> <span class="s1">&#39;IPv4,IPv6&#39;</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">nic</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s1">&#39;interface&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                    <span class="n">nic</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">protocol</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s1">&#39;protocol&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                    <span class="n">protocol</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ports</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s1">&#39;ports&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                    <span class="n">ports</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">set_directions</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s1">&#39;set_directions&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                    <span class="n">set_directions</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ipset</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s1">&#39;set&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+                    <span class="n">str_ipset</span> <span class="o">=</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;_cluster_ipset[fillcolor=&quot;peru&quot;, fontcolor=&quot;black&quot;, label=&#39;</span>
+
+                    <span class="n">ipset_type</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipset</span><span class="p">,</span> <span class="s1">&#39;ipset_type&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                    <span class="n">str_ipset</span> <span class="o">+=</span><span class="s1">&#39;&quot;{TYPE | &#39;</span> <span class="o">+</span> <span class="n">ipset_type</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">set_name</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipset</span><span class="p">,</span> <span class="s1">&#39;set_name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                        <span class="n">set_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">set_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | {Set Name | &#39;</span> <span class="o">+</span> <span class="n">set_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; }&#39;</span>
+                    <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                        <span class="n">set_name</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">netgroup_list</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipset</span><span class="p">,</span> <span class="s1">&#39;netgroup_set_list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | {Netgroup List &#39;</span>
+                        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">netgroup_list</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">ngl</span> <span class="ow">in</span> <span class="n">netgroup_list</span><span class="p">:</span>
+                                <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">ngl</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">netgroup_list</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39;}&#39;</span>
+                    <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">hostnames</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipset</span><span class="p">,</span> <span class="s1">&#39;set_hostnames&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | {Hostnames &#39;</span>
+                        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">hostnames</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">hst</span> <span class="ow">in</span> <span class="n">hostnames</span><span class="p">:</span>
+                                <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">hst</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">hostnames</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39;}&#39;</span>
+                    <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ips_v4</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipset</span><span class="p">,</span> <span class="s1">&#39;set_ips_v4&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | {IPv4 addresses &#39;</span>
+                        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">ips_v4</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">_ip_</span> <span class="ow">in</span> <span class="n">ips_v4</span><span class="p">:</span>
+                                <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">_ip_</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">ips_v4</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39;}&#39;</span>
+                    <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ips_v6</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipset</span><span class="p">,</span> <span class="s1">&#39;set_ips_v6&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | {IPv6 addresses &#39;</span>
+                        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">ips_v6</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">_ip_</span> <span class="ow">in</span> <span class="n">ips_v6</span><span class="p">:</span>
+                                <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">_ip_</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">ips_v6</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39;}&#39;</span>
+                    <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">net_v4</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipset</span><span class="p">,</span> <span class="s1">&#39;set_net_ranges_v4&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | {IPv4 Net Ranges &#39;</span>
+                        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">net_v4</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">_ip_</span> <span class="ow">in</span> <span class="n">net_v4</span><span class="p">:</span>
+                                <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">_ip_</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">net_v4</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39;}&#39;</span>
+                    <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">net_v6</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipset</span><span class="p">,</span> <span class="s1">&#39;set_net_ranges_v6&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | {IPv6 Net Ranges &#39;</span>
+                        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">net_v6</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">_ip_</span> <span class="ow">in</span> <span class="n">net_v6</span><span class="p">:</span>
+                                <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">_ip_</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">net_v6</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39;}&#39;</span>
+                    <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ip_port_ip_v4</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipset</span><span class="p">,</span> <span class="s1">&#39;set_ip_port_ip_v4&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | {IPv4 IP,Port,IP &#39;</span>
+                        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">ip_port_ip_v4</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">_ip_</span> <span class="ow">in</span> <span class="n">ip_port_ip_v4</span><span class="p">:</span>
+                                <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">_ip_</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">ip_port_ip_v4</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39;}&#39;</span>
+                    <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ip_port_ip_v6</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipset</span><span class="p">,</span> <span class="s1">&#39;set_ip_port_ip_v6&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | {IPv6 IP,Port,IP &#39;</span>
+                        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">ip_port_ip_v6</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">_ip_</span> <span class="ow">in</span> <span class="n">ip_port_ip_v6</span><span class="p">:</span>
+                                <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">_ip_</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">ip_port_ip_v6</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39;}&#39;</span>
+                    <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ip_port_net_v4</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipset</span><span class="p">,</span> <span class="s1">&#39;set_ip_port_net_v4&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | {IPv4 IP,Port,Net &#39;</span>
+                        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">ip_port_net_v4</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">_ip_</span> <span class="ow">in</span> <span class="n">ip_port_net_v4</span><span class="p">:</span>
+                                <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">_ip_</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">ip_port_net_v4</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39;}&#39;</span>
+                    <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ip_port_net_v6</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipset</span><span class="p">,</span> <span class="s1">&#39;set_ip_port_net_v6&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | {IPv6 IP,Port,Net &#39;</span>
+                        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">ip_port_net_v6</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">_ip_</span> <span class="ow">in</span> <span class="n">ip_port_net_v6</span><span class="p">:</span>
+                                <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">_ip_</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">ip_port_net_v6</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39;}&#39;</span>
+                    <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">list_sections</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipset</span><span class="p">,</span> <span class="s1">&#39;list_set_sections&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | { Sections List &#39;</span>
+                        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">list_sections</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">_ip_</span> <span class="ow">in</span> <span class="n">list_sections</span><span class="p">:</span>
+                                <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">_ip_</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span> <span class="o">+</span> <span class="n">list_sections</span>
+                        <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39;}&#39;</span>
+                    <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                    <span class="n">str_ipset</span> <span class="o">+=</span> <span class="s1">&#39;&quot;];&#39;</span>
+                    <span class="n">ipset</span> <span class="o">=</span> <span class="n">set_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                    <span class="n">ipset</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span>
+
+                <span class="k">if</span> <span class="s1">&#39;INPUT&#39;</span> <span class="ow">in</span> <span class="n">default_chain</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+                    <span class="n">str_label</span> <span class="o">=</span> <span class="s1">&#39;{IP version | &#39;</span> <span class="o">+</span> <span class="n">ip_version</span> <span class="o">+</span> <span class="s1">&#39;} | {Interface | &#39;</span> <span class="o">+</span> <span class="n">nic</span> <span class="o">+</span> <span class="s1">&#39;} | {Protocol | &#39;</span> <span class="o">+</span> <span class="n">protocol</span> <span class="o">+</span> <span class="s1">&#39;} | {Port | &#39;</span> <span class="o">+</span> <span class="n">ports</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span>
+                    <span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">action</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">jump_chain</span> <span class="o">=</span> <span class="n">action</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">action</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;in&#39;</span> <span class="ow">and</span> <span class="n">action</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;out&#39;</span><span class="p">:</span>
+                            <span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;NEW , ESTABLISHED&#39;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;ESTABLISHED&#39;</span>
+                    <span class="k">if</span> <span class="n">state</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                        <span class="n">str_label</span> <span class="o">+=</span> <span class="s1">&#39; | {STATE | &#39;</span> <span class="o">+</span> <span class="n">state</span> <span class="o">+</span> <span class="s1">&#39;} | {IPset | &#39;</span> <span class="o">+</span> <span class="n">ipset</span> <span class="o">+</span> <span class="s1">&#39;} | { IPset Direction | &#39;</span> <span class="o">+</span> <span class="n">set_directions</span> <span class="o">+</span> <span class="s1">&#39;} | {Jump Chain | &#39;</span> <span class="o">+</span> <span class="n">jump_chain</span> <span class="o">+</span> <span class="s1">&#39;}&quot;];&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">str_label</span> <span class="o">+=</span> <span class="s1">&#39; | {IPset | &#39;</span> <span class="o">+</span> <span class="n">ipset</span> <span class="o">+</span> <span class="s1">&#39;} | { IPset Direction | &#39;</span> <span class="o">+</span> <span class="n">set_directions</span> <span class="o">+</span> <span class="s1">&#39;} | {Jump Chain | &#39;</span> <span class="o">+</span> <span class="n">jump_chain</span> <span class="o">+</span> <span class="s1">&#39;}&quot;];&#39;</span>
+                    <span class="n">str_input</span> <span class="o">=</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;_cluster_input[fillcolor=&quot;darkslategray&quot;, fontcolor=&quot;yellow&quot;,label=&quot;{Direction | INPUT} |&#39;</span> <span class="o">+</span> <span class="n">str_label</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str_input</span><span class="p">)</span>
+                    <span class="n">current_section_element</span> <span class="o">=</span> <span class="s1">&#39;input&#39;</span>
+                    <span class="n">str_no_edge_connection</span> <span class="o">+=</span> <span class="s1">&#39; -&gt; {&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;_cluster_input}&#39;</span>
+
+                <span class="k">if</span> <span class="s1">&#39;OUTPUT&#39;</span> <span class="ow">in</span> <span class="n">default_chain</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+                    <span class="n">str_label</span> <span class="o">=</span> <span class="s1">&#39;{IP version | &#39;</span> <span class="o">+</span> <span class="n">ip_version</span> <span class="o">+</span> <span class="s1">&#39;} | {Interface | &#39;</span> <span class="o">+</span> <span class="n">nic</span> <span class="o">+</span> <span class="s1">&#39;} | {Protocol | &#39;</span> <span class="o">+</span> <span class="n">protocol</span> <span class="o">+</span> <span class="s1">&#39;} | {Port | &#39;</span> <span class="o">+</span> <span class="n">ports</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span>
+                    <span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">action</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">jump_chain</span> <span class="o">=</span> <span class="n">action</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">action</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;out&#39;</span> <span class="ow">and</span> <span class="n">action</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;in&#39;</span><span class="p">:</span>
+                            <span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;NEW , ESTABLISHED&#39;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;ESTABLISHED&#39;</span>
+                    <span class="k">if</span> <span class="n">state</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                        <span class="n">str_label</span> <span class="o">+=</span> <span class="s1">&#39; | {STATE | &#39;</span> <span class="o">+</span> <span class="n">state</span> <span class="o">+</span> <span class="s1">&#39;} | {IPset | &#39;</span> <span class="o">+</span> <span class="n">ipset</span> <span class="o">+</span> <span class="s1">&#39;} | { IPset Direction | &#39;</span> <span class="o">+</span> <span class="n">set_directions</span> <span class="o">+</span> <span class="s1">&#39;} | {Jump Chain | &#39;</span> <span class="o">+</span> <span class="n">jump_chain</span> <span class="o">+</span> <span class="s1">&#39;}&quot;];&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">str_label</span> <span class="o">+=</span> <span class="s1">&#39; | {IPset | &#39;</span> <span class="o">+</span> <span class="n">ipset</span> <span class="o">+</span> <span class="s1">&#39;} | { IPset Direction | &#39;</span> <span class="o">+</span> <span class="n">set_directions</span> <span class="o">+</span> <span class="s1">&#39;} | {Jump Chain | &#39;</span> <span class="o">+</span> <span class="n">jump_chain</span> <span class="o">+</span> <span class="s1">&#39;}&quot;];&#39;</span>
+                    <span class="n">str_output</span> <span class="o">=</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;_cluster_output[fillcolor=&quot;orange&quot;, fontcolor=&quot;blue&quot;,label=&quot;{Direction | OUTPUT} |&#39;</span> <span class="o">+</span> <span class="n">str_label</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str_output</span><span class="p">)</span>
+                    <span class="n">current_section_element</span> <span class="o">=</span> <span class="s1">&#39;output&#39;</span>
+                    <span class="n">str_no_edge_connection</span> <span class="o">+=</span> <span class="s1">&#39; -&gt; {&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;_cluster_output}&#39;</span>
+
+                <span class="k">if</span> <span class="n">custom_chain</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                    <span class="n">jump_chain</span> <span class="o">=</span> <span class="n">action</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; , &quot;</span> <span class="o">+</span> <span class="n">action</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">str_label_custom</span> <span class="o">=</span> <span class="s1">&#39;{IP version | &#39;</span> <span class="o">+</span> <span class="n">ip_version</span> <span class="o">+</span> <span class="s1">&#39;} | {Interface | &#39;</span> <span class="o">+</span> <span class="n">nic</span> <span class="o">+</span> <span class="s1">&#39;} | {Protocol | &#39;</span> <span class="o">+</span> <span class="n">protocol</span> <span class="o">+</span> <span class="s1">&#39;} | {Port | &#39;</span> <span class="o">+</span> <span class="n">ports</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span>
+                    <span class="n">str_label_custom</span> <span class="o">+=</span> <span class="s1">&#39; | {IPset | &#39;</span> <span class="o">+</span> <span class="n">ipset</span> <span class="o">+</span> <span class="s1">&#39;} | { IPset Direction | &#39;</span> <span class="o">+</span> <span class="n">set_directions</span> <span class="o">+</span> <span class="s1">&#39;} | {Jump Chain | &#39;</span> <span class="o">+</span> <span class="n">jump_chain</span> <span class="o">+</span> <span class="s1">&#39;}&quot;];&#39;</span>
+                    <span class="n">str_custom</span> <span class="o">=</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;_cluster_custom[fillcolor=&quot;grey&quot;, fontcolor=&quot;blue&quot;,label=&quot;{Jump from | INPUT,OUTPUT} |&#39;</span> <span class="o">+</span> <span class="n">str_label_custom</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str_custom</span><span class="p">)</span>
+                    <span class="n">current_section_element</span> <span class="o">=</span> <span class="s1">&#39;custom&#39;</span>
+                    <span class="n">str_no_edge_connection</span> <span class="o">+=</span> <span class="s1">&#39; -&gt; {&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;_cluster_custom}&#39;</span>
+
+                <span class="k">if</span> <span class="n">ipset</span> <span class="o">!=</span> <span class="s1">&#39;-&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str_ipset</span><span class="p">)</span>
+                    <span class="n">current_section_element</span> <span class="o">=</span> <span class="s1">&#39;ipset&#39;</span>
+                    <span class="n">str_no_edge_connection</span> <span class="o">+=</span> <span class="s1">&#39; -&gt; {&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;_cluster_ipset}&#39;</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;}&#39;</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">no_edge_connections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str_no_edge_connection</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">no_edge_connections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;{ &#39;</span> <span class="o">+</span> <span class="n">sections</span><span class="p">[</span><span class="n">counter</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_cluster_&#39;</span> <span class="o">+</span> <span class="n">last_section_element</span> <span class="o">+</span> <span class="s1">&#39;} -&gt; {&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span><span class="p">)</span>
+
+                <span class="n">last_section_element</span> <span class="o">=</span> <span class="n">current_section_element</span>
+                <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;} -&gt; {&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;_cluster_desc}&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">no_edge_connections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;}&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">no_edge_connections</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;}&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Write the code in the file</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="s2">&quot;/var/tmp/firewall_files&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Cannot create directory &quot;</span><span class="p">,</span> <span class="n">file_path</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="s2">&quot;/var/tmp/firewall_files&quot;</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span> <span class="o">+</span> <span class="s1">&#39;/rules_map.dot&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_handler</span><span class="p">:</span>
+                <span class="n">file_handler</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# Generated by iptables_manager.py</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">file_handler</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;#Use with https://mdaines.github.io/viz.js/</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">:</span>
+                    <span class="n">file_handler</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">file_handler</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="nb">print</span> <span class="s2">&quot;File is located at &quot;</span> <span class="o">+</span> <span class="n">file_path</span> <span class="o">+</span> <span class="s1">&#39;/rules_map.dot&#39;</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Cannot write host map file!!!!!&quot;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, CERN.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

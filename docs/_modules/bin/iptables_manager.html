@@ -54,6 +54,7 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Author: Athanasios Gkaraliakos</span>
+<span class="sd">email: a.gkaraliakos@gmail.com</span>
 <span class="sd">email: athanasios.gkaraliakos@cern.ch</span>
 
 <span class="sd">The script is written on python &gt;=2.6</span>
@@ -71,6 +72,7 @@
 <span class="kn">from</span> <span class="nn">iptables_manager_modules.default_rules</span> <span class="k">import</span> <span class="n">DefaultConfiguration</span>
 <span class="kn">from</span> <span class="nn">iptables_manager_modules.rules_builder</span> <span class="k">import</span> <span class="n">FirewallRuleBuilder</span>
 <span class="kn">from</span> <span class="nn">iptables_manager_modules.generate_files</span> <span class="k">import</span> <span class="n">IPTablesFileGenerator</span>
+<span class="kn">from</span> <span class="nn">iptables_manager_modules.rule_map</span> <span class="k">import</span> <span class="n">RuleVisualMapBuilder</span>
 
 
 <div class="viewcode-block" id="ReadWriteConfigFiles"><a class="viewcode-back" href="../../code_documentation/iptables_manager.html#bin.iptables_manager.ReadWriteConfigFiles">[docs]</a><span class="k">class</span> <span class="nc">ReadWriteConfigFiles</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -637,24 +639,6 @@
             <span class="k">for</span> <span class="n">hst</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hostnames</span><span class="p">)):</span>
                 <span class="c1"># This part is executed when in the hostnames list we provided also scripts(commands) to be ran</span>
                 <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;script:&quot;</span> <span class="ow">in</span> <span class="n">hostnames</span><span class="p">[</span><span class="n">hst</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;script_double:&quot;</span> <span class="ow">in</span> <span class="n">hostnames</span><span class="p">[</span><span class="n">hst</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;netgroup:&quot;</span> <span class="ow">in</span> <span class="n">hostnames</span><span class="p">[</span><span class="n">hst</span><span class="p">]):</span>
-                    <span class="c1"># if ipset_type == &#39;hash:ip,port,net&#39;:</span>
-                    <span class="c1">#     command, _net_range_ = hostnames[hst].split(&#39;,&#39;)</span>
-                    <span class="c1">#     command = command[7:].split()</span>
-                    <span class="c1"># else:</span>
-                    <span class="c1">#     command = hostnames[hst][7:].split()</span>
-                    <span class="c1"># command, err, exit_code = self.rule_builder.sys_process_executor(command)</span>
-                    <span class="c1"># if exit_code == 0:</span>
-                    <span class="c1">#     command = command.splitlines()</span>
-                    <span class="c1">#     command = [x for x in command if x != &#39;-&#39;]</span>
-                    <span class="c1">#     for addr in xrange(len(command)):</span>
-                    <span class="c1">#         if (&#39;,&#39; in command[addr]) and (ipset_type in [&#39;hash:ip&#39;, &#39;hash:net&#39;]):</span>
-                    <span class="c1">#             print &quot;\nSection &#39;&quot; + ipset_section + &quot;&#39; type is &#39;&quot; + \</span>
-                    <span class="c1">#                   ipset_type + &quot;&#39; but you provided extra elements. Change ipset_type option&quot;</span>
-                    <span class="c1">#             sys.exit(1)</span>
-                    <span class="c1">#         elif (&#39;,&#39; in command[addr]) and (ipset_type == &#39;hash:ip,port,net&#39;):</span>
-                    <span class="c1">#             command[addr] += &#39;,&#39; + _net_range_</span>
-                    <span class="c1">#             command[addr] = command[addr].lower()</span>
-                    <span class="c1">#     _hostnames_.extend(command)</span>
                     <span class="n">_hostnames_</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_script_runs</span><span class="p">(</span><span class="n">ipset_section</span><span class="p">,</span> <span class="n">hostnames</span><span class="p">[</span><span class="n">hst</span><span class="p">],</span> <span class="n">ipset_type</span><span class="p">,</span> <span class="n">ip_version</span><span class="p">))</span>
                 <span class="k">elif</span> <span class="p">(</span><span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">hostnames</span><span class="p">[</span><span class="n">hst</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ipset_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hash:ip&#39;</span><span class="p">,</span> <span class="s1">&#39;hash:net&#39;</span><span class="p">]):</span>
                     <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Section &quot;</span> <span class="o">+</span> <span class="n">ipset_section</span> <span class="o">+</span> <span class="s2">&quot; type is &#39;&quot;</span> <span class="o">+</span> \
@@ -1532,38 +1516,61 @@
 
 <span class="c1">###########################################################################################################</span>
 
-<div class="viewcode-block" id="ManageRules.ipsets_update"><a class="viewcode-back" href="../../code_documentation/iptables_manager.html#bin.iptables_manager.ManageRules.ipsets_update">[docs]</a>    <span class="k">def</span> <span class="nf">ipsets_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ManageRules.ipsets_update"><a class="viewcode-back" href="../../code_documentation/iptables_manager.html#bin.iptables_manager.ManageRules.ipsets_update">[docs]</a>    <span class="k">def</span> <span class="nf">ipsets_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_list</span><span class="p">,</span> <span class="n">exclude_list</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method is used to update existing kernel ipsets. It checks for rules that sections and on those that have an ipset</span>
 <span class="sd">        defined calls the --&gt; handle_ipsets() method to update the sets.</span>
 
 <span class="sd">        :return: void</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">update_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">exclude_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="nb">print</span> <span class="s1">&#39;Both --update_list and --exclude_list arguments have been defined. Please use only one of &#39;</span> \
+                  <span class="s1">&#39;the two.&#39;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">update_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">update_list</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="nb">print</span> <span class="s1">&#39;Please provide a list for the update_list argument&#39;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">exclude_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">exclude_list</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="nb">print</span> <span class="s1">&#39;Please provide a list for the exclude_list argument&#39;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="n">general_sections</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">sect</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="p">)):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="n">sect</span><span class="p">],</span> <span class="s1">&#39;section_type&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;general&#39;</span><span class="p">:</span>
-                <span class="n">general_sections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="n">sect</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">has_option</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="n">sect</span><span class="p">],</span> <span class="s1">&#39;set&#39;</span><span class="p">):</span>
+                    <span class="n">_set_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="n">sect</span><span class="p">],</span> <span class="s1">&#39;set&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="n">update_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">_set_</span> <span class="ow">in</span> <span class="n">update_list</span><span class="p">):</span>
+                        <span class="n">general_sections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="n">sect</span><span class="p">])</span>
+
+                    <span class="k">elif</span> <span class="p">(</span><span class="n">exclude_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">_set_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude_list</span><span class="p">):</span>
+                        <span class="n">general_sections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="n">sect</span><span class="p">])</span>
+
+                    <span class="k">elif</span> <span class="p">(</span><span class="n">update_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">exclude_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+                        <span class="n">general_sections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="n">sect</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">general_sections</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">sect</span> <span class="ow">in</span> <span class="n">general_sections</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">has_option</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s2">&quot;set&quot;</span><span class="p">):</span>
-                    <span class="n">set_sect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s2">&quot;set&quot;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s1">&#39;ip_version&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;ipv4&#39;</span><span class="p">,</span> <span class="s1">&#39;both&#39;</span><span class="p">]:</span>
-                        <span class="n">ip_version</span> <span class="o">=</span> <span class="s1">&#39;ipv4&#39;</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">set_sect</span><span class="p">,</span> <span class="s2">&quot;ipset_type&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;list:set&quot;</span><span class="p">:</span>
-                            <span class="n">responce</span><span class="p">,</span> <span class="n">set_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_ipsets</span><span class="p">(</span><span class="n">set_sect</span><span class="p">,</span> <span class="n">ip_version</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">responce</span><span class="p">,</span> <span class="n">set_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_list_set</span><span class="p">(</span><span class="n">set_sect</span><span class="p">,</span> <span class="n">ip_version</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-                        <span class="nb">print</span> <span class="n">responce</span><span class="p">,</span> <span class="n">set_name</span>
+                <span class="c1"># if self.parser.has_option(sect, &quot;set&quot;):</span>
+                <span class="n">set_sect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s2">&quot;set&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s1">&#39;ip_version&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;ipv4&#39;</span><span class="p">,</span> <span class="s1">&#39;both&#39;</span><span class="p">]:</span>
+                    <span class="n">ip_version</span> <span class="o">=</span> <span class="s1">&#39;ipv4&#39;</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">set_sect</span><span class="p">,</span> <span class="s2">&quot;ipset_type&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;list:set&quot;</span><span class="p">:</span>
+                        <span class="n">responce</span><span class="p">,</span> <span class="n">set_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_ipsets</span><span class="p">(</span><span class="n">set_sect</span><span class="p">,</span> <span class="n">ip_version</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">responce</span><span class="p">,</span> <span class="n">set_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_list_set</span><span class="p">(</span><span class="n">set_sect</span><span class="p">,</span> <span class="n">ip_version</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                    <span class="nb">print</span> <span class="n">responce</span><span class="p">,</span> <span class="n">set_name</span>
 
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s1">&#39;ip_version&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;ipv6&#39;</span><span class="p">,</span> <span class="s1">&#39;both&#39;</span><span class="p">]:</span>
-                        <span class="n">ip_version</span> <span class="o">=</span> <span class="s1">&#39;ipv6&#39;</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">set_sect</span><span class="p">,</span> <span class="s2">&quot;ipset_type&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;list:set&quot;</span><span class="p">:</span>
-                            <span class="n">responce</span><span class="p">,</span> <span class="n">set_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_ipsets</span><span class="p">(</span><span class="n">set_sect</span><span class="p">,</span> <span class="n">ip_version</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">responce</span><span class="p">,</span> <span class="n">set_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_list_set</span><span class="p">(</span><span class="n">set_sect</span><span class="p">,</span> <span class="n">ip_version</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-                        <span class="nb">print</span> <span class="n">responce</span><span class="p">,</span> <span class="n">set_name</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s1">&#39;ip_version&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;ipv6&#39;</span><span class="p">,</span> <span class="s1">&#39;both&#39;</span><span class="p">]:</span>
+                    <span class="n">ip_version</span> <span class="o">=</span> <span class="s1">&#39;ipv6&#39;</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">set_sect</span><span class="p">,</span> <span class="s2">&quot;ipset_type&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;list:set&quot;</span><span class="p">:</span>
+                        <span class="n">responce</span><span class="p">,</span> <span class="n">set_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_ipsets</span><span class="p">(</span><span class="n">set_sect</span><span class="p">,</span> <span class="n">ip_version</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">responce</span><span class="p">,</span> <span class="n">set_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_list_set</span><span class="p">(</span><span class="n">set_sect</span><span class="p">,</span> <span class="n">ip_version</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                    <span class="nb">print</span> <span class="n">responce</span><span class="p">,</span> <span class="n">set_name</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">rule_builder</span><span class="o">.</span><span class="n">save_ipset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deploy</span><span class="p">)</span></div>
 
@@ -1721,7 +1728,8 @@
 
 <span class="c1">###########################################################################################################</span>
 <div class="viewcode-block" id="iptables_manager"><a class="viewcode-back" href="../../code_documentation/iptables_manager.html#bin.iptables_manager.iptables_manager">[docs]</a><span class="k">def</span> <span class="nf">iptables_manager</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="s2">&quot;main&quot;</span><span class="p">,</span> <span class="n">no_default_config</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop_all</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                     <span class="n">update_sets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">deploy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">generate_files</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                     <span class="n">update_sets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">deploy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">generate_files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">update_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">map_config_files</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is the actual main function. It is used as &#39;proxy&#39; method so you can either use this script from a</span>
 <span class="sd">    another python script or directly from command line. This method is being called with either the &#39;args&#39; param or the</span>
@@ -1734,8 +1742,11 @@
 <span class="sd">    :param allow: If set it sets the policy of all the default chains to ACCEPT.</span>
 <span class="sd">    :param drop_all: If set it sets the policy of all the default chains to DROP.</span>
 <span class="sd">    :param update_sets: If set it reads the config and updates all the existing kernel ipsets</span>
+<span class="sd">    :param update_list: Explicitly indicates which ipsets will be updated.</span>
+<span class="sd">    :param exclude_list: Explicitly indicates which ipsets will not be updated.</span>
 <span class="sd">    :param deploy: If set it applies the configuration. If not all the rules are being displayed instead of run.</span>
 <span class="sd">    :param generate_files: It create the actual rule files for iptables and ip6tables to be used with the restore option</span>
+<span class="sd">    :param map_config_files: It creates a dot language code that visually maps the rules</span>
 <span class="sd">    :return: 0 if everything goes smoothly</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">default_rules_list</span> <span class="o">=</span><span class="p">[]</span>
@@ -1769,6 +1780,17 @@
         <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">update_sets</span><span class="p">:</span>
             <span class="n">update_sets</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">no_default_config</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">update_list</span><span class="p">:</span>
+                <span class="n">update_list</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">update_list</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">update_list</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">exclude_list</span><span class="p">:</span>
+                <span class="n">exclude_list</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">exclude_list</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">exclude_list</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="n">update_sets</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -1784,6 +1806,9 @@
             <span class="n">generate_files</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">generate_files</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">map_config_files</span><span class="p">:</span>
+            <span class="n">map_config_files</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)))</span>
@@ -1850,30 +1875,35 @@
 
         <span class="n">custom_rules</span><span class="o">.</span><span class="n">config_integrity_check</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">update_sets</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;UPDATE IPsets ONLY&quot;</span>
-            <span class="n">custom_rules</span><span class="o">.</span><span class="n">ipsets_update</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">map_config_files</span><span class="p">:</span>
+            <span class="n">visual_rules</span> <span class="o">=</span> <span class="n">RuleVisualMapBuilder</span><span class="p">()</span>
+            <span class="n">visual_rules</span><span class="o">.</span><span class="n">rule_map_builder</span><span class="p">(</span><span class="n">file_parser</span><span class="p">,</span> <span class="n">custom_rules</span><span class="o">.</span><span class="n">sections</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="ow">not</span> <span class="n">update_sets</span><span class="p">:</span>
-            <span class="n">iptables_rules</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">custom_rules</span><span class="o">.</span><span class="n">parse_file</span><span class="p">())</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">generate_files</span><span class="p">:</span>
-                <span class="n">custom_rules</span><span class="o">.</span><span class="n">apply_firewall_rules</span><span class="p">(</span><span class="n">iptables_rules</span><span class="p">)</span>
-                <span class="n">default</span><span class="o">.</span><span class="n">iptables_save</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;iptables_command&#39;</span><span class="p">))</span>
-                <span class="n">default</span><span class="o">.</span><span class="n">iptables_save</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;ip6tables_command&#39;</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">drop_all</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">deploy</span><span class="p">:</span>
-                    <span class="n">default</span><span class="o">.</span><span class="n">final_drop_iptables</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;iptables_command&#39;</span><span class="p">))</span>
-                    <span class="n">default</span><span class="o">.</span><span class="n">final_drop_iptables</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;ip6tables_command&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">update_sets</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;UPDATE IPsets ONLY&quot;</span>
+                <span class="n">custom_rules</span><span class="o">.</span><span class="n">ipsets_update</span><span class="p">(</span><span class="n">update_list</span><span class="p">,</span> <span class="n">exclude_list</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">update_sets</span><span class="p">:</span>
+                <span class="n">iptables_rules</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">custom_rules</span><span class="o">.</span><span class="n">parse_file</span><span class="p">())</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">generate_files</span><span class="p">:</span>
+                    <span class="n">custom_rules</span><span class="o">.</span><span class="n">apply_firewall_rules</span><span class="p">(</span><span class="n">iptables_rules</span><span class="p">)</span>
+                    <span class="n">default</span><span class="o">.</span><span class="n">iptables_save</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;iptables_command&#39;</span><span class="p">))</span>
+                    <span class="n">default</span><span class="o">.</span><span class="n">iptables_save</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;ip6tables_command&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">drop_all</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">deploy</span><span class="p">:</span>
+                        <span class="n">default</span><span class="o">.</span><span class="n">final_drop_iptables</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;iptables_command&#39;</span><span class="p">))</span>
+                        <span class="n">default</span><span class="o">.</span><span class="n">final_drop_iptables</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;ip6tables_command&#39;</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">default_rules_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">final_drop_iptables</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;iptables_command&#39;</span><span class="p">)))</span>
+                        <span class="n">default_rules_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">final_drop_iptables</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;ip6tables_command&#39;</span><span class="p">)))</span>
+                        <span class="n">default_rules_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">iptables_save</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;iptables_command&#39;</span><span class="p">)))</span>
+                        <span class="n">default_rules_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">iptables_save</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;ip6tables_command&#39;</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">generate_files</span><span class="p">:</span>
+                    <span class="n">gen_files</span> <span class="o">=</span> <span class="n">IPTablesFileGenerator</span><span class="p">()</span>
+                    <span class="n">gen_files</span><span class="o">.</span><span class="n">write_iptables_files</span><span class="p">(</span><span class="n">default_rules_list</span><span class="p">,</span> <span class="n">iptables_rules</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">default_rules_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">final_drop_iptables</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;iptables_command&#39;</span><span class="p">)))</span>
-                    <span class="n">default_rules_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">final_drop_iptables</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;ip6tables_command&#39;</span><span class="p">)))</span>
-                    <span class="n">default_rules_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">iptables_save</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;iptables_command&#39;</span><span class="p">)))</span>
-                    <span class="n">default_rules_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">iptables_save</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="s1">&#39;ip6tables_command&#39;</span><span class="p">)))</span>
-            <span class="k">if</span> <span class="n">generate_files</span><span class="p">:</span>
-                <span class="n">gen_files</span> <span class="o">=</span> <span class="n">IPTablesFileGenerator</span><span class="p">()</span>
-                <span class="n">gen_files</span><span class="o">.</span><span class="n">write_iptables_files</span><span class="p">(</span><span class="n">default_rules_list</span><span class="p">,</span> <span class="n">iptables_rules</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">print_default_rules</span><span class="p">(</span><span class="n">default_rules_list</span><span class="p">)</span>
+                    <span class="n">print_default_rules</span><span class="p">(</span><span class="n">default_rules_list</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">generate_files</span><span class="p">:</span>
@@ -1902,9 +1932,12 @@
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--interface&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Type the name of nic card you want the default rules to be applied for&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--update_sets&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Update only the ipsets&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--update_list&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Update only the specified ipsets: Use general section names&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--exclude_list&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Exclude these ipsets from update: Use general section names&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--deploy&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Deploy the configuration&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--generate_files&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Generate iptables and ip6tables files&#39;</span><span class="p">)</span>
-
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--map_config_files&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Generates dot language code in order to &#39;</span>
+                                                                        <span class="s1">&#39;visualize host file contents&#39;</span><span class="p">)</span>
     <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
 
     <span class="n">exit_code</span> <span class="o">=</span> <span class="n">iptables_manager</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>

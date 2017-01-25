@@ -27,6 +27,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from iptables_manager_modules.default_rules import DefaultConfiguration
 from iptables_manager_modules.rules_builder import FirewallRuleBuilder
 from iptables_manager_modules.generate_files import IPTablesFileGenerator
+from iptables_manager_modules.rule_map import RuleVisualMapBuilder
 
 
 class ReadWriteConfigFiles(object):
@@ -593,24 +594,6 @@ class ManageRules(object):
             for hst in xrange(len(hostnames)):
                 # This part is executed when in the hostnames list we provided also scripts(commands) to be ran
                 if ("script:" in hostnames[hst]) or ("script_double:" in hostnames[hst]) or ("netgroup:" in hostnames[hst]):
-                    # if ipset_type == 'hash:ip,port,net':
-                    #     command, _net_range_ = hostnames[hst].split(',')
-                    #     command = command[7:].split()
-                    # else:
-                    #     command = hostnames[hst][7:].split()
-                    # command, err, exit_code = self.rule_builder.sys_process_executor(command)
-                    # if exit_code == 0:
-                    #     command = command.splitlines()
-                    #     command = [x for x in command if x != '-']
-                    #     for addr in xrange(len(command)):
-                    #         if (',' in command[addr]) and (ipset_type in ['hash:ip', 'hash:net']):
-                    #             print "\nSection '" + ipset_section + "' type is '" + \
-                    #                   ipset_type + "' but you provided extra elements. Change ipset_type option"
-                    #             sys.exit(1)
-                    #         elif (',' in command[addr]) and (ipset_type == 'hash:ip,port,net'):
-                    #             command[addr] += ',' + _net_range_
-                    #             command[addr] = command[addr].lower()
-                    #     _hostnames_.extend(command)
                     _hostnames_.extend(self.handle_script_runs(ipset_section, hostnames[hst], ipset_type, ip_version))
                 elif (',' in hostnames[hst]) and (ipset_type in ['hash:ip', 'hash:net']):
                     print "\nSection " + ipset_section + " type is '" + \
@@ -1488,38 +1471,61 @@ class ManageRules(object):
 
 ###########################################################################################################
 
-    def ipsets_update(self):
+    def ipsets_update(self, update_list, exclude_list):
         """
         This method is used to update existing kernel ipsets. It checks for rules that sections and on those that have an ipset
         defined calls the --> handle_ipsets() method to update the sets.
 
         :return: void
         """
+        if (update_list is not None) and (exclude_list is not None):
+            print 'Both --update_list and --exclude_list arguments have been defined. Please use only one of ' \
+                  'the two.'
+            sys.exit(1)
+
+        if (update_list is not None) and (type(update_list) is not list):
+            print 'Please provide a list for the update_list argument'
+            sys.exit(1)
+
+        if (exclude_list is not None) and (type(exclude_list) is not list):
+            print 'Please provide a list for the exclude_list argument'
+            sys.exit(1)
 
         general_sections = []
         for sect in xrange(len(self.sections)):
             if self.parser.get(self.sections[sect], 'section_type').encode("utf-8") == 'general':
-                general_sections.append(self.sections[sect])
+
+                if self.parser.has_option(self.sections[sect], 'set'):
+                    _set_ = self.parser.get(self.sections[sect], 'set').encode("utf-8")
+
+                    if (update_list is not None) and (_set_ in update_list):
+                        general_sections.append(self.sections[sect])
+
+                    elif (exclude_list is not None) and (_set_ not in exclude_list):
+                        general_sections.append(self.sections[sect])
+
+                    elif (update_list is None) and (exclude_list is None):
+                        general_sections.append(self.sections[sect])
 
         if len(general_sections) > 0:
             for sect in general_sections:
-                if self.parser.has_option(sect, "set"):
-                    set_sect = self.parser.get(sect, "set")
-                    if self.parser.get(sect, 'ip_version') in ['ipv4', 'both']:
-                        ip_version = 'ipv4'
-                        if self.parser.get(set_sect, "ipset_type") != "list:set":
-                            responce, set_name = self.handle_ipsets(set_sect, ip_version, True)
-                        else:
-                            responce, set_name = self.handle_list_set(set_sect, ip_version, True)
-                        print responce, set_name
+                # if self.parser.has_option(sect, "set"):
+                set_sect = self.parser.get(sect, "set")
+                if self.parser.get(sect, 'ip_version') in ['ipv4', 'both']:
+                    ip_version = 'ipv4'
+                    if self.parser.get(set_sect, "ipset_type") != "list:set":
+                        responce, set_name = self.handle_ipsets(set_sect, ip_version, True)
+                    else:
+                        responce, set_name = self.handle_list_set(set_sect, ip_version, True)
+                    print responce, set_name
 
-                    if self.parser.get(sect, 'ip_version') in ['ipv6', 'both']:
-                        ip_version = 'ipv6'
-                        if self.parser.get(set_sect, "ipset_type") != "list:set":
-                            responce, set_name = self.handle_ipsets(set_sect, ip_version, True)
-                        else:
-                            responce, set_name = self.handle_list_set(set_sect, ip_version, True)
-                        print responce, set_name
+                if self.parser.get(sect, 'ip_version') in ['ipv6', 'both']:
+                    ip_version = 'ipv6'
+                    if self.parser.get(set_sect, "ipset_type") != "list:set":
+                        responce, set_name = self.handle_ipsets(set_sect, ip_version, True)
+                    else:
+                        responce, set_name = self.handle_list_set(set_sect, ip_version, True)
+                    print responce, set_name
 
             self.rule_builder.save_ipset(self.deploy)
 
@@ -1677,7 +1683,8 @@ def print_default_rules(rule_list):
 
 ###########################################################################################################
 def iptables_manager(args=None, config=None, interface="main", no_default_config=False, allow=False, drop_all=False,
-                     update_sets=False, deploy=False, generate_files=False):
+                     update_sets=False, deploy=False, generate_files=False, update_list=None, exclude_list=None,
+                     map_config_files=False):
     """
     This function is the actual main function. It is used as 'proxy' method so you can either use this script from a
     another python script or directly from command line. This method is being called with either the 'args' param or the
@@ -1690,8 +1697,11 @@ def iptables_manager(args=None, config=None, interface="main", no_default_config
     :param allow: If set it sets the policy of all the default chains to ACCEPT.
     :param drop_all: If set it sets the policy of all the default chains to DROP.
     :param update_sets: If set it reads the config and updates all the existing kernel ipsets
+    :param update_list: Explicitly indicates which ipsets will be updated.
+    :param exclude_list: Explicitly indicates which ipsets will not be updated.
     :param deploy: If set it applies the configuration. If not all the rules are being displayed instead of run.
     :param generate_files: It create the actual rule files for iptables and ip6tables to be used with the restore option
+    :param map_config_files: It creates a dot language code that visually maps the rules
     :return: 0 if everything goes smoothly
     """
     default_rules_list =[]
@@ -1725,6 +1735,17 @@ def iptables_manager(args=None, config=None, interface="main", no_default_config
         if args.update_sets:
             update_sets = True
             no_default_config = True
+
+            if args.update_list:
+                update_list = args.update_list
+            else:
+                update_list = None
+
+            if args.exclude_list:
+                exclude_list = args.exclude_list
+            else:
+                exclude_list = None
+
         else:
             update_sets = False
 
@@ -1740,6 +1761,9 @@ def iptables_manager(args=None, config=None, interface="main", no_default_config
             generate_files = True
         else:
             generate_files = False
+
+        if args.map_config_files:
+            map_config_files = True
 
     try:
         path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -1806,30 +1830,35 @@ def iptables_manager(args=None, config=None, interface="main", no_default_config
 
         custom_rules.config_integrity_check()
 
-        if update_sets:
-            print "UPDATE IPsets ONLY"
-            custom_rules.ipsets_update()
+        if map_config_files:
+            visual_rules = RuleVisualMapBuilder()
+            visual_rules.rule_map_builder(file_parser, custom_rules.sections)
 
-        elif not update_sets:
-            iptables_rules.extend(custom_rules.parse_file())
-            if not generate_files:
-                custom_rules.apply_firewall_rules(iptables_rules)
-                default.iptables_save(default.read_config_file('iptables_command'))
-                default.iptables_save(default.read_config_file('ip6tables_command'))
-            if drop_all:
-                if deploy:
-                    default.final_drop_iptables(default.read_config_file('iptables_command'))
-                    default.final_drop_iptables(default.read_config_file('ip6tables_command'))
+        else:
+            if update_sets:
+                print "UPDATE IPsets ONLY"
+                custom_rules.ipsets_update(update_list, exclude_list)
+
+            elif not update_sets:
+                iptables_rules.extend(custom_rules.parse_file())
+                if not generate_files:
+                    custom_rules.apply_firewall_rules(iptables_rules)
+                    default.iptables_save(default.read_config_file('iptables_command'))
+                    default.iptables_save(default.read_config_file('ip6tables_command'))
+                if drop_all:
+                    if deploy:
+                        default.final_drop_iptables(default.read_config_file('iptables_command'))
+                        default.final_drop_iptables(default.read_config_file('ip6tables_command'))
+                    else:
+                        default_rules_list.extend(default.final_drop_iptables(default.read_config_file('iptables_command')))
+                        default_rules_list.extend(default.final_drop_iptables(default.read_config_file('ip6tables_command')))
+                        default_rules_list.extend(default.iptables_save(default.read_config_file('iptables_command')))
+                        default_rules_list.extend(default.iptables_save(default.read_config_file('ip6tables_command')))
+                if generate_files:
+                    gen_files = IPTablesFileGenerator()
+                    gen_files.write_iptables_files(default_rules_list, iptables_rules)
                 else:
-                    default_rules_list.extend(default.final_drop_iptables(default.read_config_file('iptables_command')))
-                    default_rules_list.extend(default.final_drop_iptables(default.read_config_file('ip6tables_command')))
-                    default_rules_list.extend(default.iptables_save(default.read_config_file('iptables_command')))
-                    default_rules_list.extend(default.iptables_save(default.read_config_file('ip6tables_command')))
-            if generate_files:
-                gen_files = IPTablesFileGenerator()
-                gen_files.write_iptables_files(default_rules_list, iptables_rules)
-            else:
-                print_default_rules(default_rules_list)
+                    print_default_rules(default_rules_list)
 
     else:
         if generate_files:
@@ -1858,9 +1887,12 @@ def main():
     parser.add_argument('--interface', nargs=1,
                         help='Type the name of nic card you want the default rules to be applied for')
     parser.add_argument('--update_sets', action='store_true', help='Update only the ipsets')
+    parser.add_argument('--update_list', nargs='+', help='Update only the specified ipsets: Use general section names')
+    parser.add_argument('--exclude_list', nargs='+', help='Exclude these ipsets from update: Use general section names')
     parser.add_argument('--deploy', action='store_true', help='Deploy the configuration')
     parser.add_argument('--generate_files', action='store_true', help='Generate iptables and ip6tables files')
-
+    parser.add_argument('--map_config_files', action='store_true', help='Generates dot language code in order to '
+                                                                        'visualize host file contents')
     args = parser.parse_args()
 
     exit_code = iptables_manager(args)

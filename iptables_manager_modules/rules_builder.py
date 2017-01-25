@@ -50,7 +50,7 @@ class FirewallRuleBuilder(object):
             command_new = copy.copy(command)
             # script = os.path.join(os.path.dirname(__file__), os.pardir) + '/helpers/' + command_new[0]
             script = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/helpers/' + command_new[0]
-            print "Trying herlpers:", script
+            print "Trying helpers:", script
             command_new[0] = script
             try:
                 call = subprocess.Popen(command_new, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

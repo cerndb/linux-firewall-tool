@@ -6,6 +6,43 @@ Host Manager
 We use the argument **--no_default_config** so we can see only what we generated. In order to deploy the configuration use the
 **--deploy** argument. If you start the firewall for the first time is better to also apply the default config also.
 
+Command usage:
+
+    .. code-block:: bash
+
+        bin/host_manager.py --help
+
+        usage: host_manager.py [-h] [--no_default_config] [--update_sets]
+                       [--update_list UPDATE_LIST [UPDATE_LIST ...]]
+                       [--exclude_list EXCLUDE_LIST [EXCLUDE_LIST ...]]
+                       [--config CONFIG [CONFIG ...]] [--deploy]
+                       [--generate_files] [--allow] [--drop_all]
+                       [--ignore_check] [--check_matches] [--map_hostfile]
+
+        optional arguments:
+          -h, --help            show this help message and exit
+          --no_default_config   Default configuration
+          --update_sets         Only update IPSets
+          --update_list UPDATE_LIST [UPDATE_LIST ...]
+                                Update only the specified ipsets: Use general section
+                                names
+          --exclude_list EXCLUDE_LIST [EXCLUDE_LIST ...]
+                                Exclude these ipsets from update: Use general section
+                                names
+          --config CONFIG [CONFIG ...]
+                                Type the location of your config file to parse(absolut
+                                path)
+          --deploy              Deploy the configuration
+          --generate_files      Generate iptables and ipset configuration files
+          --allow               Set policy to ACCEPT
+          --drop_all            Set policy to DENY
+          --ignore_check        Ignore needed network components check
+          --check_matches       Check all section of the file and print at which
+                                sections is this machine matching
+          --map_hostfile        Generates dot language code in order to visualize host
+                                file contents
+
+
 Check what we will apply.
     ..  code-block:: bash
 
@@ -94,8 +131,22 @@ argument.
         0 ['static_cern_networks']
         /etc/init.d/ipset save
 
+You can also use **--update_list** and **--exclude_list** so to define a list of sets,
+to either update those only or update all except those in the list.
+
+    ..  code-block:: bash
+
+        bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --update_list "SET_SECTION_NAME_1" "SET_SECTION_NAME_2"
+
+        bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --exclude_list "SET_SECTION_NAME_1" "SET_SECTION_NAME_2"
+
+
 Like this we deploy the update of the ipsets
 
     ..  code-block:: bash
 
-        bin/host_manager.py --config /root/linux-firewall-tool/custom_conf_files/test_hosts.cfg --update_sets --deploy
+        bin/host_manager.py --config /root/cerndb-infra-firewall-tool/custom_conf_files/test_hosts.cfg --update_sets --deploy
+
+        bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --update_list "SET_SECTION_NAME_1" "SET_SECTION_NAME_2" --deploy
+
+        bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --exclude_list "SET_SECTION_NAME_1" "SET_SECTION_NAME_2" --deploy

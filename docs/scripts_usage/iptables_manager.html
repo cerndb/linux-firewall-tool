@@ -50,6 +50,42 @@
 <strong>&#8211;deploy</strong> argument. If you start the firewall for the first time is better to also apply the default config also.</p>
 <p>Command usage:</p>
 <blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/iptables_manager.py --help
+
+usage: iptables_manager.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--config CONFIG <span class="o">[</span>CONFIG ...<span class="o">]]</span>
+                   <span class="o">[</span>--no_default_config<span class="o">]</span> <span class="o">[</span>--allow<span class="o">]</span> <span class="o">[</span>--drop_all<span class="o">]</span>
+                   <span class="o">[</span>--interface INTERFACE<span class="o">]</span> <span class="o">[</span>--update_sets<span class="o">]</span>
+                   <span class="o">[</span>--update_list UPDATE_LIST <span class="o">[</span>UPDATE_LIST ...<span class="o">]]</span>
+                   <span class="o">[</span>--exclude_list EXCLUDE_LIST <span class="o">[</span>EXCLUDE_LIST ...<span class="o">]]</span>
+                   <span class="o">[</span>--deploy<span class="o">]</span> <span class="o">[</span>--generate_files<span class="o">]</span> <span class="o">[</span>--map_config_files<span class="o">]</span>
+
+optional arguments:
+  -h, --help            show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  --config CONFIG <span class="o">[</span>CONFIG ...<span class="o">]</span>
+                        Type the location of your config file to parse<span class="o">(</span>absolut
+                        path<span class="o">)</span>
+  --no_default_config   Apply default configuration from scratch
+  --allow               Apply ACCEPT policy to everything
+  --drop_all            Apply DROP policy to everything
+  --interface INTERFACE
+                        Type the name of nic card you want the default rules
+                        to be applied <span class="k">for</span>
+  --update_sets         Update only the ipsets
+  --update_list UPDATE_LIST <span class="o">[</span>UPDATE_LIST ...<span class="o">]</span>
+                        Update only the specified ipsets: Use general section
+                        names
+  --exclude_list EXCLUDE_LIST <span class="o">[</span>EXCLUDE_LIST ...<span class="o">]</span>
+                        Exclude these ipsets from update: Use general section
+                        names
+  --deploy              Deploy the configuration
+  --generate_files      Generate iptables and ip6tables files
+  --map_config_files    Generates dot language code in order to visualize host
+                        file contents
+</pre></div>
+</div>
+</div></blockquote>
+<p>Command usage:</p>
+<blockquote>
 <div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/iptables_manager.py -h
 usage: iptables_manager.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--config CONFIG <span class="o">[</span>CONFIG ...<span class="o">]]</span>
                            <span class="o">[</span>--no_default_config<span class="o">]</span> <span class="o">[</span>--allow<span class="o">]</span> <span class="o">[</span>--drop_all<span class="o">]</span>
@@ -199,9 +235,22 @@ To be removed:  <span class="o">[</span><span class="s1">&#39;fd01:1459::/32&#39
 </pre></div>
 </div>
 </div></blockquote>
+<p>You can also use <strong>&#8211;update_list</strong> and <strong>&#8211;exclude_list</strong> so to define a list of sets,
+to either update those only or update all except those in the list.</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --update_list <span class="s2">&quot;SET_SECTION_NAME_1&quot;</span> <span class="s2">&quot;SET_SECTION_NAME_2&quot;</span>
+
+bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --exclude_list <span class="s2">&quot;SET_SECTION_NAME_1&quot;</span> <span class="s2">&quot;SET_SECTION_NAME_2&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
 <p>Like this we deploy the update of the ipsets</p>
 <blockquote>
 <div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --deploy
+
+bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --update_list <span class="s2">&quot;SET_SECTION_NAME_1&quot;</span> <span class="s2">&quot;SET_SECTION_NAME_2&quot;</span> --deploy
+
+bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --exclude_list <span class="s2">&quot;SET_SECTION_NAME_1&quot;</span> <span class="s2">&quot;SET_SECTION_NAME_2&quot;</span> --deploy
 </pre></div>
 </div>
 </div></blockquote>

@@ -21,8 +21,9 @@ import configparser
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from iptables_manager import iptables_manager
 from iptables_manager_modules.rules_builder import FirewallRuleBuilder
-from ip_dns_resolve import ip_dns_resolver
-from netgroups_set_extraction import netgroup_set_extractor
+# from ip_dns_resolve import ip_dns_resolver
+# from netgroups_set_extraction import netgroup_set_extractor
+
 
 class ReadWriteConfigFiles(object):
     """
@@ -114,13 +115,8 @@ class ManageHosts(object):
                     print "Specify 'config_folder' option for section '" + i.encode("utf-8") + "'"
                     sys.exit(1)
 
-            # if not (self.parser.has_option(i.encode('utf-8'), "config_folder_files") or
-            #             (self.parser.has_option(i.encode('utf-8'), "config_files"))):
-            #     print "Specify 'config_folder_files' or 'config_files' option for section '" + i.encode("utf-8") + "'"
-            #     sys.exit(1)
-
-    def parse_config_file(self, deploy=False, no_default_config=False, update_sets=False, allow=False, drop_all=False,
-                          generate_files=False, check_matches=False):
+    def parse_config_file(self, deploy=False, no_default_config=False, update_sets=False, allow=False,
+                          drop_all=False, generate_files=False, check_matches=False, update_list=None, exclude_list=None):
         """
         This method is used to parse  the config files. It checks if the hostname of the machine is defined in the list
         of hostnames that this configuration will be applied. Then it calls the 'iptables_manager' function from the
@@ -146,9 +142,6 @@ class ManageHosts(object):
                 print "'machines' option for section '" + sect + "' must be a list or a sciprt to run"
                 sys.exit(1)
 
-            # if update_sets and not no_default_config:
-            #     print "Cannot apply default config and update sets!!!!!!"
-            #     sys.exit(1)
             if update_sets:
                 no_default_config = True
 
@@ -211,10 +204,13 @@ class ManageHosts(object):
                     print "Config folder: ", config_folder
                     print "Config files: ", config_folder_files
                     print "Config individual files: ", config_files, "\n"
+                    sys.exit(0)
                 else:
                     print "Deploy is:", deploy
+                    print 'Call iptables manager'
+                    print 'update_list, exclude_list', update_list, exclude_list
                     iptables_manager(None, config_files_list, default_interface, no_default_config, allow, drop_all,
-                                     update_sets, deploy, generate_files)
+                                     update_sets, deploy, generate_files, update_list, exclude_list)
                     sys.exit(0)
             else:
                 print "Machine list: ", machines
@@ -316,89 +312,98 @@ class ManageHosts(object):
 
 ###########################################################################################################
 
-def check_machines_functions():
-    """
-    This function is used to perform health checks before the tool starts
-
-    :return: Boolean
-    """
-
-    valid_dns = False
-    valid_landb = False
-    project_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-    dns_ipv4 = {'ip-dns-1': '137.138.16.5',
-                'ip-dns-2': '137.138.17.5',
-                'ip-dns-3': '172.18.16.5',
-                'ip-dns-4': '172.18.17.5'}
-
-    dns_ipv6 = {'ip-dns-1.ipv6': '2001:1458:201:1000::5',
-                'ip-dns-2.ipv6': '2001:1458:201:1100::5'}
-
-    for key in dns_ipv4:
-        value = ip_dns_resolver(key, 'ipv4')
-        if value[1] == dns_ipv4[key]:
-            valid_dns = True
-            break
-
-    if not valid_dns:
-        for key in dns_ipv6:
-            value = ip_dns_resolver(key, 'ipv6')
-            if value[1] == dns_ipv4[key]:
-                valid_dns = True
-                break
-
-    try:
-        for line in open(project_folder + '/default_conf_files' + '/configuration_info.cfg', 'r').readlines():
-            if 'landb_set_check' in line:
-                check_landb_set = line.partition('"')[-1].rpartition('"')[0]
-                # print check_landb_set
-                break
-
-        for line in open(project_folder + '/default_conf_files' + '/configuration_info.cfg', 'r').readlines():
-            if 'landb_set_values' in line:
-                check_landb_value = line.partition('"')[-1].rpartition('"')[0]
-                # print check_landb_value
-                break
-    except:
-        print "Cannot read config file!!! Cannot read config file!!! \nPath: " + project_folder + \
-              '/default_conf_files' + '/configuration_info.cfg'
-        sys.exit(1)
-
-    check_value = netgroup_set_extractor('ip', check_landb_set, None, None, False, False)
-
-    if check_value[0][0] == check_landb_value:
-        valid_landb = True
-
-    project_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-    command = None
-
-    try:
-        for line in open(project_folder + '/default_conf_files' + '/configuration_info.cfg', 'r').readlines():
-            if "custom_check" in line:
-                command = line.partition('"')[-1].rpartition('"')[0]
-                break
-    except:
-        print "Cannot read config file!!! Cannot read config file!!! \nPath: " + project_folder + \
-              '/default_conf_files' + '/configuration_info.cfg' + " \n"
-
-    print "Command:", command
-
-    if (command is not None) and command != "":
-        command = command.split()
-        output, err, exit_code = FirewallRuleBuilder.sys_process_executor(command)
-        print "\n############## Check script output ###############################\n"
-        print output
-        if exit_code == 0:
-            script_valid = True
-        else:
-            print "Error:", err
-            script_valid = False
-    else:
-        script_valid = True
-
-    return valid_dns and valid_landb and script_valid
+# def check_machines_functions():
+#     """
+#     This function is used to perform health checks before the tool starts
+#
+#     :return: Boolean
+#     """
+#
+#     valid_dns = False
+#     valid_landb = False
+#     project_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#
+#     dns_ipv4 = {'ip-dns-1': '137.138.16.5',
+#                 'ip-dns-2': '137.138.17.5',
+#                 'ip-dns-3': '172.18.16.5',
+#                 'ip-dns-4': '172.18.17.5'}
+#
+#     dns_ipv6 = {'ip-dns-1.ipv6': '2001:1458:201:1000::5',
+#                 'ip-dns-2.ipv6': '2001:1458:201:1100::5'}
+#
+#     for key in dns_ipv4:
+#         value = ip_dns_resolver(key, 'ipv4')
+#         if value[1] == dns_ipv4[key]:
+#             valid_dns = True
+#             break
+#
+#     if not valid_dns:
+#         for key in dns_ipv6:
+#             value = ip_dns_resolver(key, 'ipv6')
+#             if value[1] == dns_ipv4[key]:
+#                 valid_dns = True
+#                 break
+#
+#     try:
+#         check_landb_set = ''
+#         for line in open(project_folder + '/default_conf_files' + '/configuration_info.cfg', 'r').readlines():
+#             if 'landb_set_check' in line:
+#                 check_landb_set = line.partition('"')[-1].rpartition('"')[0]
+#                 # print check_landb_set
+#                 break
+#         if check_landb_set == '':
+#             print 'landb_set_check = "NETWORK_SET"  is missing from the config file'
+#
+#         check_landb_value = ''
+#         for line in open(project_folder + '/default_conf_files' + '/configuration_info.cfg', 'r').readlines():
+#             if 'landb_set_values' in line:
+#                 check_landb_value = line.partition('"')[-1].rpartition('"')[0]
+#                 # print check_landb_value
+#                 break
+#         if check_landb_value == '':
+#             print 'landb_set_values = "HOST_IN_SET"  is missing from the config file'
+#
+#     except:
+#         print "Cannot read config file!!! Cannot read config file!!! \nPath: " + project_folder + \
+#               '/default_conf_files' + '/configuration_info.cfg'
+#         sys.exit(1)
+#
+#     if (check_landb_set != '') and (check_landb_value != ''):
+#
+#         check_value = netgroup_set_extractor('ip', check_landb_set, None, None, False, False)
+#
+#         if check_value[0][0] in check_landb_value:
+#             valid_landb = True
+#
+#     project_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#
+#     command = None
+#
+#     try:
+#         for line in open(project_folder + '/default_conf_files' + '/configuration_info.cfg', 'r').readlines():
+#             if "custom_check" in line:
+#                 command = line.partition('"')[-1].rpartition('"')[0]
+#                 break
+#     except:
+#         print "Cannot read config file!!! Cannot read config file!!! \nPath: " + project_folder + \
+#               '/default_conf_files' + '/configuration_info.cfg' + " \n"
+#
+#     print "Command:", command
+#
+#     if (command is not None) and command != "":
+#         command = command.split()
+#         output, err, exit_code = FirewallRuleBuilder.sys_process_executor(command)
+#         print "\n############## Check script output ###############################\n"
+#         print output
+#         if exit_code == 0:
+#             script_valid = True
+#         else:
+#             print "Error:", err
+#             script_valid = False
+#     else:
+#         script_valid = True
+#
+#     return valid_dns and valid_landb and script_valid
 
 
 ###########################################################################################################
@@ -414,6 +419,8 @@ def main():
 
     parser.add_argument('--no_default_config', action='store_true', help='Default configuration')
     parser.add_argument('--update_sets', action='store_true', help='Only update IPSets')
+    parser.add_argument('--update_list', nargs='+', help='Update only the specified ipsets: Use general section names')
+    parser.add_argument('--exclude_list', nargs='+', help='Exclude these ipsets from update: Use general section names')
     parser.add_argument('--config', nargs='+', help='Type the location of your config file to parse(absolut path)')
     parser.add_argument('--deploy', action='store_true', help='Deploy the configuration')
     parser.add_argument('--generate_files', action='store_true', help='Generate iptables and ipset configuration files')
@@ -427,11 +434,13 @@ def main():
 
     args = parser.parse_args()
 
-    if args.ignore_check or args.check_matches:
-        valid = True
-        print "\nIgnoring DNS and LanDB check result.\n"
-    else:
-        valid = check_machines_functions()
+    # if args.ignore_check or args.check_matches:
+    #     valid = True
+    #     print "\nIgnoring DNS and LanDB check result.\n"
+    # else:
+    #     valid = check_machines_functions()
+
+    valid = True
 
     if valid:
         if args.config:
@@ -452,8 +461,10 @@ def main():
                 host_manager.host_file_mapping()
             else:
                 host_manager.parse_config_file(deploy=args.deploy, no_default_config=args.no_default_config,
-                                               update_sets=args.update_sets, allow=args.allow, drop_all=args.drop_all,
-                                               generate_files=args.generate_files, check_matches=args.check_matches)
+                                               update_sets=args.update_sets, allow=args.allow,
+                                               drop_all=args.drop_all, generate_files=args.generate_files,
+                                               check_matches=args.check_matches, update_list=args.update_list,
+                                               exclude_list=args.exclude_list)
     else:
         print "Network components check failed. Cannot operate"
 

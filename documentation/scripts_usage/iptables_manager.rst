@@ -10,6 +10,43 @@ Command usage:
 
     .. code-block:: bash
 
+        bin/iptables_manager.py --help
+
+        usage: iptables_manager.py [-h] [--config CONFIG [CONFIG ...]]
+                           [--no_default_config] [--allow] [--drop_all]
+                           [--interface INTERFACE] [--update_sets]
+                           [--update_list UPDATE_LIST [UPDATE_LIST ...]]
+                           [--exclude_list EXCLUDE_LIST [EXCLUDE_LIST ...]]
+                           [--deploy] [--generate_files] [--map_config_files]
+
+        optional arguments:
+          -h, --help            show this help message and exit
+          --config CONFIG [CONFIG ...]
+                                Type the location of your config file to parse(absolut
+                                path)
+          --no_default_config   Apply default configuration from scratch
+          --allow               Apply ACCEPT policy to everything
+          --drop_all            Apply DROP policy to everything
+          --interface INTERFACE
+                                Type the name of nic card you want the default rules
+                                to be applied for
+          --update_sets         Update only the ipsets
+          --update_list UPDATE_LIST [UPDATE_LIST ...]
+                                Update only the specified ipsets: Use general section
+                                names
+          --exclude_list EXCLUDE_LIST [EXCLUDE_LIST ...]
+                                Exclude these ipsets from update: Use general section
+                                names
+          --deploy              Deploy the configuration
+          --generate_files      Generate iptables and ip6tables files
+          --map_config_files    Generates dot language code in order to visualize host
+                                file contents
+
+
+Command usage:
+
+    .. code-block:: bash
+
         bin/iptables_manager.py -h
         usage: iptables_manager.py [-h] [--config CONFIG [CONFIG ...]]
                                    [--no_default_config] [--allow] [--drop_all]
@@ -161,8 +198,21 @@ argument.
         0 ['static_dns_servers4']
         /etc/init.d/ipset save
 
+You can also use **--update_list** and **--exclude_list** so to define a list of sets,
+to either update those only or update all except those in the list.
+
+    ..  code-block:: bash
+
+        bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --update_list "SET_SECTION_NAME_1" "SET_SECTION_NAME_2"
+
+        bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --exclude_list "SET_SECTION_NAME_1" "SET_SECTION_NAME_2"
+
 Like this we deploy the update of the ipsets
 
     ..  code-block:: bash
 
         bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --deploy
+
+        bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --update_list "SET_SECTION_NAME_1" "SET_SECTION_NAME_2" --deploy
+
+        bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --exclude_list "SET_SECTION_NAME_1" "SET_SECTION_NAME_2" --deploy

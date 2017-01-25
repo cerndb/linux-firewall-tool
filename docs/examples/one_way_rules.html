@@ -265,10 +265,11 @@ The above section will create two rules in reality one for each protocol tcp,udp
 </pre></div>
 </div>
 </div></blockquote>
-<p><strong>Example of hash:ip,port,ip using mix of script and network set</strong>
-In case your script can provide the combo of hostname,port you have to use the tag <strong>script_double</strong>. If you want to return only a list of hostnames
-then you have to provide the port for each list element and use the <strong>script:</strong> or <strong>netgroup:</strong> tags. Please note that last part of each element in the list can only
-use the <strong>script:</strong> or <a href="#id1"><span class="problematic" id="id2">**</span></a>netgroup:<a href="#id3"><span class="problematic" id="id4">**</span></a>(which extracts hostnames from LanDB) tags and has to return as output a list with single elements</p>
+<p><strong>Example of hash:ip,port,ip using mix of script and network set</strong></p>
+<p>In case your script can provide the combo of hostname,port you have to use the tag <strong>script_double</strong>
+If you want to return only a list of hostnames then you have to provide the port for each list element and use the <strong>script:</strong> or <strong>netgroup:</strong> tags.
+Please note that last part of each element in the list can only use the <strong>script:</strong> or <a href="#id1"><span class="problematic" id="id2">**</span></a>netgroup:<a href="#id3"><span class="problematic" id="id4">**</span></a>(which extracts hostnames from LanDB) tags and has
+to return as output a list with single elements</p>
 <blockquote>
 <div><div class="highlight-ini"><div class="highlight"><pre><span></span><span class="k">[test_triplet_from_iptables_manager_3]</span>
 <span class="na">section_type</span> <span class="o">=</span> <span class="s">general</span>

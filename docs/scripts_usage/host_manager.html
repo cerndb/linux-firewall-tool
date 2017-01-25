@@ -49,6 +49,42 @@
 <p><strong>host_manager.py</strong></p>
 <p>We use the argument <strong>&#8211;no_default_config</strong> so we can see only what we generated. In order to deploy the configuration use the
 <strong>&#8211;deploy</strong> argument. If you start the firewall for the first time is better to also apply the default config also.</p>
+<p>Command usage:</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --help
+
+usage: host_manager.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--no_default_config<span class="o">]</span> <span class="o">[</span>--update_sets<span class="o">]</span>
+               <span class="o">[</span>--update_list UPDATE_LIST <span class="o">[</span>UPDATE_LIST ...<span class="o">]]</span>
+               <span class="o">[</span>--exclude_list EXCLUDE_LIST <span class="o">[</span>EXCLUDE_LIST ...<span class="o">]]</span>
+               <span class="o">[</span>--config CONFIG <span class="o">[</span>CONFIG ...<span class="o">]]</span> <span class="o">[</span>--deploy<span class="o">]</span>
+               <span class="o">[</span>--generate_files<span class="o">]</span> <span class="o">[</span>--allow<span class="o">]</span> <span class="o">[</span>--drop_all<span class="o">]</span>
+               <span class="o">[</span>--ignore_check<span class="o">]</span> <span class="o">[</span>--check_matches<span class="o">]</span> <span class="o">[</span>--map_hostfile<span class="o">]</span>
+
+optional arguments:
+  -h, --help            show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  --no_default_config   Default configuration
+  --update_sets         Only update IPSets
+  --update_list UPDATE_LIST <span class="o">[</span>UPDATE_LIST ...<span class="o">]</span>
+                        Update only the specified ipsets: Use general section
+                        names
+  --exclude_list EXCLUDE_LIST <span class="o">[</span>EXCLUDE_LIST ...<span class="o">]</span>
+                        Exclude these ipsets from update: Use general section
+                        names
+  --config CONFIG <span class="o">[</span>CONFIG ...<span class="o">]</span>
+                        Type the location of your config file to parse<span class="o">(</span>absolut
+                        path<span class="o">)</span>
+  --deploy              Deploy the configuration
+  --generate_files      Generate iptables and ipset configuration files
+  --allow               Set policy to ACCEPT
+  --drop_all            Set policy to DENY
+  --ignore_check        Ignore needed network components check
+  --check_matches       Check all section of the file and print at which
+                        sections is this machine matching
+  --map_hostfile        Generates dot language code in order to visualize host
+                        file contents
+</pre></div>
+</div>
+</div></blockquote>
 <dl class="docutils">
 <dt>Check what we will apply.</dt>
 <dd><div class="first highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --no_default_config --config /root/linux-firewall-tool/custom_conf_files/test_hosts.cfg
@@ -134,9 +170,22 @@ To be removed:  <span class="o">[]</span>
 </pre></div>
 </div>
 </div></blockquote>
+<p>You can also use <strong>&#8211;update_list</strong> and <strong>&#8211;exclude_list</strong> so to define a list of sets,
+to either update those only or update all except those in the list.</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --update_list <span class="s2">&quot;SET_SECTION_NAME_1&quot;</span> <span class="s2">&quot;SET_SECTION_NAME_2&quot;</span>
+
+bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --exclude_list <span class="s2">&quot;SET_SECTION_NAME_1&quot;</span> <span class="s2">&quot;SET_SECTION_NAME_2&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
 <p>Like this we deploy the update of the ipsets</p>
 <blockquote>
-<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --config /root/linux-firewall-tool/custom_conf_files/test_hosts.cfg --update_sets --deploy
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>bin/host_manager.py --config /root/cerndb-infra-firewall-tool/custom_conf_files/test_hosts.cfg --update_sets --deploy
+
+bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --update_list <span class="s2">&quot;SET_SECTION_NAME_1&quot;</span> <span class="s2">&quot;SET_SECTION_NAME_2&quot;</span> --deploy
+
+bin/iptables_manager.py --config custom_conf_files/example_config_14.cfg --update_sets --exclude_list <span class="s2">&quot;SET_SECTION_NAME_1&quot;</span> <span class="s2">&quot;SET_SECTION_NAME_2&quot;</span> --deploy
 </pre></div>
 </div>
 </div></blockquote>
