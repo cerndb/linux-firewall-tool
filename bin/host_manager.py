@@ -47,7 +47,7 @@ class ReadWriteConfigFiles(object):
             self.parser.read(filepath)
             return self.parser
         except configparser.ParsingError, err:
-            print 'Could not parse file: ' + filepath, err
+            print 'Could not parse file: ', filepath, err
             sys.exit(1)
 
     def write_config_file(self, file_path):
@@ -465,6 +465,9 @@ def main():
                                                drop_all=args.drop_all, generate_files=args.generate_files,
                                                check_matches=args.check_matches, update_list=args.update_list,
                                                exclude_list=args.exclude_list)
+        else:
+            print 'No config file provided!!'
+            sys.exit(1)
     else:
         print "Network components check failed. Cannot operate"
 
