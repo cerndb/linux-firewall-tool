@@ -92,7 +92,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span>
         <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ParsingError</span><span class="p">,</span> <span class="n">err</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s1">&#39;Could not parse file: &#39;</span> <span class="o">+</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">err</span>
+            <span class="nb">print</span> <span class="s1">&#39;Could not parse file: &#39;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">err</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ReadWriteConfigFiles.write_config_file"><a class="viewcode-back" href="../../code_documentation/host_manager.html#bin.host_manager.ReadWriteConfigFiles.write_config_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">):</span>
@@ -297,7 +297,7 @@
             <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
                 <span class="n">config_folder</span> <span class="o">=</span> <span class="kc">None</span>
 
-            <span class="n">subgraphs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&quot;cl-&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;&quot;[label=&quot;path:&#39;</span> <span class="o">+</span> <span class="n">config_folder</span> <span class="o">+</span> <span class="s1">&#39;&quot; fontcolor=green fontsize=14];&#39;</span><span class="p">)</span>
+            <span class="n">subgraphs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&quot;cl-&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;&quot;[label=&quot;path:&#39;</span> <span class="o">+</span> <span class="n">config_folder</span> <span class="o">+</span> <span class="s1">&#39;&quot; fontcolor=black fontsize=14];&#39;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">connections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&quot;cluster_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_next&quot; -&gt; &quot;cl-&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;&quot;[ltail=cluster_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, lhead=cluster_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;];&#39;</span><span class="p">)</span>
@@ -510,6 +510,9 @@
                                                <span class="n">drop_all</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">drop_all</span><span class="p">,</span> <span class="n">generate_files</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">generate_files</span><span class="p">,</span>
                                                <span class="n">check_matches</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">check_matches</span><span class="p">,</span> <span class="n">update_list</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">update_list</span><span class="p">,</span>
                                                <span class="n">exclude_list</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">exclude_list</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s1">&#39;No config file provided!!&#39;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span> <span class="s2">&quot;Network components check failed. Cannot operate&quot;</span></div>
 

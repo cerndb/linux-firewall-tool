@@ -58,6 +58,7 @@
 <span class="sd">The script is written on python &gt;=2.6</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">configparser</span>
@@ -90,7 +91,7 @@
         <span class="n">custom_chain</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="k">for</span> <span class="n">sect</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sect</span><span class="p">,</span> <span class="s1">&#39;section_type&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;general&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;[fillcolor=&quot;green&quot;, fontcolor=&quot;yellow&quot;,label=&quot;&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;&quot;]&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;[fillcolor=&quot;green&quot;, fontcolor=&quot;black&quot;,label=&quot;&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;&quot;]&#39;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;subgraph cluster_&#39;</span> <span class="o">+</span> <span class="n">sect</span> <span class="o">+</span> <span class="s1">&#39;{&#39;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">subgraph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;ranksep=&quot;1.0&quot;&#39;</span><span class="p">)</span>
 

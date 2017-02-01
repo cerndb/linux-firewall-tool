@@ -13,6 +13,7 @@ email: athanasios.gkaraliakos@cern.ch
 The script is written on python >=2.6
 
 """
+
 import os
 import sys
 import configparser
@@ -45,7 +46,7 @@ class RuleVisualMapBuilder(object):
         custom_chain = ''
         for sect in sections:
             if parser.get(sect, 'section_type').encode("utf-8") == 'general':
-                self.subgraph.append(sect + '[fillcolor="green", fontcolor="yellow",label="' + sect + '"]')
+                self.subgraph.append(sect + '[fillcolor="green", fontcolor="black",label="' + sect + '"]')
                 self.subgraph.append('subgraph cluster_' + sect + '{')
                 self.subgraph.append('ranksep="1.0"')
 

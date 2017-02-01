@@ -252,7 +252,7 @@ class ManageHosts(object):
             except configparser.NoOptionError:
                 config_folder = None
 
-            subgraphs.append('"cl-' + sect + '"[label="path:' + config_folder + '" fontcolor=green fontsize=14];')
+            subgraphs.append('"cl-' + sect + '"[label="path:' + config_folder + '" fontcolor=black fontsize=14];')
 
             if counter > 0:
                 connections.append('"cluster_' + str(counter-1) + '_next" -> "cl-' + sect + '"[ltail=cluster_' + str(counter-1) + ', lhead=cluster_' + str(counter) + '];')
