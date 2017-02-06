@@ -41,14 +41,14 @@ class FirewallRuleBuilder(object):
         :return: Response, Error, exit code from piping standard output and standard error
         """
         try:
+            print 'Command: "', ' '.join(command), '"'
             call = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             response, err = call.communicate()
             exit_code = call.wait()
             return response, err, exit_code
         except:
-            print "Script ", command, " not in system path"
+            print 'Command: "', ' '.join(command), '" not in system path'
             command_new = copy.copy(command)
-            # script = os.path.join(os.path.dirname(__file__), os.pardir) + '/helpers/' + command_new[0]
             script = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/helpers/' + command_new[0]
             print "Trying helpers:", script
             command_new[0] = script
@@ -57,13 +57,13 @@ class FirewallRuleBuilder(object):
                 response, err = call.communicate()
                 exit_code = call.wait()
                 if err:
-                    print "Script error: ", command
+                    print 'Command error: "', ' '.join(command_new), '"'
                 return response, err, exit_code
             except:
-                print "\nError on running command: ",
-                for k in xrange(len(command) - 1):
-                    print command[k],
-                print command[-1]
+                print '\nError on running command: "', ' '.join(command), '"'
+                # for k in xrange(len(command) - 1):
+                #     print command[k],
+                # print command[-1]
                 print "Provide absolute path or place your script in helpers directory"
                 print ''
                 del command_new

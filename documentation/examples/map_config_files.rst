@@ -2,7 +2,7 @@ Visual mapping of config files
 ==============================
 
 
-** Mapping the files **
+**Mapping the files**
 
 On both scripts (**host_manager.py** and **iptables_manager.py**) there is an argument from command line.
 

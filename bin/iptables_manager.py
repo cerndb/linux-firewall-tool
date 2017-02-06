@@ -923,7 +923,7 @@ class ManageRules(object):
                     print "Usage problem with ipset"
                     print response_set
                     print set_name
-                    sys.exit(0)
+                    sys.exit(1)
             if ports is not None:
                 modules['multiport'] = ['dports', ports]
             # print chain_name, ip_version, nic, protocol, comment, modules, jump_chain
@@ -1189,7 +1189,7 @@ class ManageRules(object):
                     print "Usage problem with ipset"
                     print response_set
                     print set_name
-                    sys.exit(0)
+                    sys.exit(1)
 
             if ports is not None:
                 modules['multiport'] = ['dports', ports]
