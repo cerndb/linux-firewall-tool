@@ -53,8 +53,8 @@ def other_nic_extractor(all_nics=False):
 
         interfaces = [nic for nic in interfaces if nic not in bonded_interfaces]
     else:
-        print err
-        print "Cannot extract bonded interfaces"
+        # print err
+        print "No bonded interfaces detected"
 
     main_nic = main_nic_extractor()
 

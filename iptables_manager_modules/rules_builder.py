@@ -47,6 +47,8 @@ class FirewallRuleBuilder(object):
         exit_code = call.wait()
         if exit_code == 0:
             return response, err, exit_code
+        elif (exit_code != 0) and (('ipset' in command[0]) or ('iptables' in command[0])):
+            return response, err, exit_code
 
         print 'Command: "', ' '.join(command), '" not in system path'
         command_new = copy.copy(command)
@@ -58,6 +60,8 @@ class FirewallRuleBuilder(object):
         exit_code = call.wait()
         if exit_code == 0:
             return response, err, exit_code
+        elif (exit_code != 0) and (('ipset' in command_new[0]) or ('iptables' in command_new[0])):
+            return response, err, exit_code  # Not needed. Added  just in case
 
         print '\nError on running command: "', ' '.join(command), '"'
         print "Provide absolute path or place your script in helpers directory"
