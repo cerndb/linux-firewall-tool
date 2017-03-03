@@ -31,3 +31,8 @@ machine is in that list the given configuration will be served to the iptables.
 The meaning of the the above is that your configuration can be in one place an all the machines.
 By using a tool such as Puppet or Ansible you just have a list of machines that will get certain 
 configuration regarding the firewall. 
+
+
+## Tool's architecture
+
+![alt tag](https://raw.githubusercontent.com/cerndb/linux-firewall-tool/master/tool_architecture.png)
