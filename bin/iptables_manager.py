@@ -651,16 +651,16 @@ class ManageRules(object):
                     else:
                         print "The error is: ", err
                         sys.exit(1)
-                if ipset_type == 'hash:ip':
-                    try:
-                        netgroup_set_list = eval(self.parser.get(ipset_section, 'netgroup_set_list').encode('utf-8'))
-                    except configparser.NoOptionError:
-                        netgroup_set_list = None
-                    if netgroup_set_list is not None:
-                        if type(netgroup_set_list) is not list:
-                            print "\nOption netgroup_set_list for '" + ipset_section + "' section should be a list. " \
-                                                                                    "Set it correctly"
-                            sys.exit(1)
+                # if ipset_type == 'hash:ip':
+                try:
+                    netgroup_set_list = eval(self.parser.get(ipset_section, 'netgroup_set_list').encode('utf-8'))
+                except configparser.NoOptionError:
+                    netgroup_set_list = None
+                if netgroup_set_list is not None:
+                    if type(netgroup_set_list) is not list:
+                        print "\nOption netgroup_set_list for '" + ipset_section + "' section should be a list. " \
+                                                                                "Set it correctly"
+                        sys.exit(1)
 
         elif ipset_type in ['hash:net', 'hash:net,port']:
             try:

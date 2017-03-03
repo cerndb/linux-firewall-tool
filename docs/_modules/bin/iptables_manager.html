@@ -696,16 +696,16 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="nb">print</span> <span class="s2">&quot;The error is: &quot;</span><span class="p">,</span> <span class="n">err</span>
                         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">ipset_type</span> <span class="o">==</span> <span class="s1">&#39;hash:ip&#39;</span><span class="p">:</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">netgroup_set_list</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipset_section</span><span class="p">,</span> <span class="s1">&#39;netgroup_set_list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
-                    <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
-                        <span class="n">netgroup_set_list</span> <span class="o">=</span> <span class="kc">None</span>
-                    <span class="k">if</span> <span class="n">netgroup_set_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">netgroup_set_list</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
-                            <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Option netgroup_set_list for &#39;&quot;</span> <span class="o">+</span> <span class="n">ipset_section</span> <span class="o">+</span> <span class="s2">&quot;&#39; section should be a list. &quot;</span> \
-                                                                                    <span class="s2">&quot;Set it correctly&quot;</span>
-                            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="c1"># if ipset_type == &#39;hash:ip&#39;:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">netgroup_set_list</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipset_section</span><span class="p">,</span> <span class="s1">&#39;netgroup_set_list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+                    <span class="n">netgroup_set_list</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">netgroup_set_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">netgroup_set_list</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
+                        <span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Option netgroup_set_list for &#39;&quot;</span> <span class="o">+</span> <span class="n">ipset_section</span> <span class="o">+</span> <span class="s2">&quot;&#39; section should be a list. &quot;</span> \
+                                                                                <span class="s2">&quot;Set it correctly&quot;</span>
+                        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">ipset_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hash:net&#39;</span><span class="p">,</span> <span class="s1">&#39;hash:net,port&#39;</span><span class="p">]:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -968,7 +968,7 @@
                     <span class="nb">print</span> <span class="s2">&quot;Usage problem with ipset&quot;</span>
                     <span class="nb">print</span> <span class="n">response_set</span>
                     <span class="nb">print</span> <span class="n">set_name</span>
-                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">ports</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">modules</span><span class="p">[</span><span class="s1">&#39;multiport&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dports&#39;</span><span class="p">,</span> <span class="n">ports</span><span class="p">]</span>
             <span class="c1"># print chain_name, ip_version, nic, protocol, comment, modules, jump_chain</span>
@@ -1234,7 +1234,7 @@
                     <span class="nb">print</span> <span class="s2">&quot;Usage problem with ipset&quot;</span>
                     <span class="nb">print</span> <span class="n">response_set</span>
                     <span class="nb">print</span> <span class="n">set_name</span>
-                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">ports</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">modules</span><span class="p">[</span><span class="s1">&#39;multiport&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dports&#39;</span><span class="p">,</span> <span class="n">ports</span><span class="p">]</span>

@@ -101,6 +101,77 @@ The above section will create two rules in reality one for each protocol tcp,udp
         /sbin/iptables -A OUTPUT -o eth0 -p udp -m set --match-set static_dns_servers4_single_v4 dst,dst -j DROP -m comment --comment access_outgoing_ports_tcp_signle
 
 
+**Example using CERN LanDB sets to create an ipset of hash:ip,port**
+
+    .. code-block:: ini
+
+        [access_outgoing_infor_ext_services]
+        description = access to print lables service
+        section_type = general
+        action = ['accept']
+        default_chain = OUTPUT
+        ip_version = both
+        interface = main
+        protocol = tcp
+        set = landbset_it_db_infor_ext_services
+
+
+    .. code-block:: ini
+
+        [landbset_it_db_infor_ext_services]
+        description =  Network set containing Infor external services require by application
+        section_type = ipset
+        ipset_type = hash:ip,port
+        set_name = ["landdb_it_db_infor_ext_svcs"]
+        netgroup_set_list = ['IT SECURITY FIREWALL ALIENDB,8888','DRUPAL,80']
+
+The output of the above is the following:
+
+    .. code-block:: bash
+
+        Command: " /usr/sbin/ipset list landdb_it_db_infor_ext_svcs_v4 "
+        Set type is:  hash:ip,port
+        /usr/sbin/ipset create landdb_it_db_infor_ext_svcs_v4 hash:ip,port family inet hashsize 1024 maxelem 65536
+        Set  landdb_it_db_infor_ext_svcs_v4  created
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 137.138.99.145,tcp:8888
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 188.184.37.206,tcp:80
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 137.138.99.136,tcp:8888
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 137.138.99.139,tcp:8888
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 137.138.99.141,tcp:8888
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 137.138.47.216,tcp:8888
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 188.184.37.205,tcp:80
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 188.184.37.208,tcp:80
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 137.138.47.221,tcp:8888
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 137.138.99.140,tcp:8888
+        Section name: access_outgoing_infor_ext_services
+
+    .. code-block:: bash
+
+        Command: " /usr/sbin/ipset list landdb_it_db_infor_ext_svcs_v6 "
+        Set type is:  hash:ip,port
+        /usr/sbin/ipset create landdb_it_db_infor_ext_svcs_v6 hash:ip,port family inet6 hashsize 1024 maxelem 65536
+        Set  landdb_it_db_infor_ext_svcs_v6  created
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b49f::100:7,tcp:8888
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b50e::100:12,tcp:8888
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b50e::100:17,tcp:8888
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b0::100:e,tcp:80
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b0::100:d,tcp:80
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b49f::100:5,tcp:8888
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b49f::100:2,tcp:8888
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b0::100:10,tcp:80
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b49f::100:6,tcp:8888
+        /usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b49f::100:27,tcp:8888
+
+    .. code-block:: bash
+
+        /etc/init.d/ipset save
+
+
+    .. code-block:: bash
+
+        /sbin/iptables -A OUTPUT -o eth0 -p tcp -m set --match-set landdb_it_db_infor_ext_svcs_v4 dst,dst -j ACCEPT -m comment --comment access_outgoing_infor_ext_services
+        /sbin/ip6tables -A OUTPUT -o eth0 -p tcp -m set --match-set landdb_it_db_infor_ext_svcs_v6 dst,dst -j ACCEPT -m comment --comment access_outgoing_infor_ext_services
+
 
 **Example with ipset triplet**
 

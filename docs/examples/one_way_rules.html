@@ -142,6 +142,71 @@ The above section will create two rules in reality one for each protocol tcp,udp
 </pre></div>
 </div>
 </div></blockquote>
+<p><strong>Example using CERN LanDB sets to create an ipset of hash:ip,port</strong></p>
+<blockquote>
+<div><div class="highlight-ini"><div class="highlight"><pre><span></span><span class="k">[access_outgoing_infor_ext_services]</span>
+<span class="na">description</span> <span class="o">=</span> <span class="s">access to print lables service</span>
+<span class="na">section_type</span> <span class="o">=</span> <span class="s">general</span>
+<span class="na">action</span> <span class="o">=</span> <span class="s">[&#39;accept&#39;]</span>
+<span class="na">default_chain</span> <span class="o">=</span> <span class="s">OUTPUT</span>
+<span class="na">ip_version</span> <span class="o">=</span> <span class="s">both</span>
+<span class="na">interface</span> <span class="o">=</span> <span class="s">main</span>
+<span class="na">protocol</span> <span class="o">=</span> <span class="s">tcp</span>
+<span class="na">set</span> <span class="o">=</span> <span class="s">landbset_it_db_infor_ext_services</span>
+</pre></div>
+</div>
+<div class="highlight-ini"><div class="highlight"><pre><span></span><span class="k">[landbset_it_db_infor_ext_services]</span>
+<span class="na">description</span> <span class="o">=</span>  <span class="s">Network set containing Infor external services require by application</span>
+<span class="na">section_type</span> <span class="o">=</span> <span class="s">ipset</span>
+<span class="na">ipset_type</span> <span class="o">=</span> <span class="s">hash:ip,port</span>
+<span class="na">set_name</span> <span class="o">=</span> <span class="s">[&quot;landdb_it_db_infor_ext_svcs&quot;]</span>
+<span class="na">netgroup_set_list</span> <span class="o">=</span> <span class="s">[&#39;IT SECURITY FIREWALL ALIENDB,8888&#39;,&#39;DRUPAL,80&#39;]</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The output of the above is the following:</p>
+<blockquote>
+<div><div class="highlight-bash"><div class="highlight"><pre><span></span>Command: <span class="s2">&quot; /usr/sbin/ipset list landdb_it_db_infor_ext_svcs_v4 &quot;</span>
+Set <span class="nb">type</span> is:  hash:ip,port
+/usr/sbin/ipset create landdb_it_db_infor_ext_svcs_v4 hash:ip,port family inet hashsize <span class="m">1024</span> maxelem 65536
+Set  landdb_it_db_infor_ext_svcs_v4  created
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 137.138.99.145,tcp:8888
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 188.184.37.206,tcp:80
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 137.138.99.136,tcp:8888
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 137.138.99.139,tcp:8888
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 137.138.99.141,tcp:8888
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 137.138.47.216,tcp:8888
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 188.184.37.205,tcp:80
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 188.184.37.208,tcp:80
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 137.138.47.221,tcp:8888
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v4 137.138.99.140,tcp:8888
+Section name: access_outgoing_infor_ext_services
+</pre></div>
+</div>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>Command: <span class="s2">&quot; /usr/sbin/ipset list landdb_it_db_infor_ext_svcs_v6 &quot;</span>
+Set <span class="nb">type</span> is:  hash:ip,port
+/usr/sbin/ipset create landdb_it_db_infor_ext_svcs_v6 hash:ip,port family inet6 hashsize <span class="m">1024</span> maxelem 65536
+Set  landdb_it_db_infor_ext_svcs_v6  created
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b49f::100:7,tcp:8888
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b50e::100:12,tcp:8888
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b50e::100:17,tcp:8888
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b0::100:e,tcp:80
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b0::100:d,tcp:80
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b49f::100:5,tcp:8888
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b49f::100:2,tcp:8888
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b0::100:10,tcp:80
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b49f::100:6,tcp:8888
+/usr/sbin/ipset add landdb_it_db_infor_ext_svcs_v6 2001:1458:201:b49f::100:27,tcp:8888
+</pre></div>
+</div>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>/etc/init.d/ipset save
+</pre></div>
+</div>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>/sbin/iptables -A OUTPUT -o eth0 -p tcp -m <span class="nb">set</span> --match-set landdb_it_db_infor_ext_svcs_v4 dst,dst -j ACCEPT -m comment --comment access_outgoing_infor_ext_services
+/sbin/ip6tables -A OUTPUT -o eth0 -p tcp -m <span class="nb">set</span> --match-set landdb_it_db_infor_ext_svcs_v6 dst,dst -j ACCEPT -m comment --comment access_outgoing_infor_ext_services
+</pre></div>
+</div>
+</div></blockquote>
 <p><strong>Example with ipset triplet</strong></p>
 <blockquote>
 <div><div class="highlight-ini"><div class="highlight"><pre><span></span><span class="k">[triplet_set]</span>

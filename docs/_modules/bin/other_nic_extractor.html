@@ -98,8 +98,8 @@
 
         <span class="n">interfaces</span> <span class="o">=</span> <span class="p">[</span><span class="n">nic</span> <span class="k">for</span> <span class="n">nic</span> <span class="ow">in</span> <span class="n">interfaces</span> <span class="k">if</span> <span class="n">nic</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">bonded_interfaces</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span> <span class="n">err</span>
-        <span class="nb">print</span> <span class="s2">&quot;Cannot extract bonded interfaces&quot;</span>
+        <span class="c1"># print err</span>
+        <span class="nb">print</span> <span class="s2">&quot;No bonded interfaces detected&quot;</span>
 
     <span class="n">main_nic</span> <span class="o">=</span> <span class="n">main_nic_extractor</span><span class="p">()</span>
 

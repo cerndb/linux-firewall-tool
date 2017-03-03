@@ -679,20 +679,36 @@ def handle_custom_set(simulate, action, setname, iptype, settype, ips=None, host
                             for t_addr in xrange(len(tmp_addr)):
                                 tmp_addr[t_addr] += ',' + port[hst]
                             hostsetfinal.append(tmp_addr)
+
                 setname = setname.replace(' ', '_')
 
                 hostsetfinal = extract_ips_from_network_set(hostsetfinal, iptype)
 
             if netgroup_net_list is not None:
+                netgroup_net_ips = []
                 if 'port' not in settype:
-                    netgroup_net_ips = []
                     for _set_ in netgroup_net_list:
                         ips_tmp = get_network_sets(_set_, iptype)
                         netgroup_net_ips.extend(extract_ips_from_network_set(ips_tmp, iptype))
+                else:
+                    if 'direct' in port:
+                        for __set__ in netgroup_net_list:
+                            if ',' in __set__:
+                                __set__name, __port__ = __set__.split(',')
+                                __set__ips = netgroup_set_extractor(iptype, __set__name)
+                                __set__ips = extract_ips_from_network_set(__set__ips, iptype)
+                                for __st_ip_ in xrange(len(__set__ips)):
+                                    if ':' not in __port__:
+                                        __port__ = 'tcp:' + __port__
+                                    __set__ips[__st_ip_] = __set__ips[__st_ip_] + ',' + __port__
+                                netgroup_net_ips.extend(__set__ips)
+                            else:
+                                print "Did not provide port for netgroup: " + __set__name
+                                sys.exit(1)
 
-                    hostsetfinal.extend(netgroup_net_ips)
-                    del netgroup_net_ips[:]
-                    del netgroup_net_ips
+                hostsetfinal.extend(netgroup_net_ips)
+                del netgroup_net_ips[:]
+                del netgroup_net_ips
 
             if ips is not None:
                 for ip in ips:
