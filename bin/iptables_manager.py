@@ -1517,7 +1517,12 @@ class ManageRules(object):
                         responce, set_name = self.handle_ipsets(set_sect, ip_version, True)
                     else:
                         responce, set_name = self.handle_list_set(set_sect, ip_version, True)
-                    print responce, set_name
+                    
+                    if responce != 0:
+                        print 'Ipset "' + set_name + '" not set correctly'
+                        sys.exit(responce)
+                    else:
+                        print set_name
 
                 if self.parser.get(sect, 'ip_version') in ['ipv6', 'both']:
                     ip_version = 'ipv6'
@@ -1525,7 +1530,12 @@ class ManageRules(object):
                         responce, set_name = self.handle_ipsets(set_sect, ip_version, True)
                     else:
                         responce, set_name = self.handle_list_set(set_sect, ip_version, True)
-                    print responce, set_name
+                    
+                    if responce != 0:
+                        print 'Ipset "' + set_name + '" not set correctly'
+                        sys.exit(responce)
+                    else:
+                        print set_name
 
             self.rule_builder.save_ipset(self.deploy)
 
