@@ -6,7 +6,7 @@ https://cerndb.github.io/linux-firewall-tool/
 
 # Usage
 
-To fully use this tool rub=n either **host_manager.py** or **iptables_manager.py**
+To fully use this tool run either **host_manager.py** or **iptables_manager.py**
 
 The real power of the tool is the use of custom commands/scripts you can use to 
 populate the option and finaly have a fully working firewall setup for both
